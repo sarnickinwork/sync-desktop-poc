@@ -9,6 +9,8 @@
     "dialog:default",
     "fs:default",
     "fs:allow-remove",
+    "fs:allow-appdata-write",
+    "fs:allow-appdata-write-recursive",
     {
       "identifier": "shell:allow-execute",
       "allow": [
