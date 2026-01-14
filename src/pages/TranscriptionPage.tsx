@@ -1,8 +1,16 @@
 import { useState } from "react";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  useTheme,
+  alpha,
+} from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
+// Components
 import Stepper from "../components/Stepper";
 import LogsPanel from "../components/LogsPanel";
 import TranscriptViewer from "../components/TranscriptViewer";
@@ -10,6 +18,7 @@ import VideoPreview from "../components/preview/VideoPreview";
 import TranscriptPreview from "../components/preview/TranscriptPreview";
 import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
 import SyncedPlayer from "../components/sync/SyncedPlayer";
+import ThemeToggle from "../components/ThemeToggle"; // <--- NEW IMPORT
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
 
@@ -18,18 +27,16 @@ type VideoItem = {
   name: string;
 };
 
-// Interface for the new sentence structure
 type SyncedLine = {
   text: string;
-  start: number; // in milliseconds
-  end: number; // in milliseconds
+  start: number;
+  end: number;
 };
 
 export default function TranscriptionPage() {
+  const theme = useTheme(); // <--- Hook to access theme colors
   const [step, setStep] = useState(0);
-
   const [video, setVideo] = useState<VideoItem | null>(null);
-  // We keep this for the "Preview" step, but the final result will use AssemblyAI data
   const [transcriptText, setTranscriptText] = useState<string | null>(null);
 
   const { logs, isProcessing, transcriptResult, handleWorkflow } =
@@ -37,10 +44,6 @@ export default function TranscriptionPage() {
 
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
 
-  /**
-   * PARSER: Converts AssemblyAI 'words' array into full sentences with timestamps.
-   * Logic: Accumulate words until a punctuation mark (. ? !) is found.
-   */
   function generateSentencesFromAssembly(apiResult: any): SyncedLine[] {
     if (!apiResult?.words) return [];
 
@@ -49,32 +52,22 @@ export default function TranscriptionPage() {
     let startTime: number | null = null;
 
     apiResult.words.forEach((word: any) => {
-      // 1. Mark start time of the new sentence
-      if (startTime === null) {
-        startTime = word.start;
-      }
-
-      // 2. Add word to current buffer
+      if (startTime === null) startTime = word.start;
       currentSentenceWords.push(word.text);
 
-      // 3. Check if this word ends a sentence (simple punctuation check)
-      // You can expand this regex if needed (e.g. for quotes)
       const isEndOfSentence = /[.!?]$/.test(word.text);
 
       if (isEndOfSentence) {
         sentences.push({
           text: currentSentenceWords.join(" "),
           start: startTime!,
-          end: word.end, // The end of the last word is the end of the sentence
+          end: word.end,
         });
-
-        // Reset for next sentence
         currentSentenceWords = [];
         startTime = null;
       }
     });
 
-    // Handle any remaining words (if the transcript doesn't end with punctuation)
     if (currentSentenceWords.length > 0 && startTime !== null) {
       sentences.push({
         text: currentSentenceWords.join(" "),
@@ -88,9 +81,18 @@ export default function TranscriptionPage() {
 
   return (
     <Box p={4} maxWidth={1100} mx="auto">
-      <Typography variant="h5" fontWeight={600} mb={3}>
-        Sync App POC UI Updated
-      </Typography>
+      {/* HEADER: Title + Toggle */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h5" fontWeight={600}>
+          Sync App POC v1.0.2
+        </Typography>
+        <ThemeToggle />
+      </Box>
 
       <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result"]} />
 
@@ -114,35 +116,39 @@ export default function TranscriptionPage() {
                         },
                       ],
                     });
-
                     if (!selected || Array.isArray(selected)) return;
-
                     setVideo({
                       path: selected,
                       name: selected.split("\\").pop() || selected,
                     });
                   }}
                   sx={{
-                    border: "2px dashed #4caf50",
+                    border: "2px dashed",
+                    // Use theme color for border
+                    borderColor: video ? "success.main" : "text.secondary",
                     borderRadius: 2,
                     p: 3,
                     mt: 2,
                     textAlign: "center",
                     cursor: "pointer",
-                    background: video ? "#f1f8e9" : "transparent",
+                    // Dynamic background using alpha helper for dark mode support
+                    bgcolor: video
+                      ? alpha(theme.palette.success.main, 0.1)
+                      : "transparent",
+                    transition: "all 0.2s",
                   }}
                 >
-                  <Typography>
+                  <Typography color="textPrimary">
                     {video ? "Video selected" : "Click to select video"}
                   </Typography>
-                  <Typography variant="caption">
+                  <Typography variant="caption" color="textSecondary">
                     {video ? video.name : "Supports MP4, MKV, AVI, MOV"}
                   </Typography>
                 </Box>
               </CardContent>
             </Card>
 
-            {/* Transcript Upload (Optional now, but kept for UI consistency) */}
+            {/* Transcript Upload */}
             <TranscriptUploadCard
               transcript={transcriptText}
               setTranscript={(file) => {
@@ -153,13 +159,18 @@ export default function TranscriptionPage() {
           </Box>
 
           <Box mt={3}>
-            {/* Note: I removed the strict check for transcriptText since we generate it now */}
             <button
               disabled={!video}
               onClick={() => setStep(1)}
               style={{
                 padding: "10px 20px",
                 cursor: video ? "pointer" : "not-allowed",
+                backgroundColor: video
+                  ? theme.palette.primary.main
+                  : theme.palette.action.disabledBackground,
+                color: video ? "#fff" : theme.palette.text.disabled,
+                border: "none",
+                borderRadius: "4px",
               }}
             >
               Next →
@@ -174,11 +185,15 @@ export default function TranscriptionPage() {
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
             <VideoPreview videoPath={convertFileSrc(video.path)} />
 
-            {/* Only show this if they actually uploaded a file, otherwise show a placeholder */}
             {transcriptText ? (
               <TranscriptPreview transcript={transcriptText} />
             ) : (
-              <Box p={3} border="1px dashed #ccc" borderRadius={2}>
+              <Box
+                p={3}
+                border="1px dashed"
+                borderColor="divider"
+                borderRadius={2}
+              >
                 <Typography color="text.secondary">
                   No manual transcript uploaded. One will be generated by AI.
                 </Typography>
@@ -187,8 +202,18 @@ export default function TranscriptionPage() {
           </Box>
 
           <Box mt={3} display="flex" gap={2}>
-            <button onClick={() => setStep(0)}>← Back</button>
-            <button onClick={() => setStep(2)}>Next →</button>
+            <button
+              onClick={() => setStep(0)}
+              style={{ padding: "8px 16px", cursor: "pointer" }}
+            >
+              ← Back
+            </button>
+            <button
+              onClick={() => setStep(2)}
+              style={{ padding: "8px 16px", cursor: "pointer" }}
+            >
+              Next →
+            </button>
           </Box>
         </>
       )}
@@ -206,7 +231,9 @@ export default function TranscriptionPage() {
             onClick={() => handleWorkflow(video.path)}
             style={{
               padding: "10px 20px",
-              backgroundColor: isProcessing ? "#ccc" : "#1976d2",
+              backgroundColor: isProcessing
+                ? theme.palette.action.disabled
+                : theme.palette.primary.main,
               color: "white",
               border: "none",
               borderRadius: "4px",
@@ -225,7 +252,6 @@ export default function TranscriptionPage() {
               </Typography>
               <button
                 onClick={() => {
-                  // HERE IS THE CHANGE: Use the new parser function
                   const lines = generateSentencesFromAssembly(transcriptResult);
                   setSyncedLines(lines);
                   setStep(3);
@@ -250,15 +276,12 @@ export default function TranscriptionPage() {
                 setTranscriptText(null);
                 setSyncedLines([]);
               }}
+              style={{ padding: "8px 16px", cursor: "pointer" }}
             >
               ← Start Over
             </button>
           </Box>
 
-          {/* SyncedPlayer expects lines in { text, start, end } format.
-            AssemblyAI returns timestamps in milliseconds.
-            SyncedPlayer handles the ms -> s conversion internally in its onClick.
-          */}
           <SyncedPlayer
             videoUrl={convertFileSrc(video.path)}
             lines={syncedLines}
@@ -268,7 +291,6 @@ export default function TranscriptionPage() {
 
       <Box mt={5}>
         <LogsPanel logs={logs} />
-        {/* Useful for debugging the raw JSON from AssemblyAI */}
         <TranscriptViewer data={transcriptResult} />
       </Box>
     </Box>

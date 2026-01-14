@@ -40,7 +40,7 @@ export default function VideoUploadCard({ video, setVideo }: Props) {
             mt: 2,
             textAlign: "center",
             cursor: "pointer",
-            background: video ? "#f1f8e9" : "transparent",
+            background: video ? "#d8f2bb" : "transparent",
           }}
         >
           <Typography>

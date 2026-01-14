@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "sync-app-poc",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "identifier": "com.syncapp.poc",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -46,7 +46,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFEMzNCNEIwQkQ5QTY1RDcKUldUWFpacTlzTFF6SFdrRGg4eEEvSGlPZGZiZFl1U291dEdVd0k0QkFNUU9HUDliQUhiQjZVZzAK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlCNjMxOTVEMURDQTg3MkMKUldRc2g4b2RYUmxqbTFsM3pTQm9uYUNRd3U1T1BlQURsSkNJaU1COFFjamlpK05FRldBcGoxNWsK",
       "endpoints": ["http://localhost:3000/latest.json"],
       "dangerousInsecureTransportProtocol": true
     }

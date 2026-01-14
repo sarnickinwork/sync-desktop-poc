@@ -1,14 +1,19 @@
-import { useEffect } from "react";
-// Updater Imports (From your branch)
-import { check } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
+import { useEffect, useState, useMemo } from "react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
-// UI Import (From friend's branch)
+// Updater Imports
+import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
+
+// Context
+import { ColorModeContext } from "./themes/ThemeContext";
+
+// Pages
 import TranscriptionPage from "./pages/TranscriptionPage";
 
 /**
  * Custom Hook: useAppUpdater
- * Handles checking for updates on mount and managing the update flow.
  */
 function useAppUpdater() {
   useEffect(() => {
@@ -20,14 +25,13 @@ function useAppUpdater() {
           const yes = await window.confirm(
             `Update to ${update.version} is available!\n\nRelease notes: ${update.body}\n\nInstall now?`
           );
-          
+
           if (yes) {
             await update.downloadAndInstall();
-            // Restart the app after install
             await relaunch();
           }
         } else {
-            console.log("No updates found.");
+          console.log("No updates found.");
         }
       } catch (error) {
         console.error("Error checking for updates:", error);
@@ -39,9 +43,44 @@ function useAppUpdater() {
 }
 
 export default function App() {
-  // 1. Initialize the Updater (Your Logic)
+  // 1. Initialize the Updater
   useAppUpdater();
 
-  // 2. Render the Refactored UI (Friend's Logic)
-  return <TranscriptionPage />;
+  // 2. Theme State Management
+  const [mode, setMode] = useState<"light" | "dark">("light");
+
+  const colorMode = useMemo(
+    () => ({
+      mode,
+      toggleColorMode: () => {
+        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+      },
+    }),
+    [mode]
+  );
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          primary: { main: "#1976d2" },
+          // We define specific background colors to ensure contrast in both modes
+          background: {
+            default: mode === "light" ? "#f4f6f8" : "#121212",
+            paper: mode === "light" ? "#ffffff" : "#1e1e1e",
+          },
+        },
+      }),
+    [mode]
+  );
+
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <TranscriptionPage />
+      </ThemeProvider>
+    </ColorModeContext.Provider>
+  );
 }
