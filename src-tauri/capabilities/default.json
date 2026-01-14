@@ -11,6 +11,8 @@
     "fs:allow-remove",
     "fs:allow-appdata-write",
     "fs:allow-appdata-write-recursive",
+    "fs:allow-video-read",
+    "fs:allow-video-read-recursive",
     {
       "identifier": "shell:allow-execute",
       "allow": [
@@ -24,7 +26,22 @@
     },
     {
       "identifier": "fs:scope",
-      "allow": ["$APPDATA", "$APPDATA/**"]
+      "allow": [
+        "$APPDATA",
+        "$APPDATA/**",
+
+        "$DESKTOP",
+        "$DESKTOP/**",
+
+        "$DOWNLOAD",
+        "$DOWNLOAD/**",
+
+        "$VIDEO",
+        "$VIDEO/**",
+
+        "$DOCUMENT",
+        "$DOCUMENT/**"
+      ]
     }
   ]
 }

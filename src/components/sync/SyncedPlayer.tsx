@@ -16,6 +16,24 @@ export default function SyncedPlayer({ videoUrl, lines }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
 
+  // 🔥 Fix for Tauri/WebView media not initializing
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.pause();
+    video.load();
+
+    const tryPlay = async () => {
+      try {
+        await video.play();
+        video.pause();
+      } catch {}
+    };
+
+    tryPlay();
+  }, [videoUrl]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -31,10 +49,12 @@ export default function SyncedPlayer({ videoUrl, lines }: Props) {
       <Box>
         <Typography fontWeight={600}>Video</Typography>
         <video
+          key={videoUrl} // 👈 IMPORTANT
           ref={videoRef}
           src={videoUrl}
           controls
-          style={{ width: "100%", borderRadius: 8 }}
+          preload="auto"
+          style={{ width: "100%", borderRadius: 8, background: "#000" }}
         />
       </Box>
 

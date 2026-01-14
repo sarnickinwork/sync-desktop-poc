@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { Card, CardContent, Typography, Box } from "@mui/material";
 
 type Props = {
-  transcript: File | null;
+  transcript: File | string | null;
   setTranscript: (f: File | null) => void;
 };
 
@@ -11,9 +11,12 @@ export default function TranscriptUploadCard({
   transcript,
   setTranscript,
 }: Props) {
-  const onDrop = useCallback((files: File[]) => {
-    setTranscript(files[0]);
-  }, []);
+  const onDrop = useCallback(
+    (files: File[]) => {
+      setTranscript(files[0]);
+    },
+    [setTranscript]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -40,7 +43,7 @@ export default function TranscriptUploadCard({
         >
           <input {...getInputProps()} />
           <Typography>
-            {transcript ? transcript.name : "Drag & drop transcript here"}
+            {transcript ? "Transcript uploaded" : "Drag & drop transcript here"}
           </Typography>
           <Typography variant="caption">or click to browse</Typography>
         </Box>

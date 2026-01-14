@@ -18,7 +18,17 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$DESKTOP/**",
+          "$DOWNLOAD/**",
+          "$VIDEO/**",
+          "$DOCUMENT/**",
+          "$APPDATA/**"
+        ]
+      }
     }
   },
   "bundle": {
@@ -31,8 +41,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": [
-      "binaries/ffmpeg"
-    ]
+    "externalBin": ["binaries/ffmpeg"]
   }
 }

@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { Command } from "@tauri-apps/plugin-shell";
-import {
-  readFile,
-  mkdir,
-  exists,
-  remove,
-  writeFile,
-} from "@tauri-apps/plugin-fs";
-
+import { readFile, mkdir, exists, remove } from "@tauri-apps/plugin-fs";
 import { appDataDir, join } from "@tauri-apps/api/path";
 
 const API_KEY = import.meta.env.VITE_ASSEMBLY_AI;
@@ -53,23 +46,19 @@ export function useTranscriptionWorkflow() {
     while (true) {
       const response = await fetch(
         `https://api.assemblyai.com/v2/transcript/${id}`,
-        {
-          headers: { authorization: API_KEY },
-        }
+        { headers: { authorization: API_KEY } }
       );
       const json = await response.json();
 
-      if (json.status === "completed") {
-        return json;
-      } else if (json.status === "error") {
-        throw new Error(json.error);
-      }
+      if (json.status === "completed") return json;
+      if (json.status === "error") throw new Error(json.error);
 
       await new Promise((r) => setTimeout(r, 2000));
     }
   };
 
-  const handleWorkflow = async (videoFile: File) => {
+  // Uses path directly (safe for large files)
+  const handleWorkflow = async (videoPath: string) => {
     let audioPath = "";
 
     try {
@@ -77,22 +66,13 @@ export function useTranscriptionWorkflow() {
       setLogs([]);
       setTranscriptResult(null);
 
+      log(`Using uploaded file: ${videoPath}`);
+
       const appData = await appDataDir();
-      // Ensure app data directory exists
-      const dirExists = await exists(appData);
-      if (!dirExists) {
+      if (!(await exists(appData))) {
         log("Creating app data directory...");
         await mkdir(appData);
       }
-
-      // Save uploaded video to disk so FFmpeg can access it
-      const videoPath = await join(appData, videoFile.name);
-
-      log("Saving uploaded video to disk...");
-      const buffer = await videoFile.arrayBuffer();
-      await writeFile(videoPath, new Uint8Array(buffer));
-
-      log(`Using uploaded file: ${videoPath}`);
 
       audioPath = await join(appData, "temp_audio.mp3");
 
@@ -112,6 +92,7 @@ export function useTranscriptionWorkflow() {
       if (output.code !== 0) {
         throw new Error(`FFmpeg failed: ${output.stderr}`);
       }
+
       log("Audio extracted successfully.");
 
       const uploadUrl = await uploadFile(audioPath);

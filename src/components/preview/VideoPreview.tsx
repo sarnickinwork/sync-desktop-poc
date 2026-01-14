@@ -1,30 +1,29 @@
 import { Box, Typography } from "@mui/material";
 
-type Props = {
-  videoPath: string;
-};
-
-export default function VideoPreview({ videoPath }: Props) {
+export default function VideoPreview({ videoPath }: { videoPath: string }) {
   return (
     <Box>
       <Typography fontWeight={600} mb={1}>
-        Video
+        Video Preview
       </Typography>
 
-      <Box
-        sx={{
-          border: "1px solid #e0e0e0",
-          borderRadius: 2,
-          overflow: "hidden",
+      <video
+        src={videoPath}
+        controls
+        preload="metadata"
+        style={{
+          width: "100%",
+          maxHeight: 400,
+          borderRadius: 8,
           background: "#000",
         }}
-      >
-        <video
-          src={`file://${videoPath}`}
-          controls
-          style={{ width: "100%", maxHeight: 400 }}
-        />
-      </Box>
+      />
+
+      {/* <video
+        src="https://www.w3schools.com/html/mov_bbb.mp4"
+        controls
+        style={{ width: "100%" }}
+      /> */}
     </Box>
   );
 }

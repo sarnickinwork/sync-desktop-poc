@@ -1,10 +1,10 @@
 import { Box, Typography } from "@mui/material";
 
-type Props = {
+export default function TranscriptPreview({
+  transcript,
+}: {
   transcript: string;
-};
-
-export default function TranscriptPreview({ transcript }: Props) {
+}) {
   const lines = transcript.split("\n").filter(Boolean);
 
   return (
@@ -22,12 +22,11 @@ export default function TranscriptPreview({ transcript }: Props) {
         Transcript
       </Typography>
 
-      {lines.map((line, index) => (
-        <Box key={index} display="flex" gap={2} mb={1} alignItems="flex-start">
-          <Typography variant="caption" sx={{ minWidth: 30, color: "#888" }}>
-            {index + 1}.
+      {lines.map((line, i) => (
+        <Box key={i} display="flex" gap={2} mb={1}>
+          <Typography variant="caption" sx={{ minWidth: 30 }}>
+            {i + 1}.
           </Typography>
-
           <Typography variant="body2">{line}</Typography>
         </Box>
       ))}

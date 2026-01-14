@@ -1,58 +1,89 @@
 import { useState } from "react";
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import { useDropzone } from "react-dropzone";
+import { open } from "@tauri-apps/plugin-dialog";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 import Stepper from "../components/Stepper";
 import LogsPanel from "../components/LogsPanel";
 import TranscriptViewer from "../components/TranscriptViewer";
 import VideoPreview from "../components/preview/VideoPreview";
 import TranscriptPreview from "../components/preview/TranscriptPreview";
+import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
+import SyncedPlayer from "../components/sync/SyncedPlayer";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
-import SyncedPlayer from "../components/sync/SyncedPlayer";
+
+type VideoItem = {
+  path: string;
+  name: string;
+};
+
+// Interface for the new sentence structure
+type SyncedLine = {
+  text: string;
+  start: number; // in milliseconds
+  end: number; // in milliseconds
+};
 
 export default function TranscriptionPage() {
   const [step, setStep] = useState(0);
 
-  const [videos, setVideos] = useState<File[]>([]);
+  const [video, setVideo] = useState<VideoItem | null>(null);
+  // We keep this for the "Preview" step, but the final result will use AssemblyAI data
   const [transcriptText, setTranscriptText] = useState<string | null>(null);
 
-  const { logs, transcriptResult, handleWorkflow, isProcessing } =
+  const { logs, isProcessing, transcriptResult, handleWorkflow } =
     useTranscriptionWorkflow();
-  const [syncedLines, setSyncedLines] = useState<any[]>([]);
 
-  // ---------------- VIDEO DROPZONE ----------------
-  const videoDrop = useDropzone({
-    accept: { "video/*": [] },
-    multiple: true,
-    onDrop: (acceptedFiles) => {
-      setVideos((prev) => [...prev, ...acceptedFiles]);
-    },
-  });
+  const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
 
-  // ---------------- TRANSCRIPT DROPZONE ----------------
-  const transcriptDrop = useDropzone({
-    accept: { "text/*": [] },
-    multiple: false,
-    onDrop: async (acceptedFiles) => {
-      const file = acceptedFiles[0];
-      const text = await file.text();
-      setTranscriptText(text);
-    },
-  });
+  /**
+   * PARSER: Converts AssemblyAI 'words' array into full sentences with timestamps.
+   * Logic: Accumulate words until a punctuation mark (. ? !) is found.
+   */
+  function generateSentencesFromAssembly(apiResult: any): SyncedLine[] {
+    if (!apiResult?.words) return [];
 
-  function buildTimedLines(assemblyResult: any, originalTranscript: string) {
-    const words = assemblyResult?.words || [];
-    const transcriptLines = originalTranscript
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
+    const sentences: SyncedLine[] = [];
+    let currentSentenceWords: string[] = [];
+    let startTime: number | null = null;
 
-    return transcriptLines.map((line, i) => ({
-      text: line,
-      start: words[i]?.start ?? i * 1000,
-      end: words[i]?.end ?? i * 1000 + 800,
-    }));
+    apiResult.words.forEach((word: any) => {
+      // 1. Mark start time of the new sentence
+      if (startTime === null) {
+        startTime = word.start;
+      }
+
+      // 2. Add word to current buffer
+      currentSentenceWords.push(word.text);
+
+      // 3. Check if this word ends a sentence (simple punctuation check)
+      // You can expand this regex if needed (e.g. for quotes)
+      const isEndOfSentence = /[.!?]$/.test(word.text);
+
+      if (isEndOfSentence) {
+        sentences.push({
+          text: currentSentenceWords.join(" "),
+          start: startTime!,
+          end: word.end, // The end of the last word is the end of the sentence
+        });
+
+        // Reset for next sentence
+        currentSentenceWords = [];
+        startTime = null;
+      }
+    });
+
+    // Handle any remaining words (if the transcript doesn't end with punctuation)
+    if (currentSentenceWords.length > 0 && startTime !== null) {
+      sentences.push({
+        text: currentSentenceWords.join(" "),
+        start: startTime,
+        end: apiResult.words[apiResult.words.length - 1].end,
+      });
+    }
+
+    return sentences;
   }
 
   return (
@@ -63,81 +94,73 @@ export default function TranscriptionPage() {
 
       <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result"]} />
 
-      {/* ---------------- STEP 1: UPLOAD ---------------- */}
+      {/* STEP 1: UPLOAD */}
       {step === 0 && (
         <>
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
-            {/* VIDEOS */}
+            {/* Video Upload */}
             <Card variant="outlined">
               <CardContent>
-                <Typography fontWeight={600}>Videos</Typography>
+                <Typography fontWeight={600}>Video</Typography>
 
                 <Box
-                  {...videoDrop.getRootProps()}
+                  onClick={async () => {
+                    const selected = await open({
+                      multiple: false,
+                      filters: [
+                        {
+                          name: "Video",
+                          extensions: ["mp4", "mkv", "avi", "mov"],
+                        },
+                      ],
+                    });
+
+                    if (!selected || Array.isArray(selected)) return;
+
+                    setVideo({
+                      path: selected,
+                      name: selected.split("\\").pop() || selected,
+                    });
+                  }}
                   sx={{
                     border: "2px dashed #4caf50",
                     borderRadius: 2,
-                    p: 4,
+                    p: 3,
                     mt: 2,
                     textAlign: "center",
                     cursor: "pointer",
-                    background: videoDrop.isDragActive
-                      ? "#f1f8e9"
-                      : "transparent",
+                    background: video ? "#f1f8e9" : "transparent",
                   }}
                 >
-                  <input {...videoDrop.getInputProps()} />
-                  <Typography>Drag & drop videos here</Typography>
-                  <Typography variant="caption">or click to browse</Typography>
-                </Box>
-
-                {videos.length > 0 && (
-                  <Box mt={2}>
-                    {videos.map((file, i) => (
-                      <Typography key={i} variant="body2">
-                        {i + 1}. {file.name}
-                      </Typography>
-                    ))}
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* TRANSCRIPT */}
-            <Card variant="outlined">
-              <CardContent>
-                <Typography fontWeight={600}>Transcript</Typography>
-
-                <Box
-                  {...transcriptDrop.getRootProps()}
-                  sx={{
-                    border: "2px dashed #2196f3",
-                    borderRadius: 2,
-                    p: 4,
-                    mt: 2,
-                    textAlign: "center",
-                    cursor: "pointer",
-                    background: transcriptDrop.isDragActive
-                      ? "#e3f2fd"
-                      : "transparent",
-                  }}
-                >
-                  <input {...transcriptDrop.getInputProps()} />
                   <Typography>
-                    {transcriptText
-                      ? "Transcript uploaded"
-                      : "Drag & drop transcript here"}
+                    {video ? "Video selected" : "Click to select video"}
                   </Typography>
-                  <Typography variant="caption">or click to browse</Typography>
+                  <Typography variant="caption">
+                    {video ? video.name : "Supports MP4, MKV, AVI, MOV"}
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>
+
+            {/* Transcript Upload (Optional now, but kept for UI consistency) */}
+            <TranscriptUploadCard
+              transcript={transcriptText}
+              setTranscript={(file) => {
+                if (!file) return;
+                file.text().then(setTranscriptText);
+              }}
+            />
           </Box>
 
           <Box mt={3}>
+            {/* Note: I removed the strict check for transcriptText since we generate it now */}
             <button
-              disabled={!videos.length || !transcriptText}
+              disabled={!video}
               onClick={() => setStep(1)}
+              style={{
+                padding: "10px 20px",
+                cursor: video ? "pointer" : "not-allowed",
+              }}
             >
               Next →
             </button>
@@ -145,12 +168,22 @@ export default function TranscriptionPage() {
         </>
       )}
 
-      {/* ---------------- STEP 2: PREVIEW ---------------- */}
-      {step === 1 && transcriptText && videos.length > 0 && (
+      {/* STEP 2: PREVIEW */}
+      {step === 1 && video && (
         <>
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
-            <VideoPreview videoPath={URL.createObjectURL(videos[0])} />
-            <TranscriptPreview transcript={transcriptText} />
+            <VideoPreview videoPath={convertFileSrc(video.path)} />
+
+            {/* Only show this if they actually uploaded a file, otherwise show a placeholder */}
+            {transcriptText ? (
+              <TranscriptPreview transcript={transcriptText} />
+            ) : (
+              <Box p={3} border="1px dashed #ccc" borderRadius={2}>
+                <Typography color="text.secondary">
+                  No manual transcript uploaded. One will be generated by AI.
+                </Typography>
+              </Box>
+            )}
           </Box>
 
           <Box mt={3} display="flex" gap={2}>
@@ -160,52 +193,82 @@ export default function TranscriptionPage() {
         </>
       )}
 
-      {/* STEP 3 — SYNC */}
-      {step === 2 && (
-        <Box mt={4}>
+      {/* STEP 3: SYNC */}
+      {step === 2 && video && (
+        <Box mt={3}>
           <Typography mb={2}>
-            This will extract audio, send to AssemblyAI, and sync transcript.
+            Click below to extract audio, upload to AssemblyAI, and get
+            timestamped sentences.
           </Typography>
 
           <button
             disabled={isProcessing}
-            onClick={async () => {
-              await handleWorkflow(videos[0]); // your existing pipeline
+            onClick={() => handleWorkflow(video.path)}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: isProcessing ? "#ccc" : "#1976d2",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: isProcessing ? "wait" : "pointer",
             }}
           >
-            {isProcessing ? "Syncing..." : "Start Sync"}
+            {isProcessing
+              ? "Processing (FFmpeg + API)..."
+              : "Start Auto-Sync Workflow"}
           </button>
 
           {transcriptResult && (
             <Box mt={2}>
+              <Typography color="success.main" fontWeight={600} mb={1}>
+                Success! Transcription received.
+              </Typography>
               <button
                 onClick={() => {
-                  const lines = buildTimedLines(
-                    transcriptResult,
-                    transcriptText!
-                  );
+                  // HERE IS THE CHANGE: Use the new parser function
+                  const lines = generateSentencesFromAssembly(transcriptResult);
                   setSyncedLines(lines);
                   setStep(3);
                 }}
+                style={{ padding: "10px 20px", cursor: "pointer" }}
               >
-                Continue →
+                View Synced Result →
               </button>
             </Box>
           )}
         </Box>
       )}
 
-      {/* STEP 4 — RESULT */}
-      {step === 3 && syncedLines.length > 0 && (
-        <SyncedPlayer
-          videoUrl={URL.createObjectURL(videos[0])}
-          lines={syncedLines}
-        />
+      {/* STEP 4: RESULT */}
+      {step === 3 && video && syncedLines.length > 0 && (
+        <Box>
+          <Box mb={2}>
+            <button
+              onClick={() => {
+                setStep(0);
+                setVideo(null);
+                setTranscriptText(null);
+                setSyncedLines([]);
+              }}
+            >
+              ← Start Over
+            </button>
+          </Box>
+
+          {/* SyncedPlayer expects lines in { text, start, end } format.
+            AssemblyAI returns timestamps in milliseconds.
+            SyncedPlayer handles the ms -> s conversion internally in its onClick.
+          */}
+          <SyncedPlayer
+            videoUrl={convertFileSrc(video.path)}
+            lines={syncedLines}
+          />
+        </Box>
       )}
 
-      {/* ---------------- DEBUG UI (unchanged) ---------------- */}
       <Box mt={5}>
         <LogsPanel logs={logs} />
+        {/* Useful for debugging the raw JSON from AssemblyAI */}
         <TranscriptViewer data={transcriptResult} />
       </Box>
     </Box>
