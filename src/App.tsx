@@ -186,7 +186,7 @@ function App() {
       }}
     >
       {/* Update Title to check visually if update applied */}
-      <h1>Sync App POC v0.1.1 hello</h1>
+      <h1>Sync App POC v0.1.2 hello world</h1>
 
       <button
         onClick={handleWorkflow}
