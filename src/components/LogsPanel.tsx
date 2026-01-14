@@ -1,13 +1,19 @@
+import { useTheme } from "@mui/material/styles";
+
 export default function LogsPanel({ logs }: { logs: string[] }) {
+  const theme = useTheme();
+
   return (
     <div
       style={{
-        background: "#f4f4f4",
+        // Dynamic background and border colors
+        background: theme.palette.mode === "dark" ? "#1e1e1e" : "#f4f4f4",
+        border: `1px solid ${theme.palette.divider}`,
+        color: theme.palette.text.primary,
         padding: "15px",
         borderRadius: "8px",
         height: "150px",
         overflowY: "auto",
-        border: "1px solid #ddd",
       }}
     >
       <strong>Logs:</strong>

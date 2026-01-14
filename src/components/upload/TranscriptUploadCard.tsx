@@ -1,6 +1,13 @@
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Card, CardContent, Typography, Box } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  useTheme,
+  alpha,
+} from "@mui/material";
 
 type Props = {
   transcript: File | string | null;
@@ -11,6 +18,8 @@ export default function TranscriptUploadCard({
   transcript,
   setTranscript,
 }: Props) {
+  const theme = useTheme();
+
   const onDrop = useCallback(
     (files: File[]) => {
       setTranscript(files[0]);
@@ -24,6 +33,9 @@ export default function TranscriptUploadCard({
     multiple: false,
   });
 
+  // Helper to determine if the "Blue" active state should be shown
+  const isActive = isDragActive || transcript;
+
   return (
     <Card variant="outlined">
       <CardContent>
@@ -32,20 +44,34 @@ export default function TranscriptUploadCard({
         <Box
           {...getRootProps()}
           sx={{
-            border: "2px dashed #2196f3",
+            border: "2px dashed",
+            // Blue if dragging or file selected, otherwise gray
+            borderColor: isActive ? "primary.main" : "text.secondary",
             borderRadius: 2,
             p: 3,
             mt: 2,
             textAlign: "center",
             cursor: "pointer",
-            background: isDragActive ? "#e3f2fd" : "transparent",
+            transition: "all 0.2s ease",
+            // Blue tint background if active/selected
+            bgcolor: isActive
+              ? alpha(theme.palette.primary.main, 0.1)
+              : "transparent",
           }}
         >
           <input {...getInputProps()} />
-          <Typography>
+
+          <Typography color="textPrimary">
             {transcript ? "Transcript uploaded" : "Drag & drop transcript here"}
           </Typography>
-          <Typography variant="caption">or click to browse</Typography>
+
+          <Typography variant="caption" color="textSecondary">
+            {transcript
+              ? typeof transcript === "string"
+                ? "Manual Text"
+                : transcript.name
+              : "or click to browse"}
+          </Typography>
         </Box>
       </CardContent>
     </Card>

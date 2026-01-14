@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme, alpha } from "@mui/material";
 
 type Line = {
   text: string;
@@ -15,6 +15,7 @@ type Props = {
 export default function SyncedPlayer({ videoUrl, lines }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const theme = useTheme();
 
   // 🔥 Fix for Tauri/WebView media not initializing
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function SyncedPlayer({ videoUrl, lines }: Props) {
       <Box>
         <Typography fontWeight={600}>Video</Typography>
         <video
-          key={videoUrl} // 👈 IMPORTANT
+          key={videoUrl}
           ref={videoRef}
           src={videoUrl}
           controls
@@ -61,12 +62,13 @@ export default function SyncedPlayer({ videoUrl, lines }: Props) {
       {/* TRANSCRIPT */}
       <Box
         sx={{
-          border: "1px solid #ddd",
+          border: 1,
+          borderColor: "divider",
           borderRadius: 2,
           p: 2,
           height: 450,
           overflowY: "auto",
-          background: "#fafafa",
+          bgcolor: "background.paper", // Adapts to theme
         }}
       >
         <Typography fontWeight={600} mb={1}>
@@ -88,14 +90,24 @@ export default function SyncedPlayer({ videoUrl, lines }: Props) {
                 p: 1,
                 borderRadius: 1,
                 cursor: "pointer",
-                background: active ? "#e3f2fd" : "transparent",
-                "&:hover": { background: "#f0f0f0" },
+                transition: "background-color 0.2s",
+                // Active state: Blue tint in light, darker blue in dark mode
+                // Inactive state: Transparent
+                bgcolor: active
+                  ? alpha(theme.palette.primary.main, 0.2)
+                  : "transparent",
+                "&:hover": {
+                  // Hover state: Light gray in light, dark gray in dark mode
+                  bgcolor: active
+                    ? alpha(theme.palette.primary.main, 0.3)
+                    : theme.palette.action.hover,
+                },
               }}
             >
               <Typography variant="caption" color="text.secondary">
                 {(line.start / 1000).toFixed(1)}s
               </Typography>
-              <Typography>{line.text}</Typography>
+              <Typography color="text.primary">{line.text}</Typography>
             </Box>
           );
         })}
