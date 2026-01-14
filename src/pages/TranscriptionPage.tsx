@@ -89,7 +89,7 @@ export default function TranscriptionPage() {
   return (
     <Box p={4} maxWidth={1100} mx="auto">
       <Typography variant="h5" fontWeight={600} mb={3}>
-        Sync App POC
+        Sync App POC UI Updated
       </Typography>
 
       <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result"]} />
