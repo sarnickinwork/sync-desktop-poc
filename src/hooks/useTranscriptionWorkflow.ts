@@ -3,7 +3,7 @@ import { Command } from "@tauri-apps/plugin-shell";
 import { readFile, mkdir, exists, remove } from "@tauri-apps/plugin-fs";
 import { appDataDir, join } from "@tauri-apps/api/path";
 
-const API_KEY = import.meta.env.VITE_ASSEMBLY_AI;
+const API_URL = import.meta.env.VITE_API_URL;
 
 export function useTranscriptionWorkflow() {
   const [logs, setLogs] = useState<string[]>([]);
@@ -12,53 +12,12 @@ export function useTranscriptionWorkflow() {
 
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
 
-  const uploadFile = async (filePath: string) => {
-    log("Reading file into memory...");
-    const fileData = await readFile(filePath);
-
-    log("Uploading to AssemblyAI...");
-    const response = await fetch("https://api.assemblyai.com/v2/upload", {
-      method: "POST",
-      headers: { authorization: API_KEY },
-      body: fileData,
-    });
-
-    const json = await response.json();
-    return json.upload_url;
-  };
-
-  const requestTranscription = async (audioUrl: string) => {
-    log("Requesting transcription...");
-    const response = await fetch("https://api.assemblyai.com/v2/transcript", {
-      method: "POST",
-      headers: {
-        authorization: API_KEY,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ audio_url: audioUrl, speaker_labels: true }),
-    });
-    const json = await response.json();
-    return json.id;
-  };
-
-  const waitForCompletion = async (id: string) => {
-    log(`Polling job ${id}...`);
-    while (true) {
-      const response = await fetch(
-        `https://api.assemblyai.com/v2/transcript/${id}`,
-        { headers: { authorization: API_KEY } }
-      );
-      const json = await response.json();
-
-      if (json.status === "completed") return json;
-      if (json.status === "error") throw new Error(json.error);
-
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-  };
-
-  // Uses path directly (safe for large files)
-  const handleWorkflow = async (videoPath: string) => {
+  // Updated signature to accept text and line number
+  const handleWorkflow = async (
+    videoPath: string,
+    manualTranscript: string | null,
+    startLine: number = 0
+  ) => {
     let audioPath = "";
 
     try {
@@ -66,49 +25,84 @@ export function useTranscriptionWorkflow() {
       setLogs([]);
       setTranscriptResult(null);
 
-      log(`Using uploaded file: ${videoPath}`);
+      if (!API_URL) throw new Error("VITE_API_URL is missing in .env");
+
+      // --- STEP 1: LOCAL AUDIO EXTRACTION (FFmpeg) ---
+      log(`Processing local video: ${videoPath}`);
 
       const appData = await appDataDir();
       if (!(await exists(appData))) {
-        log("Creating app data directory...");
         await mkdir(appData);
       }
 
+      // Define temp path for the audio
       audioPath = await join(appData, "temp_audio.mp3");
 
+      log("Extracting audio with FFmpeg (Sidecar)...");
       const command = Command.sidecar("binaries/ffmpeg", [
         "-i",
         videoPath,
-        "-vn",
+        "-vn", // No video
         "-acodec",
-        "libmp3lame",
-        "-y",
+        "libmp3lame", // Encode to MP3
+        "-y", // Overwrite if exists
         audioPath,
       ]);
 
-      log("Extracting audio with FFmpeg...");
       const output = await command.execute();
 
       if (output.code !== 0) {
         throw new Error(`FFmpeg failed: ${output.stderr}`);
       }
-
       log("Audio extracted successfully.");
 
-      const uploadUrl = await uploadFile(audioPath);
-      const transcriptId = await requestTranscription(uploadUrl);
-      const result = await waitForCompletion(transcriptId);
+      // --- STEP 2: READ FILES INTO MEMORY ---
+      log("Reading extracted audio file...");
+      const audioData = await readFile(audioPath);
+      // Create a Blob/File from the raw bytes
+      const audioBlob = new Blob([audioData], { type: "audio/mp3" });
+      const audioFile = new File([audioBlob], "audio.mp3", {
+        type: "audio/mp3",
+      });
 
-      log("TRANSCRIPTION COMPLETE!");
+      // --- STEP 3: PREPARE FORM DATA FOR BACKEND ---
+      const formData = new FormData();
+      formData.append("AudioFiles", audioFile); // The small MP3 file
+      formData.append("startLine", startLine.toString());
 
-      log("Cleaning up temporary audio file...");
+      if (manualTranscript) {
+        const textBlob = new Blob([manualTranscript], { type: "text/plain" });
+        const textFile = new File([textBlob], "transcript.txt", {
+          type: "text/plain",
+        });
+        formData.append("transcript", textFile);
+        log("Attached manual transcript file.");
+      }
+
+      // --- STEP 4: SEND TO BACKEND ---
+      log(`Sending to backend (${API_URL}/finaltranscript)...`);
+
+      const response = await fetch(`${API_URL}/finaltranscript`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error (${response.status}): ${errorText}`);
+      }
+
+      const json = await response.json();
+      log("Backend processing complete!");
+      setTranscriptResult(json);
+
+      // --- STEP 5: CLEANUP ---
+      log("Cleaning up temporary files...");
       await remove(audioPath);
       log("Cleanup successful.");
-
-      setTranscriptResult(result);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      log(`Error: ${err}`);
+      log(`Error: ${err.message || err}`);
     } finally {
       setIsProcessing(false);
     }
