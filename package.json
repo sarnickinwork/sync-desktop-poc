@@ -24,12 +24,15 @@
     "@tauri-apps/plugin-process": "^2.3.1",
     "@tauri-apps/plugin-shell": "^2.3.4",
     "@tauri-apps/plugin-updater": "^2.9.0",
+    "axios": "^1.13.2",
+    "fuzzball": "^2.2.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
+    "@types/node": "^25.0.8",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
