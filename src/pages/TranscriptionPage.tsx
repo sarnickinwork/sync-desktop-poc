@@ -132,7 +132,7 @@ export default function TranscriptionPage() {
         mb={3}
       >
         <Typography variant="h5" fontWeight={600}>
-          Sync App POC
+          Sync App POC  v1.0.5
         </Typography>
         <ThemeToggle />
       </Box>
