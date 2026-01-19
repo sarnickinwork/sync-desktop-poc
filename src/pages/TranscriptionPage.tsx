@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -18,6 +18,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import TimerIcon from "@mui/icons-material/Timer";
 
 // Components
 import Stepper from "../components/Stepper";
@@ -53,10 +54,38 @@ export default function TranscriptionPage() {
   // State for the line number input
   const [startLine, setStartLine] = useState(0);
 
-  const { logs, isProcessing, transcriptResult, mappedResult, smiContent, handleWorkflow } =
+  const { logs, isProcessing, transcriptResult, mappedResult, smiContent, apiElapsedTime, handleWorkflow } =
     useTranscriptionWorkflow();
 
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
+  
+  // Live elapsed time for stopwatch display
+  const [liveElapsedTime, setLiveElapsedTime] = useState<number>(0);
+
+  // Effect to update live elapsed time during processing
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
+    if (isProcessing) {
+      const startTime = Date.now();
+      setLiveElapsedTime(0);
+      
+      intervalId = setInterval(() => {
+        setLiveElapsedTime(Date.now() - startTime);
+      }, 100); // Update every 100ms for smooth display
+    } else {
+      setLiveElapsedTime(0);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isProcessing]);
 
   function generateSentencesFromAssembly(apiResult: any): SyncedLine[] {
     if (!apiResult?.words) return [];
@@ -275,6 +304,59 @@ export default function TranscriptionPage() {
               : "Start Auto-Sync Workflow"}
           </Button>
 
+          {/* Live Stopwatch Display */}
+          {isProcessing && (
+            <Box
+              mt={4}
+              p={4}
+              bgcolor={alpha(theme.palette.info.main, 0.1)}
+              borderRadius={3}
+              border={2}
+              borderColor="info.main"
+              textAlign="center"
+              sx={{
+                background: `linear-gradient(135deg, ${alpha(
+                  theme.palette.info.main,
+                  0.15
+                )} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
+              }}
+            >
+              <Box display="flex" alignItems="center" justifyContent="center" gap={2} mb={2}>
+                <TimerIcon
+                  sx={{
+                    fontSize: 48,
+                    color: theme.palette.info.main,
+                    animation: "pulse 2s ease-in-out infinite",
+                    "@keyframes pulse": {
+                      "0%, 100%": { opacity: 1 },
+                      "50%": { opacity: 0.5 },
+                    },
+                  }}
+                />
+                <Typography variant="h4" fontWeight={700} color="info.main">
+                  Processing...
+                </Typography>
+              </Box>
+              
+              <Typography
+                variant="h2"
+                fontWeight={800}
+                sx={{
+                  fontFamily: "monospace",
+                  color: theme.palette.info.main,
+                  letterSpacing: 2,
+                  mb: 1,
+                }}
+              >
+                {(liveElapsedTime / 1000).toFixed(2)}s
+              </Typography>
+              
+              <Typography variant="body1" color="text.secondary">
+                Real-time elapsed time
+              </Typography>
+            </Box>
+          )}
+
           {transcriptResult && (
             <Box
               mt={4}
@@ -334,6 +416,7 @@ export default function TranscriptionPage() {
             <ResultsDisplay
               mappedResults={mappedResult}
               smiContent={smiContent}
+              apiElapsedTime={apiElapsedTime}
               onDownloadSMI={() => {
                 if (smiContent) {
                   downloadSMI(smiContent, "synced_subtitle.smi");
