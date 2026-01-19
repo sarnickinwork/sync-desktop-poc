@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Command } from "@tauri-apps/plugin-shell";
-import { readFile, mkdir, exists, remove } from "@tauri-apps/plugin-fs";
-import { appDataDir, join } from "@tauri-apps/api/path";
+import { readFile, mkdir, exists, remove, writeTextFile } from "@tauri-apps/plugin-fs";
+import { appDataDir, join, downloadDir } from "@tauri-apps/api/path";
 
 import {
   SimpleTranscriptDto,
@@ -42,6 +42,7 @@ export function useTranscriptionWorkflow() {
   const [synContent, setSynContent] = useState<string | null>(null);
   const [apiStartTime, setApiStartTime] = useState<number | null>(null);
   const [apiElapsedTime, setApiElapsedTime] = useState<number | null>(null);
+  const [projectFolderPath, setProjectFolderPath] = useState<string | null>(null);
 
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
 
@@ -63,8 +64,58 @@ export function useTranscriptionWorkflow() {
       setSynContent(null);
       setApiStartTime(null);
       setApiElapsedTime(null);
+      setProjectFolderPath(null);
 
       if (!API_URL) throw new Error("VITE_API_URL is missing in .env");
+
+      // --- STEP 0: CREATE PROJECT FOLDER STRUCTURE ---
+      log("Creating project folder structure...");
+      
+      // Extract project name from video path
+      const videoFileName = videoPath.split("\\").pop() || videoPath.split("/").pop() || "project";
+      const projectName = videoFileName.replace(/\.[^/.]+$/, "").trim();
+      
+      // Create project folder in Downloads
+      const downloadsPath = await downloadDir();
+      const projectFolder = await join(downloadsPath, projectName);
+      
+      // Create main project folder
+      if (!(await exists(projectFolder))) {
+        await mkdir(projectFolder);
+      }
+      
+      // Create subfolders
+      const mediaFolder = await join(projectFolder, "media");
+      const transcriptionFolder = await join(projectFolder, "transcription");
+      
+      if (!(await exists(mediaFolder))) {
+        await mkdir(mediaFolder);
+      }
+      if (!(await exists(transcriptionFolder))) {
+        await mkdir(transcriptionFolder);
+      }
+      
+      // Store project folder path
+      setProjectFolderPath(projectFolder);
+      log(`Project folder created: ${projectFolder}`);
+      
+      // Create initial .syn file (resume checkpoint)
+      const initialSynPath = await join(projectFolder, `${projectName}.syn`);
+      const { generateSYN } = await import('../utils/synGenerationUtils');
+      const initialSyn = generateSYN({
+        videoFilename: videoFileName,
+        videoPath: `media/${videoFileName}`,
+        videoDuration: 0, // Will be updated later
+        subtitleFilename: `${projectName}.smi`,
+        subtitlePath: `media/${projectName}.smi`,
+        transcriptFilename: manualTranscript ? "transcript.txt" : "generated_transcript.txt",
+        transcriptPath: `transcription/${manualTranscript ? "transcript.txt" : "generated_transcript.txt"}`,
+        startLine,
+        sentences: [] // Will be populated after processing
+      });
+      
+      await writeTextFile(initialSynPath, initialSyn);
+      log("Initial .syn file created (resume checkpoint)");
 
       // --- STEP 1: LOCAL AUDIO EXTRACTION (FFmpeg) ---
       log(`Processing local video: ${videoPath}`);
@@ -219,6 +270,13 @@ export function useTranscriptionWorkflow() {
         });
         setSynContent(syn);
         log("SYN content generated successfully!");
+        
+        // Update .syn file in project folder with complete data
+        if (projectFolder) {
+          const synPath = await join(projectFolder, `${projectName}.syn`);
+          await writeTextFile(synPath, syn);
+          log("Updated .syn file in project folder with complete data");
+        }
       } else {
         log("No manual transcript provided. Skipping text mapping.");
         // If no manual transcript, just use the AI sentences directly
@@ -252,6 +310,7 @@ export function useTranscriptionWorkflow() {
     dvtContent,
     synContent,
     apiElapsedTime,
+    projectFolderPath,
     handleWorkflow,
   };
 }
