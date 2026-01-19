@@ -38,6 +38,8 @@ export function useTranscriptionWorkflow() {
   const [transcriptResult, setTranscriptResult] = useState<any>(null);
   const [mappedResult, setMappedResult] = useState<MappedSentenceResult[] | null>(null);
   const [smiContent, setSmiContent] = useState<string | null>(null);
+  const [dvtContent, setDvtContent] = useState<string | null>(null);
+  const [synContent, setSynContent] = useState<string | null>(null);
   const [apiStartTime, setApiStartTime] = useState<number | null>(null);
   const [apiElapsedTime, setApiElapsedTime] = useState<number | null>(null);
 
@@ -57,6 +59,8 @@ export function useTranscriptionWorkflow() {
       setTranscriptResult(null);
       setMappedResult(null);
       setSmiContent(null);
+      setDvtContent(null);
+      setSynContent(null);
       setApiStartTime(null);
       setApiElapsedTime(null);
 
@@ -116,7 +120,7 @@ export function useTranscriptionWorkflow() {
 
       // --- STEP 4: SEND TO BACKEND ---
       log(`Sending to backend (${API_URL}/finaltranscript)...`);
-      
+
       // Start timer
       const startTime = Date.now();
       setApiStartTime(startTime);
@@ -132,7 +136,7 @@ export function useTranscriptionWorkflow() {
       }
 
       const json = await response.json();
-      
+
       // Stop timer
       const elapsedTime = Date.now() - startTime;
       setApiElapsedTime(elapsedTime);
@@ -145,7 +149,7 @@ export function useTranscriptionWorkflow() {
       // Convert response(s) to SimpleTranscriptDto format
       // Handle both single response and array of responses
       let transcriptsArray: SimpleTranscriptDto[];
-      
+
       if (Array.isArray(json)) {
         log(`Received ${json.length} transcript chunks. Merging...`);
         transcriptsArray = json.map((item: any) => convertToSimpleTranscriptDto(item));
@@ -161,28 +165,60 @@ export function useTranscriptionWorkflow() {
       // --- STEP 6: TEXT MAPPING (if manual transcript provided) ---
       if (manualTranscript) {
         log(`Extracting human transcript from line ${startLine}...`);
-        
+
         // Sanitize and extract from the given line number
         const sanitizedHumanText = extractHumanTranscriptFromContent(
           manualTranscript,
           startLine
         );
-        
+
         log(`Extracted ${sanitizedHumanText.split(' ').length} words from human transcript.`);
 
         // Perform DTW text mapping
         log("Performing DTW text mapping...");
         const mappingResult = performTextMapping(sanitizedHumanText, mergedTranscript);
-        
+
         log(`Text mapping complete! ${mappingResult.totalSentences} sentences mapped.`);
         setMappedResult(mappingResult.sentences);
 
-        // --- STEP 7: GENERATE SMI (Store in state, don't auto-download) ---
+        // --- STEP 7: GENERATE SMI, DVT, and SYN (Store in state, don't auto-download) ---
         log("Generating SMI subtitle content...");
         const { generateSMI } = await import('../utils/smiGenerationUtils');
         const smi = generateSMI(mappingResult.sentences);
         setSmiContent(smi);
         log("SMI content generated successfully!");
+
+        // Generate DVT file
+        log("Generating DVT (DepoView) file...");
+        const { generateDVT } = await import('../utils/dvtGenerationUtils');
+        const videoFilename = videoPath.split('\\').pop() || 'video.mp4';
+        const dvt = generateDVT({
+          title: `Deposition - ${videoFilename}`,
+          videoFilename,
+          videoPath: `media/${videoFilename}`,
+          duration: mappingResult.sentences[mappingResult.sentences.length - 1]?.end || 0,
+          createdDate: new Date().toISOString(),
+          sentences: mappingResult.sentences
+        });
+        setDvtContent(dvt);
+        log("DVT content generated successfully!");
+
+        // Generate SYN file
+        log("Generating SYN (proprietary) file...");
+        const { generateSYN } = await import('../utils/synGenerationUtils');
+        const syn = generateSYN({
+          videoFilename,
+          videoPath: `media/${videoFilename}`,
+          videoDuration: mappingResult.sentences[mappingResult.sentences.length - 1]?.end || 0,
+          subtitleFilename: 'subtitle.smi',
+          subtitlePath: 'media/subtitle.smi',
+          transcriptFilename: 'transcript.txt',
+          transcriptPath: 'transcript/transcript.txt',
+          startLine,
+          sentences: mappingResult.sentences
+        });
+        setSynContent(syn);
+        log("SYN content generated successfully!");
       } else {
         log("No manual transcript provided. Skipping text mapping.");
         // If no manual transcript, just use the AI sentences directly
@@ -213,6 +249,8 @@ export function useTranscriptionWorkflow() {
     transcriptResult,
     mappedResult,
     smiContent,
+    dvtContent,
+    synContent,
     apiElapsedTime,
     handleWorkflow,
   };
