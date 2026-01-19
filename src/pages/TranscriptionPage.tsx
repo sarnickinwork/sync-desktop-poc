@@ -32,7 +32,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import ResultsDisplay from "../components/ResultsDisplay";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
-import { downloadSMI } from "../utils/smiGenerationUtils";
+import { downloadSMI, downloadDVT, downloadSYN } from "../utils";
 
 type VideoItem = {
   path: string;
@@ -54,7 +54,7 @@ export default function TranscriptionPage() {
   // State for the line number input
   const [startLine, setStartLine] = useState(0);
 
-  const { logs, isProcessing, transcriptResult, mappedResult, smiContent, apiElapsedTime, handleWorkflow } =
+  const { logs, isProcessing, transcriptResult, mappedResult, smiContent, dvtContent, synContent, apiElapsedTime, handleWorkflow } =
     useTranscriptionWorkflow();
 
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
@@ -416,10 +416,24 @@ export default function TranscriptionPage() {
             <ResultsDisplay
               mappedResults={mappedResult}
               smiContent={smiContent}
+              dvtContent={dvtContent}
+              synContent={synContent}
               apiElapsedTime={apiElapsedTime}
               onDownloadSMI={() => {
                 if (smiContent) {
                   downloadSMI(smiContent, "synced_subtitle.smi");
+                }
+              }}
+              onDownloadDVT={() => {
+                if (dvtContent) {
+                  const videoName = video?.name.replace(/\.[^/.]+$/, "") || "deposition";
+                  downloadDVT(dvtContent, `${videoName}.dvt`);
+                }
+              }}
+              onDownloadSYN={() => {
+                if (synContent) {
+                  const videoName = video?.name.replace(/\.[^/.]+$/, "") || "sync";
+                  downloadSYN(synContent, `${videoName}.syn`);
                 }
               }}
             />

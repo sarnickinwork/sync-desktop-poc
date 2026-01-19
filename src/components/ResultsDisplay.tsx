@@ -24,8 +24,12 @@ import { MappedSentenceResult } from "../utils/types";
 interface ResultsDisplayProps {
     mappedResults: MappedSentenceResult[];
     smiContent: string | null;
+    dvtContent?: string | null;
+    synContent?: string | null;
     apiElapsedTime?: number | null;
     onDownloadSMI: () => void;
+    onDownloadDVT?: () => void;
+    onDownloadSYN?: () => void;
 }
 
 /**
@@ -61,8 +65,12 @@ function getConfidenceLabel(confidence: number): string {
 export default function ResultsDisplay({
     mappedResults,
     smiContent,
+    dvtContent,
+    synContent,
     apiElapsedTime,
     onDownloadSMI,
+    onDownloadDVT,
+    onDownloadSYN,
 }: ResultsDisplayProps) {
     const theme = useTheme();
 
@@ -135,22 +143,58 @@ export default function ResultsDisplay({
                         )}
                     </Box>
 
-                    {smiContent && (
-                        <Box mt={3}>
-                            <Button
-                                variant="contained"
-                                size="large"
-                                startIcon={<DownloadIcon />}
-                                onClick={onDownloadSMI}
-                                sx={{
-                                    px: 4,
-                                    py: 1.5,
-                                    borderRadius: 2,
-                                    fontWeight: 600,
-                                }}
-                            >
-                                Download SMI Subtitle File
-                            </Button>
+                    {(smiContent || dvtContent || synContent) && (
+                        <Box mt={3} display="flex" gap={2} flexWrap="wrap">
+                            {smiContent && (
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    startIcon={<DownloadIcon />}
+                                    onClick={onDownloadSMI}
+                                    sx={{
+                                        px: 4,
+                                        py: 1.5,
+                                        borderRadius: 2,
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    Download SMI Subtitle
+                                </Button>
+                            )}
+                            {dvtContent && onDownloadDVT && (
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    color="secondary"
+                                    startIcon={<DownloadIcon />}
+                                    onClick={onDownloadDVT}
+                                    sx={{
+                                        px: 4,
+                                        py: 1.5,
+                                        borderRadius: 2,
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    Download DVT File
+                                </Button>
+                            )}
+                            {synContent && onDownloadSYN && (
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    color="info"
+                                    startIcon={<DownloadIcon />}
+                                    onClick={onDownloadSYN}
+                                    sx={{
+                                        px: 4,
+                                        py: 1.5,
+                                        borderRadius: 2,
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    Download SYN File
+                                </Button>
+                            )}
                         </Box>
                     )}
                 </CardContent>

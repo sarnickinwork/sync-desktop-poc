@@ -51,3 +51,27 @@ export interface UploadedFile {
     mimetype: string;
     size: number;
 }
+
+// DVT (DepoView) metadata structure
+export interface DVTMetadata {
+    title: string;
+    videoFilename: string;
+    videoPath: string;
+    duration: number;
+    createdDate: string;
+    sentences: MappedSentenceResult[];
+}
+
+// SYN (proprietary) metadata structure
+export interface SYNMetadata {
+    videoFilename: string;
+    videoPath: string;
+    videoDuration: number;
+    subtitleFilename: string;
+    subtitlePath: string;
+    transcriptFilename: string;
+    transcriptPath: string;
+    startLine: number;
+    sentences: MappedSentenceResult[];
+}
+
