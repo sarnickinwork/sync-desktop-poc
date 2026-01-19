@@ -40,3 +40,6 @@ export {
 
 // Text mapping utilities
 export { performTextMapping } from './textMappingUtils';
+
+// SMI generation utilities
+export { generateSMI, downloadSMI, generateAndDownloadSMI } from './smiGenerationUtils';

@@ -28,8 +28,10 @@ import TranscriptPreview from "../components/preview/TranscriptPreview";
 import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
 import SyncedPlayer from "../components/sync/SyncedPlayer";
 import ThemeToggle from "../components/ThemeToggle";
+import ResultsDisplay from "../components/ResultsDisplay";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
+import { downloadSMI } from "../utils/smiGenerationUtils";
 
 type VideoItem = {
   path: string;
@@ -51,7 +53,7 @@ export default function TranscriptionPage() {
   // State for the line number input
   const [startLine, setStartLine] = useState(0);
 
-  const { logs, isProcessing, transcriptResult, handleWorkflow } =
+  const { logs, isProcessing, transcriptResult, mappedResult, smiContent, handleWorkflow } =
     useTranscriptionWorkflow();
 
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
@@ -308,7 +310,7 @@ export default function TranscriptionPage() {
       )}
 
       {/* STEP 3: RESULT */}
-      {step === 3 && video && syncedLines.length > 0 && (
+      {step === 3 && video && (
         <Box>
           <Box mb={3}>
             <Button
@@ -320,17 +322,43 @@ export default function TranscriptionPage() {
                 setVideo(null);
                 setTranscriptText(null);
                 setSyncedLines([]);
-                setStartLine(0); // Reset start line
+                setStartLine(0);
               }}
             >
               Start New Project
             </Button>
           </Box>
 
-          <SyncedPlayer
-            videoUrl={convertFileSrc(video.path)}
-            lines={syncedLines}
-          />
+          {/* If we have mapped results (manual transcript was provided), show ResultsDisplay */}
+          {mappedResult && mappedResult.length > 0 ? (
+            <ResultsDisplay
+              mappedResults={mappedResult}
+              smiContent={smiContent}
+              onDownloadSMI={() => {
+                if (smiContent) {
+                  downloadSMI(smiContent, "synced_subtitle.smi");
+                }
+              }}
+            />
+          ) : syncedLines.length > 0 ? (
+            /* Otherwise, if we have synced lines (AI-only), show the player */
+            <SyncedPlayer
+              videoUrl={convertFileSrc(video.path)}
+              lines={syncedLines}
+            />
+          ) : (
+            <Box
+              p={4}
+              textAlign="center"
+              border="1px dashed"
+              borderColor="divider"
+              borderRadius={2}
+            >
+              <Typography color="text.secondary">
+                No results available. Please go back and run the sync workflow.
+              </Typography>
+            </Box>
+          )}
         </Box>
       )}
 

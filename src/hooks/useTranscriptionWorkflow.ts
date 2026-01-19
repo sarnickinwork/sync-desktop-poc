@@ -3,12 +3,41 @@ import { Command } from "@tauri-apps/plugin-shell";
 import { readFile, mkdir, exists, remove } from "@tauri-apps/plugin-fs";
 import { appDataDir, join } from "@tauri-apps/api/path";
 
+import {
+  SimpleTranscriptDto,
+  WordDTO,
+  MappedSentenceResult,
+  mergeTranscripts,
+  extractHumanTranscriptFromContent,
+  performTextMapping,
+} from "../utils";
+
 const API_URL = import.meta.env.VITE_API_URL;
+
+/**
+ * Convert raw AssemblyAI response to SimpleTranscriptDto format
+ */
+function convertToSimpleTranscriptDto(rawResponse: any): SimpleTranscriptDto {
+  const words: WordDTO[] = (rawResponse.words || []).map((w: any) => ({
+    text: w.text,
+    start: w.start,
+    end: w.end,
+    confidence: w.confidence || 0,
+  }));
+
+  return {
+    fullText: rawResponse.text || "",
+    sentences: [], // We don't need sentences for merging, words are sufficient
+    words,
+  };
+}
 
 export function useTranscriptionWorkflow() {
   const [logs, setLogs] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcriptResult, setTranscriptResult] = useState<any>(null);
+  const [mappedResult, setMappedResult] = useState<MappedSentenceResult[] | null>(null);
+  const [smiContent, setSmiContent] = useState<string | null>(null);
 
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
 
@@ -24,6 +53,8 @@ export function useTranscriptionWorkflow() {
       setIsProcessing(true);
       setLogs([]);
       setTranscriptResult(null);
+      setMappedResult(null);
+      setSmiContent(null);
 
       if (!API_URL) throw new Error("VITE_API_URL is missing in .env");
 
@@ -96,10 +127,61 @@ export function useTranscriptionWorkflow() {
       log("Backend processing complete!");
       setTranscriptResult(json);
 
-      // --- STEP 5: CLEANUP ---
+      // --- STEP 5: POST-PROCESSING ---
+      log("Starting post-processing...");
+
+      // Convert response(s) to SimpleTranscriptDto format
+      // Handle both single response and array of responses
+      let transcriptsArray: SimpleTranscriptDto[];
+      
+      if (Array.isArray(json)) {
+        log(`Received ${json.length} transcript chunks. Merging...`);
+        transcriptsArray = json.map((item: any) => convertToSimpleTranscriptDto(item));
+      } else {
+        log("Received single transcript response.");
+        transcriptsArray = [convertToSimpleTranscriptDto(json)];
+      }
+
+      // Merge all transcripts into one
+      const mergedTranscript = mergeTranscripts(transcriptsArray);
+      log(`Merged transcript has ${mergedTranscript.words.length} words.`);
+
+      // --- STEP 6: TEXT MAPPING (if manual transcript provided) ---
+      if (manualTranscript) {
+        log(`Extracting human transcript from line ${startLine}...`);
+        
+        // Sanitize and extract from the given line number
+        const sanitizedHumanText = extractHumanTranscriptFromContent(
+          manualTranscript,
+          startLine
+        );
+        
+        log(`Extracted ${sanitizedHumanText.split(' ').length} words from human transcript.`);
+
+        // Perform DTW text mapping
+        log("Performing DTW text mapping...");
+        const mappingResult = performTextMapping(sanitizedHumanText, mergedTranscript);
+        
+        log(`Text mapping complete! ${mappingResult.totalSentences} sentences mapped.`);
+        setMappedResult(mappingResult.sentences);
+
+        // --- STEP 7: GENERATE SMI (Store in state, don't auto-download) ---
+        log("Generating SMI subtitle content...");
+        const { generateSMI } = await import('../utils/smiGenerationUtils');
+        const smi = generateSMI(mappingResult.sentences);
+        setSmiContent(smi);
+        log("SMI content generated successfully!");
+      } else {
+        log("No manual transcript provided. Skipping text mapping.");
+        // If no manual transcript, just use the AI sentences directly
+        // Convert merged words to basic sentences for display
+        setMappedResult(null);
+      }
+
+      // --- STEP 8: CLEANUP ---
       log("Cleaning up temporary files...");
       await remove(audioPath);
-      log("Cleanup successful.");
+      log("Cleanup successful. Workflow complete!");
     } catch (err: any) {
       console.error(err);
       log(`Error: ${err.message || err}`);
@@ -112,6 +194,9 @@ export function useTranscriptionWorkflow() {
     logs,
     isProcessing,
     transcriptResult,
+    mappedResult,
+    smiContent,
     handleWorkflow,
   };
 }
+
