@@ -35,7 +35,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import ResultsDisplay from "../components/ResultsDisplay";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
-import { downloadSMI } from "../utils/smiGenerationUtils";
+import { downloadSMI, downloadDVT, downloadSYN } from "../utils";
 
 type VideoItem = {
   path: string;
@@ -85,6 +85,8 @@ export default function TranscriptionPage() {
     transcriptResult,
     mappedResult,
     smiContent, // <--- This contains the backend SAMI file
+    dvtContent,
+    synContent,
     apiElapsedTime,
     handleWorkflow,
   } = useTranscriptionWorkflow();
@@ -266,7 +268,7 @@ export default function TranscriptionPage() {
         mb={3}
       >
         <Typography variant="h5" fontWeight={600}>
-          Sync App POC
+          Sync App POC v1.0.5
         </Typography>
         <ThemeToggle />
       </Box>
@@ -534,9 +536,27 @@ export default function TranscriptionPage() {
             <ResultsDisplay
               mappedResults={mappedResult}
               smiContent={smiContent}
+              dvtContent={dvtContent}
+              synContent={synContent}
               apiElapsedTime={apiElapsedTime}
               onDownloadSMI={() => {
-                if (smiContent) downloadSMI(smiContent, "synced_subtitle.smi");
+                if (smiContent) {
+                  downloadSMI(smiContent, "synced_subtitle.smi");
+                }
+              }}
+              onDownloadDVT={() => {
+                if (dvtContent) {
+                  const videoName =
+                    video?.name.replace(/\.[^/.]+$/, "") || "deposition";
+                  downloadDVT(dvtContent, `${videoName}.dvt`);
+                }
+              }}
+              onDownloadSYN={() => {
+                if (synContent) {
+                  const videoName =
+                    video?.name.replace(/\.[^/.]+$/, "") || "sync";
+                  downloadSYN(synContent, `${videoName}.syn`);
+                }
               }}
             />
           ) : syncedLines.length > 0 ? (
