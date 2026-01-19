@@ -11,8 +11,9 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import { downloadDir, join } from "@tauri-apps/api/path";
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { join } from "@tauri-apps/api/path";
+import { writeTextFile, copyFile } from "@tauri-apps/plugin-fs";
 
 // Icons
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -89,6 +90,7 @@ export default function TranscriptionPage() {
     dvtContent,
     synContent,
     apiElapsedTime,
+    projectFolderPath,
     handleWorkflow,
   } = useTranscriptionWorkflow();
 
@@ -152,37 +154,35 @@ export default function TranscriptionPage() {
       return;
     }
 
+    if (!projectFolderPath) {
+      alert("Project folder not found. Please run the workflow first.");
+      return;
+    }
+
     try {
       setIsExporting(true);
 
       // 1. Prepare Paths - Keep original filenames
       const rawProjectName = video.name.replace(/\.[^/.]+$/, "").trim();
-      // Use original video filename as-is
       const originalVideoName = video.name;
-      // Use original transcript filename if available, otherwise default to "transcript.txt"
       const finalTranscriptFileName = transcriptFileName || "transcript.txt";
 
       // 2. Prepare Content
 
-      // A. SAMI Content: Use backend response (smiContent) if available.
-      // Fallback to local generator only if backend didn't return one (e.g. error case).
+      // A. SAMI Content
       const finalSamiContent = smiContent
         ? smiContent
         : generateSamiContent(dataToExport, rawProjectName);
 
-      // B. Transcript Content: Use the original uploaded text (transcriptText).
-      // Fallback to generated text only if user never uploaded a transcript.
+      // B. Transcript Content
       const finalTxtContent = transcriptText
         ? transcriptText
         : dataToExport.map((l) => l.text).join(" ");
 
-      // C. DVT Content: Use backend response (dvtContent) if available.
-      // Fallback to generating it locally if not available.
+      // C. DVT Content
       let finalDvtContent = dvtContent;
       if (!finalDvtContent) {
-        // Generate DVT as fallback
         const { generateDVT } = await import("../utils/dvtGenerationUtils");
-        // Convert SyncedLine to MappedSentenceResult format if needed
         const sentencesForDVT = dataToExport.map((line: any) => ({
           sentence: line.sentence || line.text,
           start: line.start,
@@ -199,13 +199,10 @@ export default function TranscriptionPage() {
         });
       }
 
-      // D. SYN Content: Use backend response (synContent) if available.
-      // Fallback to generating it locally if not available.
+      // D. SYN Content
       let finalSynContent = synContent;
       if (!finalSynContent) {
-        // Generate SYN as fallback
         const { generateSYN } = await import("../utils/synGenerationUtils");
-        // Convert SyncedLine to MappedSentenceResult format if needed
         const sentencesForSYN = dataToExport.map((line: any) => ({
           sentence: line.sentence || line.text,
           start: line.start,
@@ -225,49 +222,35 @@ export default function TranscriptionPage() {
         });
       }
 
-      // 3. Define Output Path
-      const downloadsPath = await downloadDir();
-      const savePath = await join(downloadsPath, `${rawProjectName}.zip`);
+      // 3. Write files to project folder
+      console.log("Exporting to project folder:", projectFolderPath);
 
-      console.log("Starting Rust Export to:", savePath);
+      // Copy video file to media folder
+      const videoDestPath = await join(projectFolderPath, "media", originalVideoName);
+      await copyFile(video.path, videoDestPath);
+      console.log("Video copied to:", videoDestPath);
 
-      // 4. INVOKE RUST (Heavy Lifting)
-      await invoke("export_project_zip", {
-        zipPath: savePath,
-        entries: [
-          // Video: Stream from disk with ORIGINAL filename
-          {
-            path: `media/${originalVideoName}`,
-            source_path: video.path,
-            content: null,
-          },
-          // SAMI File: Use 'finalSamiContent' (from backend)
-          {
-            path: `media/${rawProjectName}.smi`,
-            content: finalSamiContent,
-            source_path: null,
-          },
-          // Transcript File: Use ORIGINAL filename from upload
-          {
-            path: `transcription/${finalTranscriptFileName}`,
-            content: finalTxtContent,
-            source_path: null,
-          },
-          // Metadata Files - Use XML/JSON content from workflow
-          {
-            path: `${rawProjectName}.dvt`,
-            content: finalDvtContent,
-            source_path: null,
-          },
-          {
-            path: `${rawProjectName}.syn`,
-            content: finalSynContent,
-            source_path: null,
-          },
-        ],
-      });
+      // Write .smi file to media folder
+      const smiPath = await join(projectFolderPath, "media", `${rawProjectName}.smi`);
+      await writeTextFile(smiPath, finalSamiContent);
+      console.log(".smi file written to:", smiPath);
 
-      alert(`Export Successful!\nSaved to Downloads:\n${savePath}`);
+      // Write transcript to transcription folder
+      const transcriptPath = await join(projectFolderPath, "transcription", finalTranscriptFileName);
+      await writeTextFile(transcriptPath, finalTxtContent);
+      console.log("Transcript written to:", transcriptPath);
+
+      // Write .dvt file to project root
+      const dvtPath = await join(projectFolderPath, `${rawProjectName}.dvt`);
+      await writeTextFile(dvtPath, finalDvtContent);
+      console.log(".dvt file written to:", dvtPath);
+
+      // Update .syn file at project root
+      const synPath = await join(projectFolderPath, `${rawProjectName}.syn`);
+      await writeTextFile(synPath, finalSynContent);
+      console.log(".syn file updated at:", synPath);
+
+      alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
     } catch (error: any) {
       console.error("Export Failed:", error);
       alert(`Export Failed: ${error}`);
