@@ -1,10 +1,7 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-
-// Updater Imports
-import { check } from "@tauri-apps/plugin-updater";
-import { relaunch } from "@tauri-apps/plugin-process";
+import { Snackbar, Alert } from "@mui/material";
 
 // Context
 import { ColorModeContext } from "./themes/ThemeContext";
@@ -12,39 +9,24 @@ import { ColorModeContext } from "./themes/ThemeContext";
 // Pages
 import TranscriptionPage from "./pages/TranscriptionPage";
 
-/**
- * Custom Hook: useAppUpdater
- */
-function useAppUpdater() {
-  useEffect(() => {
-    const checkForUpdates = async () => {
-      try {
-        const update = await check();
-        if (update) {
-          console.log(`Found update: ${update.version}`);
-          const yes = await window.confirm(
-            `Update to ${update.version} is available!\n\nRelease notes: ${update.body}\n\nInstall now?`
-          );
+// Components
+import UpdateDialog from "./components/UpdateDialog";
 
-          if (yes) {
-            await update.downloadAndInstall();
-            await relaunch();
-          }
-        } else {
-          console.log("No updates found.");
-        }
-      } catch (error) {
-        console.error("Error checking for updates:", error);
-      }
-    };
-
-    checkForUpdates();
-  }, []);
-}
+// Hooks
+import { useAppUpdater } from "./hooks/useAppUpdater";
 
 export default function App() {
   // 1. Initialize the Updater
-  useAppUpdater();
+  const {
+    updateAvailable,
+    updateInfo,
+    isDownloading,
+    downloadProgress,
+    error,
+    installUpdate,
+    closeUpdateDialog,
+    clearError,
+  } = useAppUpdater();
 
   // 2. Theme State Management
   const [mode, setMode] = useState<"light" | "dark">("light");
@@ -80,6 +62,30 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <TranscriptionPage />
+
+        {/* Update Dialog */}
+        <UpdateDialog
+          open={updateAvailable}
+          updateInfo={updateInfo}
+          isDownloading={isDownloading}
+          downloadProgress={downloadProgress}
+          onConfirm={installUpdate}
+          onCancel={closeUpdateDialog}
+        />
+
+        {/* Error Notification */}
+        {error && (
+          <Snackbar
+            open={!!error}
+            autoHideDuration={8000}
+            onClose={clearError}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            <Alert severity="error" variant="filled" onClose={clearError}>
+              Update Error: {error}
+            </Alert>
+          </Snackbar>
+        )}
       </ThemeProvider>
     </ColorModeContext.Provider>
   );
