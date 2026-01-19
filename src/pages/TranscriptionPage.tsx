@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import { downloadDir, join, extname } from "@tauri-apps/api/path";
+import { downloadDir, join } from "@tauri-apps/api/path";
 
 // Icons
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -74,10 +74,11 @@ export default function TranscriptionPage() {
   const [step, setStep] = useState(0);
   const [video, setVideo] = useState<VideoItem | null>(null);
   const [transcriptText, setTranscriptText] = useState<string | null>(null);
+  const [transcriptFileName, setTranscriptFileName] = useState<string | null>(null);
 
   // Export State
   const [isExporting, setIsExporting] = useState(false);
-  const [startLine, setStartLine] = useState(0);
+  const [startLine, setStartLine] = useState<string>("");
 
   const {
     logs,
@@ -154,10 +155,12 @@ export default function TranscriptionPage() {
     try {
       setIsExporting(true);
 
-      // 1. Prepare Paths
+      // 1. Prepare Paths - Keep original filenames
       const rawProjectName = video.name.replace(/\.[^/.]+$/, "").trim();
-      const videoExt = await extname(video.path);
-      const videoNameInZip = `${rawProjectName}.${videoExt}`;
+      // Use original video filename as-is
+      const originalVideoName = video.name;
+      // Use original transcript filename if available, otherwise default to "transcript.txt"
+      const finalTranscriptFileName = transcriptFileName || "transcript.txt";
 
       // 2. Prepare Content
 
@@ -173,39 +176,54 @@ export default function TranscriptionPage() {
         ? transcriptText
         : dataToExport.map((l) => l.text).join(" ");
 
-      const dvtData = JSON.stringify(
-        {
-          app: "SyncExpress",
-          type: "desktop-poc",
-          id: crypto.randomUUID(),
-          config: {
-            startLineOffset: startLine,
-            originalVideoName: video.name,
-            mode:
-              mappedResult && mappedResult.length > 0
-                ? "manual-sync"
-                : "auto-sync",
-          },
-        },
-        null,
-        2,
-      );
+      // C. DVT Content: Use backend response (dvtContent) if available.
+      // Fallback to generating it locally if not available.
+      let finalDvtContent = dvtContent;
+      if (!finalDvtContent) {
+        // Generate DVT as fallback
+        const { generateDVT } = await import("../utils/dvtGenerationUtils");
+        // Convert SyncedLine to MappedSentenceResult format if needed
+        const sentencesForDVT = dataToExport.map((line: any) => ({
+          sentence: line.sentence || line.text,
+          start: line.start,
+          end: line.end,
+          confidence: line.confidence || 1.0,
+        }));
+        finalDvtContent = generateDVT({
+          title: `Deposition - ${originalVideoName}`,
+          videoFilename: originalVideoName,
+          videoPath: `media/${originalVideoName}`,
+          duration: dataToExport[dataToExport.length - 1]?.end || 0,
+          createdDate: new Date().toISOString(),
+          sentences: sentencesForDVT,
+        });
+      }
 
-      const synData = JSON.stringify(
-        {
-          version: "1.0",
-          projectName: rawProjectName,
-          createdAt: new Date().toISOString(),
-          media: {
-            video: `media/${videoNameInZip}`,
-            smi: `media/${rawProjectName}.smi`,
-          },
-          transcription: `transcription/${rawProjectName}.txt`,
-          syncedData: dataToExport,
-        },
-        null,
-        2,
-      );
+      // D. SYN Content: Use backend response (synContent) if available.
+      // Fallback to generating it locally if not available.
+      let finalSynContent = synContent;
+      if (!finalSynContent) {
+        // Generate SYN as fallback
+        const { generateSYN } = await import("../utils/synGenerationUtils");
+        // Convert SyncedLine to MappedSentenceResult format if needed
+        const sentencesForSYN = dataToExport.map((line: any) => ({
+          sentence: line.sentence || line.text,
+          start: line.start,
+          end: line.end,
+          confidence: line.confidence || 1.0,
+        }));
+        finalSynContent = generateSYN({
+          videoFilename: originalVideoName,
+          videoPath: `media/${originalVideoName}`,
+          videoDuration: dataToExport[dataToExport.length - 1]?.end || 0,
+          subtitleFilename: `${rawProjectName}.smi`,
+          subtitlePath: `media/${rawProjectName}.smi`,
+          transcriptFilename: finalTranscriptFileName,
+          transcriptPath: `transcription/${finalTranscriptFileName}`,
+          startLine: parseInt(startLine) || 0,
+          sentences: sentencesForSYN,
+        });
+      }
 
       // 3. Define Output Path
       const downloadsPath = await downloadDir();
@@ -217,9 +235,9 @@ export default function TranscriptionPage() {
       await invoke("export_project_zip", {
         zipPath: savePath,
         entries: [
-          // Video: Stream from disk
+          // Video: Stream from disk with ORIGINAL filename
           {
-            path: `media/${videoNameInZip}`,
+            path: `media/${originalVideoName}`,
             source_path: video.path,
             content: null,
           },
@@ -229,21 +247,21 @@ export default function TranscriptionPage() {
             content: finalSamiContent,
             source_path: null,
           },
-          // Transcript File: Use 'finalTxtContent' (from upload)
+          // Transcript File: Use ORIGINAL filename from upload
           {
-            path: `transcription/${rawProjectName}.txt`,
+            path: `transcription/${finalTranscriptFileName}`,
             content: finalTxtContent,
             source_path: null,
           },
-          // Metadata Files
+          // Metadata Files - Use XML/JSON content from workflow
           {
             path: `${rawProjectName}.dvt`,
-            content: dvtData,
+            content: finalDvtContent,
             source_path: null,
           },
           {
             path: `${rawProjectName}.syn`,
-            content: synData,
+            content: finalSynContent,
             source_path: null,
           },
         ],
@@ -327,6 +345,7 @@ export default function TranscriptionPage() {
               transcript={transcriptText}
               setTranscript={(file) => {
                 if (!file) return;
+                setTranscriptFileName(file.name);
                 file.text().then(setTranscriptText);
               }}
             />
@@ -378,7 +397,8 @@ export default function TranscriptionPage() {
               variant="outlined"
               size="small"
               value={startLine}
-              onChange={(e) => setStartLine(Number(e.target.value))}
+              onChange={(e) => setStartLine(e.target.value)}
+              placeholder="0"
               helperText="Optional: Offset for transcription sync"
               fullWidth
             />
@@ -418,7 +438,7 @@ export default function TranscriptionPage() {
             size="large"
             disabled={isProcessing}
             onClick={() =>
-              handleWorkflow(video.path, transcriptText, startLine)
+              handleWorkflow(video.path, transcriptText, parseInt(startLine) || 0)
             }
             startIcon={!isProcessing && <PlayArrowIcon />}
             sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
@@ -507,8 +527,9 @@ export default function TranscriptionPage() {
                 setStep(0);
                 setVideo(null);
                 setTranscriptText(null);
+                setTranscriptFileName(null);
                 setSyncedLines([]);
-                setStartLine(0);
+                setStartLine("");
               }}
             >
               Start New Project
