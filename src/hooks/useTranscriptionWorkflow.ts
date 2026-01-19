@@ -38,6 +38,8 @@ export function useTranscriptionWorkflow() {
   const [transcriptResult, setTranscriptResult] = useState<any>(null);
   const [mappedResult, setMappedResult] = useState<MappedSentenceResult[] | null>(null);
   const [smiContent, setSmiContent] = useState<string | null>(null);
+  const [apiStartTime, setApiStartTime] = useState<number | null>(null);
+  const [apiElapsedTime, setApiElapsedTime] = useState<number | null>(null);
 
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
 
@@ -55,6 +57,8 @@ export function useTranscriptionWorkflow() {
       setTranscriptResult(null);
       setMappedResult(null);
       setSmiContent(null);
+      setApiStartTime(null);
+      setApiElapsedTime(null);
 
       if (!API_URL) throw new Error("VITE_API_URL is missing in .env");
 
@@ -112,6 +116,10 @@ export function useTranscriptionWorkflow() {
 
       // --- STEP 4: SEND TO BACKEND ---
       log(`Sending to backend (${API_URL}/finaltranscript)...`);
+      
+      // Start timer
+      const startTime = Date.now();
+      setApiStartTime(startTime);
 
       const response = await fetch(`${API_URL}/finaltranscript`, {
         method: "POST",
@@ -124,7 +132,11 @@ export function useTranscriptionWorkflow() {
       }
 
       const json = await response.json();
-      log("Backend processing complete!");
+      
+      // Stop timer
+      const elapsedTime = Date.now() - startTime;
+      setApiElapsedTime(elapsedTime);
+      log(`Backend processing complete! (${(elapsedTime / 1000).toFixed(2)}s)`);
       setTranscriptResult(json);
 
       // --- STEP 5: POST-PROCESSING ---
@@ -183,6 +195,11 @@ export function useTranscriptionWorkflow() {
       await remove(audioPath);
       log("Cleanup successful. Workflow complete!");
     } catch (err: any) {
+      // Stop timer on error as well
+      if (apiStartTime) {
+        const elapsedTime = Date.now() - apiStartTime;
+        setApiElapsedTime(elapsedTime);
+      }
       console.error(err);
       log(`Error: ${err.message || err}`);
     } finally {
@@ -196,6 +213,7 @@ export function useTranscriptionWorkflow() {
     transcriptResult,
     mappedResult,
     smiContent,
+    apiElapsedTime,
     handleWorkflow,
   };
 }
