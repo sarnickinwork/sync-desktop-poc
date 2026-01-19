@@ -7,10 +7,12 @@ import {
   useTheme,
   alpha,
   Button,
-  TextField, // <--- Ensure this is imported
+  TextField,
+  CircularProgress,
 } from "@mui/material";
 import { open } from "@tauri-apps/plugin-dialog";
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { downloadDir, join, extname } from "@tauri-apps/api/path";
 
 // Icons
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -19,6 +21,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TimerIcon from "@mui/icons-material/Timer";
+import SaveAltIcon from "@mui/icons-material/SaveAlt";
 
 // Components
 import Stepper from "../components/Stepper";
@@ -45,62 +48,78 @@ type SyncedLine = {
   end: number;
 };
 
+// --- HELPER: Local Fallback Generator ---
+const generateSamiContent = (lines: SyncedLine[], title: string) => {
+  const bodyContent = lines
+    .map((line) => {
+      const startMs = Math.round(line.start);
+      return `    <SYNC Start=${startMs}>\n      <P Class=ENCC>${line.text}</P>\n    </SYNC>`;
+    })
+    .join("\n");
+
+  return `<SAMI>
+<HEAD>
+<TITLE>${title}</TITLE>
+<STYLE TYPE="text/css">
+</STYLE>
+</HEAD>
+<BODY>
+${bodyContent}
+</BODY>
+</SAMI>`;
+};
+
 export default function TranscriptionPage() {
   const theme = useTheme();
   const [step, setStep] = useState(0);
   const [video, setVideo] = useState<VideoItem | null>(null);
   const [transcriptText, setTranscriptText] = useState<string | null>(null);
 
-  // State for the line number input
+  // Export State
+  const [isExporting, setIsExporting] = useState(false);
   const [startLine, setStartLine] = useState(0);
 
-  const { logs, isProcessing, transcriptResult, mappedResult, smiContent, dvtContent, synContent, apiElapsedTime, handleWorkflow } =
-    useTranscriptionWorkflow();
+  const {
+    logs,
+    isProcessing,
+    transcriptResult,
+    mappedResult,
+    smiContent, // <--- This contains the backend SAMI file
+    dvtContent,
+    synContent,
+    apiElapsedTime,
+    handleWorkflow,
+  } = useTranscriptionWorkflow();
 
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
-  
-  // Live elapsed time for stopwatch display
   const [liveElapsedTime, setLiveElapsedTime] = useState<number>(0);
 
-  // Effect to update live elapsed time during processing
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-    
     if (isProcessing) {
       const startTime = Date.now();
       setLiveElapsedTime(0);
-      
       intervalId = setInterval(() => {
         setLiveElapsedTime(Date.now() - startTime);
-      }, 100); // Update every 100ms for smooth display
+      }, 100);
     } else {
       setLiveElapsedTime(0);
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
     }
-    
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
     };
   }, [isProcessing]);
 
   function generateSentencesFromAssembly(apiResult: any): SyncedLine[] {
     if (!apiResult?.words) return [];
-
     const sentences: SyncedLine[] = [];
     let currentSentenceWords: string[] = [];
     let startTime: number | null = null;
-
     apiResult.words.forEach((word: any) => {
       if (startTime === null) startTime = word.start;
       currentSentenceWords.push(word.text);
-
-      const isEndOfSentence = /[.!?]$/.test(word.text);
-
-      if (isEndOfSentence) {
+      if (/[.!?]$/.test(word.text)) {
         sentences.push({
           text: currentSentenceWords.join(" "),
           start: startTime!,
@@ -110,7 +129,6 @@ export default function TranscriptionPage() {
         startTime = null;
       }
     });
-
     if (currentSentenceWords.length > 0 && startTime !== null) {
       sentences.push({
         text: currentSentenceWords.join(" "),
@@ -118,13 +136,131 @@ export default function TranscriptionPage() {
         end: apiResult.words[apiResult.words.length - 1].end,
       });
     }
-
     return sentences;
   }
 
+  // --- RUST-BASED EXPORT ---
+  const handleExportZip = async () => {
+    const dataToExport: SyncedLine[] =
+      mappedResult && mappedResult.length > 0
+        ? (mappedResult as any[])
+        : syncedLines;
+
+    if (!video || dataToExport.length === 0) {
+      alert("No synced data available to export.");
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+
+      // 1. Prepare Paths
+      const rawProjectName = video.name.replace(/\.[^/.]+$/, "").trim();
+      const videoExt = await extname(video.path);
+      const videoNameInZip = `${rawProjectName}.${videoExt}`;
+
+      // 2. Prepare Content
+
+      // A. SAMI Content: Use backend response (smiContent) if available.
+      // Fallback to local generator only if backend didn't return one (e.g. error case).
+      const finalSamiContent = smiContent
+        ? smiContent
+        : generateSamiContent(dataToExport, rawProjectName);
+
+      // B. Transcript Content: Use the original uploaded text (transcriptText).
+      // Fallback to generated text only if user never uploaded a transcript.
+      const finalTxtContent = transcriptText
+        ? transcriptText
+        : dataToExport.map((l) => l.text).join(" ");
+
+      const dvtData = JSON.stringify(
+        {
+          app: "SyncExpress",
+          type: "desktop-poc",
+          id: crypto.randomUUID(),
+          config: {
+            startLineOffset: startLine,
+            originalVideoName: video.name,
+            mode:
+              mappedResult && mappedResult.length > 0
+                ? "manual-sync"
+                : "auto-sync",
+          },
+        },
+        null,
+        2,
+      );
+
+      const synData = JSON.stringify(
+        {
+          version: "1.0",
+          projectName: rawProjectName,
+          createdAt: new Date().toISOString(),
+          media: {
+            video: `media/${videoNameInZip}`,
+            smi: `media/${rawProjectName}.smi`,
+          },
+          transcription: `transcription/${rawProjectName}.txt`,
+          syncedData: dataToExport,
+        },
+        null,
+        2,
+      );
+
+      // 3. Define Output Path
+      const downloadsPath = await downloadDir();
+      const savePath = await join(downloadsPath, `${rawProjectName}.zip`);
+
+      console.log("Starting Rust Export to:", savePath);
+
+      // 4. INVOKE RUST (Heavy Lifting)
+      await invoke("export_project_zip", {
+        zipPath: savePath,
+        entries: [
+          // Video: Stream from disk
+          {
+            path: `media/${videoNameInZip}`,
+            source_path: video.path,
+            content: null,
+          },
+          // SAMI File: Use 'finalSamiContent' (from backend)
+          {
+            path: `media/${rawProjectName}.smi`,
+            content: finalSamiContent,
+            source_path: null,
+          },
+          // Transcript File: Use 'finalTxtContent' (from upload)
+          {
+            path: `transcription/${rawProjectName}.txt`,
+            content: finalTxtContent,
+            source_path: null,
+          },
+          // Metadata Files
+          {
+            path: `${rawProjectName}.dvt`,
+            content: dvtData,
+            source_path: null,
+          },
+          {
+            path: `${rawProjectName}.syn`,
+            content: synData,
+            source_path: null,
+          },
+        ],
+      });
+
+      alert(`Export Successful!\nSaved to Downloads:\n${savePath}`);
+    } catch (error: any) {
+      console.error("Export Failed:", error);
+      alert(`Export Failed: ${error}`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <Box p={4} maxWidth={1100} mx="auto">
-      {/* HEADER: Title + Toggle */}
+      {/* HEADER */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -132,7 +268,7 @@ export default function TranscriptionPage() {
         mb={3}
       >
         <Typography variant="h5" fontWeight={600}>
-          Sync App POC  v1.0.5
+          Sync App POC v1.0.5
         </Typography>
         <ThemeToggle />
       </Box>
@@ -143,11 +279,9 @@ export default function TranscriptionPage() {
       {step === 0 && (
         <>
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
-            {/* Video Upload */}
             <Card variant="outlined">
               <CardContent>
                 <Typography fontWeight={600}>Video</Typography>
-
                 <Box
                   onClick={async () => {
                     const selected = await open({
@@ -189,7 +323,6 @@ export default function TranscriptionPage() {
               </CardContent>
             </Card>
 
-            {/* Transcript Upload */}
             <TranscriptUploadCard
               transcript={transcriptText}
               setTranscript={(file) => {
@@ -214,12 +347,11 @@ export default function TranscriptionPage() {
         </>
       )}
 
-      {/* STEP 1: PREVIEW & CONFIGURATION */}
+      {/* STEP 1: PREVIEW */}
       {step === 1 && video && (
         <>
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
             <VideoPreview videoPath={convertFileSrc(video.path)} />
-
             {transcriptText ? (
               <TranscriptPreview transcript={transcriptText} />
             ) : (
@@ -239,7 +371,6 @@ export default function TranscriptionPage() {
             )}
           </Box>
 
-          {/* --- NEW LOCATION FOR INPUT FIELD --- */}
           <Box mt={4} maxWidth={300}>
             <TextField
               label="Start Line Number"
@@ -282,29 +413,21 @@ export default function TranscriptionPage() {
           <Typography mb={3} color="text.secondary">
             Click below to extract audio locally and sync via backend.
           </Typography>
-
           <Button
             variant="contained"
             size="large"
             disabled={isProcessing}
-            // Passing the startLine gathered in Step 1
             onClick={() =>
               handleWorkflow(video.path, transcriptText, startLine)
             }
             startIcon={!isProcessing && <PlayArrowIcon />}
-            sx={{
-              py: 1.5,
-              px: 4,
-              borderRadius: 2,
-              fontSize: "1.1rem",
-            }}
+            sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
           >
             {isProcessing
               ? "Extracting & Uploading..."
               : "Start Auto-Sync Workflow"}
           </Button>
 
-          {/* Live Stopwatch Display */}
           {isProcessing && (
             <Box
               mt={4}
@@ -314,45 +437,27 @@ export default function TranscriptionPage() {
               border={2}
               borderColor="info.main"
               textAlign="center"
-              sx={{
-                background: `linear-gradient(135deg, ${alpha(
-                  theme.palette.info.main,
-                  0.15
-                )} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
-              }}
             >
-              <Box display="flex" alignItems="center" justifyContent="center" gap={2} mb={2}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                gap={2}
+                mb={2}
+              >
                 <TimerIcon
-                  sx={{
-                    fontSize: 48,
-                    color: theme.palette.info.main,
-                    animation: "pulse 2s ease-in-out infinite",
-                    "@keyframes pulse": {
-                      "0%, 100%": { opacity: 1 },
-                      "50%": { opacity: 0.5 },
-                    },
-                  }}
+                  sx={{ fontSize: 48, color: theme.palette.info.main }}
                 />
                 <Typography variant="h4" fontWeight={700} color="info.main">
                   Processing...
                 </Typography>
               </Box>
-              
               <Typography
                 variant="h2"
                 fontWeight={800}
-                sx={{
-                  fontFamily: "monospace",
-                  color: theme.palette.info.main,
-                  letterSpacing: 2,
-                  mb: 1,
-                }}
+                sx={{ fontFamily: "monospace", color: theme.palette.info.main }}
               >
                 {(liveElapsedTime / 1000).toFixed(2)}s
-              </Typography>
-              
-              <Typography variant="body1" color="text.secondary">
-                Real-time elapsed time
               </Typography>
             </Box>
           )}
@@ -372,7 +477,6 @@ export default function TranscriptionPage() {
                   Transcription Complete!
                 </Typography>
               </Box>
-
               <Button
                 variant="contained"
                 color="success"
@@ -394,7 +498,7 @@ export default function TranscriptionPage() {
       {/* STEP 3: RESULT */}
       {step === 3 && video && (
         <Box>
-          <Box mb={3}>
+          <Box mb={3} display="flex" gap={2} flexWrap="wrap">
             <Button
               variant="outlined"
               startIcon={<RestartAltIcon />}
@@ -409,9 +513,25 @@ export default function TranscriptionPage() {
             >
               Start New Project
             </Button>
+
+            {/* EXPORT BUTTON */}
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleExportZip}
+              disabled={isExporting}
+              startIcon={
+                isExporting ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <SaveAltIcon />
+                )
+              }
+            >
+              {isExporting ? "Zipping (Native)..." : "Export Project Zip"}
+            </Button>
           </Box>
 
-          {/* If we have mapped results (manual transcript was provided), show ResultsDisplay */}
           {mappedResult && mappedResult.length > 0 ? (
             <ResultsDisplay
               mappedResults={mappedResult}
@@ -426,19 +546,20 @@ export default function TranscriptionPage() {
               }}
               onDownloadDVT={() => {
                 if (dvtContent) {
-                  const videoName = video?.name.replace(/\.[^/.]+$/, "") || "deposition";
+                  const videoName =
+                    video?.name.replace(/\.[^/.]+$/, "") || "deposition";
                   downloadDVT(dvtContent, `${videoName}.dvt`);
                 }
               }}
               onDownloadSYN={() => {
                 if (synContent) {
-                  const videoName = video?.name.replace(/\.[^/.]+$/, "") || "sync";
+                  const videoName =
+                    video?.name.replace(/\.[^/.]+$/, "") || "sync";
                   downloadSYN(synContent, `${videoName}.syn`);
                 }
               }}
             />
           ) : syncedLines.length > 0 ? (
-            /* Otherwise, if we have synced lines (AI-only), show the player */
             <SyncedPlayer
               videoUrl={convertFileSrc(video.path)}
               lines={syncedLines}
@@ -452,7 +573,7 @@ export default function TranscriptionPage() {
               borderRadius={2}
             >
               <Typography color="text.secondary">
-                No results available. Please go back and run the sync workflow.
+                No results available.
               </Typography>
             </Box>
           )}

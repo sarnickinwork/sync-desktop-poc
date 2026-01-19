@@ -26,12 +26,14 @@
     "@tauri-apps/plugin-updater": "^2.9.0",
     "axios": "^1.13.2",
     "fuzzball": "^2.2.3",
+    "jszip": "^3.10.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^25.0.8",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
