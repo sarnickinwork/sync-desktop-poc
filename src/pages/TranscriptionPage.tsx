@@ -17,6 +17,7 @@ import { writeTextFile, copyFile } from "@tauri-apps/plugin-fs";
 
 // Icons
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -70,7 +71,11 @@ ${bodyContent}
 </SAMI>`;
 };
 
-export default function TranscriptionPage() {
+type Props = {
+  onNavigateToImport?: () => void;
+};
+
+export default function TranscriptionPage({ onNavigateToImport }: Props) {
   const theme = useTheme();
   const [step, setStep] = useState(0);
   const [video, setVideo] = useState<VideoItem | null>(null);
@@ -271,7 +276,18 @@ export default function TranscriptionPage() {
         <Typography variant="h5" fontWeight={600}>
           Sync App POC v1.0.5
         </Typography>
-        <ThemeToggle />
+        <Box display="flex" gap={2}>
+          {onNavigateToImport && (
+            <Button
+              variant="outlined"
+              startIcon={<FolderOpenIcon />}
+              onClick={onNavigateToImport}
+            >
+              Import Package
+            </Button>
+          )}
+          <ThemeToggle />
+        </Box>
       </Box>
 
       <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result"]} />

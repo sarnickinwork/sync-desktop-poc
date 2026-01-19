@@ -8,6 +8,9 @@ import { ColorModeContext } from "./themes/ThemeContext";
 
 // Pages
 import TranscriptionPage from "./pages/TranscriptionPage";
+import ImportEditPage from "./pages/ImportEditPage";
+
+// ... imports ...
 
 // Components
 import UpdateDialog from "./components/UpdateDialog";
@@ -27,6 +30,9 @@ export default function App() {
     closeUpdateDialog,
     clearError,
   } = useAppUpdater();
+
+  // Navigation State
+  const [currentPage, setCurrentPage] = useState<"home" | "import">("home");
 
   // 2. Theme State Management
   const [mode, setMode] = useState<"light" | "dark">("light");
@@ -61,7 +67,14 @@ export default function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <TranscriptionPage />
+
+        {currentPage === "home" ? (
+          <TranscriptionPage onNavigateToImport={() => setCurrentPage("import")} />
+        ) : (
+          <ImportEditPage onBack={() => setCurrentPage("home")} />
+        )}
+
+        {/* Update Dialog ... */}
 
         {/* Update Dialog */}
         <UpdateDialog

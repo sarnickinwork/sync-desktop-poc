@@ -43,12 +43,14 @@ export { performTextMapping } from './textMappingUtils';
 
 // SMI generation utilities
 export { generateSMI, downloadSMI, generateAndDownloadSMI } from './smiGenerationUtils';
+export { parseSMI } from './smiParsingUtils';
 
 // DVT generation utilities
 export { generateDVT, downloadDVT, generateAndDownloadDVT } from './dvtGenerationUtils';
 
 // SYN generation utilities
 export { generateSYN, downloadSYN, generateAndDownloadSYN } from './synGenerationUtils';
+export { parseSYN } from './synParsingUtils';
 
 // Export all types
 export type { DVTMetadata, SYNMetadata } from './types';
