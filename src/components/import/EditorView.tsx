@@ -12,11 +12,16 @@ import {
   useTheme,
   Chip,
   IconButton,
-  Tooltip
+  Tooltip,
+  Switch,
+  FormControlLabel,
+  ToggleButtonGroup,
+  ToggleButton
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { SmiSubtitle } from "../../utils/smiParsingUtils";
 import { formatMs } from "../../utils";
@@ -39,6 +44,7 @@ const SubtitleRow = memo(
     isSelected,
     isEdited,
     onRowClick,
+    editMode,
   }: {
     sub: SmiSubtitle;
     index: number;
@@ -46,34 +52,41 @@ const SubtitleRow = memo(
     isSelected: boolean;
     isEdited: boolean;
     onRowClick: (index: number) => void;
+    editMode: boolean;
   }) => {
     const theme = useTheme();
     const rowRef = useRef<HTMLTableRowElement>(null);
 
     useEffect(() => {
-      // Improved scrolling logic: only scroll if far out of view? 
-      // Or stick to center. Center is good for focus mode.
-      if ((isActive || isSelected) && rowRef.current) {
-        rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Edit Mode: Only scroll to selected line (for editing focus)
+      // View Mode: Scroll to active line (following playback)
+      if (rowRef.current) {
+        if (editMode && isSelected) {
+          // In edit mode, scroll only when line is selected
+          rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if (!editMode && isActive) {
+          // In view mode, scroll follows the playing line
+          rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
-    }, [isActive, isSelected]);
+    }, [isActive, isSelected, editMode]);
 
     return (
       <TableRow
         ref={rowRef}
-        selected={isSelected}
-        onClick={() => onRowClick(index)} // Single click selects
+        selected={isSelected && editMode}
+        onClick={() => onRowClick(index)} // Clickable in both modes
         sx={{
-          cursor: "pointer",
+          cursor: "pointer", // Always show pointer cursor
           // Hover effect
           "&:hover": { bgcolor: alpha(theme.palette.action.hover, 0.1) },
           // Selected State (Edit Focus)
-          ...(isSelected && {
+          ...(isSelected && editMode && {
             bgcolor: alpha(theme.palette.primary.main, 0.15) + " !important",
             borderLeft: `4px solid ${theme.palette.primary.main}`,
           }),
-          // Active Playing State (if not selected)
-          ...(!isSelected && isActive && {
+          // Active Playing State (if not selected or not in edit mode)
+          ...((!isSelected || !editMode) && isActive && {
             bgcolor: alpha(theme.palette.action.selected, 0.08),
             borderLeft: `4px solid ${theme.palette.divider}`,
           }),
@@ -86,6 +99,25 @@ const SubtitleRow = memo(
         <TableCell sx={{ fontFamily: "monospace", width: 100, fontSize: '0.85rem', color: isEdited ? 'warning.main' : 'inherit' }}>
           {formatMs(sub.start)}
         </TableCell>
+        <TableCell sx={{ width: 80, textAlign: 'center' }}>
+          {sub.confidence !== undefined && (
+            <Chip
+              label={`${Math.round(sub.confidence)}%`}
+              size="small"
+              sx={{
+                bgcolor:
+                  sub.confidence >= 85 ? 'success.main' :
+                    sub.confidence >= 70 ? 'warning.main' :
+                      'error.main',
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                height: 20,
+                minWidth: 50
+              }}
+            />
+          )}
+        </TableCell>
         <TableCell sx={{ fontSize: '0.95rem' }}>{sub.text}</TableCell>
       </TableRow>
     );
@@ -96,7 +128,8 @@ const SubtitleRow = memo(
       prev.isSelected === next.isSelected &&
       prev.sub === next.sub &&
       prev.index === next.index &&
-      prev.isEdited === next.isEdited
+      prev.isEdited === next.isEdited &&
+      prev.editMode === next.editMode
     );
   }
 );
@@ -112,10 +145,22 @@ export default function EditorView({
   const playerRef = useRef<SyncedPlayerRef>(null);
 
   // State
+  const [editMode, setEditMode] = useState(false); // View/Edit mode toggle
+  const [confidenceFilter, setConfidenceFilter] = useState<'all' | 'high' | 'medium' | 'low' | 'edited'>('all'); // Confidence filter
   const [activeIndex, setActiveIndex] = useState<number>(-1); // Index currently playing
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null); // Index selected for editing
   const [globalTime, setGlobalTime] = useState(0);
   const [editedIndices, setEditedIndices] = useState<Set<number>>(new Set());
+
+  // Filter subtitles by confidence
+  const filteredSubtitles = subtitles.filter((sub, idx) => {
+    if (confidenceFilter === 'all') return true;
+    if (confidenceFilter === 'edited') return editedIndices.has(idx);
+    if (confidenceFilter === 'high') return (sub.confidence || 0) >= 85;
+    if (confidenceFilter === 'medium') return (sub.confidence || 0) >= 70 && (sub.confidence || 0) < 85;
+    if (confidenceFilter === 'low') return (sub.confidence || 0) < 70;
+    return true;
+  });
 
   // Handling Stop-at-End logic
   // If we are "Focus Playing" a specific line, we check if globalTime > line.end
@@ -150,11 +195,11 @@ export default function EditorView({
   // --- SHORTCUTS HANDLER ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Must have a selection to edit
-      if (selectedIndex === null || !onUpdateSubtitles) return;
+      // Must be in edit mode and have a selection to edit
+      if (!editMode || selectedIndex === null || !onUpdateSubtitles) return;
 
-      // ENTER: Sync Start Time
-      if (e.code === "Enter") {
+      // SPACE: Record current timestamp to selected line
+      if (e.code === "Space") {
         e.preventDefault();
 
         const syncedTime = Math.round(globalTime); // Round to ms
@@ -163,7 +208,7 @@ export default function EditorView({
         updated[selectedIndex] = {
           ...updated[selectedIndex],
           start: syncedTime,
-          confidence: 100 // Mark as confirmed
+          confidence: 100 // Mark as manually confirmed
         };
 
         // Mark as edited
@@ -173,28 +218,11 @@ export default function EditorView({
 
         onUpdateSubtitles(updated);
 
-        // Visual feedback?
-      }
+        // Pause the video after recording timestamp
+        playerRef.current?.pause();
 
-      // SPACE: Toggle Play/Pause for the selected segment
-      if (e.code === "Space") {
-        e.preventDefault();
-        // If we are currently playing (focus or otherwise), pause.
-        // But checking `focusPlayingIndex` is tricky because manual play might not set it.
-        // Let's assume SPACE in Edit View ALWAYS acts on the selected line context.
-
-        if (focusPlayingIndex !== null) {
-          // We are in a focus play loop -> Pause
-          playerRef.current?.pause();
-          setFocusPlayingIndex(null);
-        } else {
-          // We are likely paused or manual playing.
-          // If selection exists, SEEK to Start and PLAY with Focus.
-          const start = subtitles[selectedIndex].start;
-          // Seek and set focus.
-          playerRef.current?.seek(start);
-          setFocusPlayingIndex(selectedIndex);
-        }
+        // Visual feedback
+        console.log(`✓ Line ${selectedIndex + 1} timestamp updated to ${syncedTime}ms`);
       }
 
       // ARROWS: Navigate
@@ -222,17 +250,24 @@ export default function EditorView({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedIndex, subtitles, onUpdateSubtitles, globalTime, editedIndices, focusPlayingIndex]);
+  }, [editMode, selectedIndex, subtitles, onUpdateSubtitles, globalTime, editedIndices, focusPlayingIndex]);
 
   const handleRowClick = useCallback(
     (index: number) => {
-      setSelectedIndex(index);
-      // Auto-seek to line start and PAUSE (Waiting for user action)
-      const start = subtitles[index].start;
-      playerRef.current?.seek(start);
-      playerRef.current?.pause();
+      if (editMode) {
+        // Edit Mode: Select line for editing, pause at start
+        setSelectedIndex(index);
+        const start = subtitles[index].start;
+        playerRef.current?.seek(start);
+        playerRef.current?.pause();
+      } else {
+        // View Mode: Navigate to that timestamp and play
+        const start = subtitles[index].start;
+        playerRef.current?.seek(start);
+        // Auto-play in view mode for easy navigation
+      }
     },
-    [subtitles]
+    [subtitles, editMode]
   );
 
   return (
@@ -267,34 +302,31 @@ export default function EditorView({
           />
         </Box>
 
-        {/* Overlay Info */}
-        <Box
-          position="absolute"
-          bottom={20}
-          left={0}
-          right={0}
-          display="flex"
-          justifyContent="center"
-          sx={{ pointerEvents: "none" }}
-        >
-          <Chip
-            icon={selectedIndex !== null ? <EditIcon /> : undefined}
-            label={
-              selectedIndex !== null
-                ? "EDIT MODE: Press SPACE to Review Line • ENTER to Set Start Time"
-                : "Select a line to start editing"
-            }
-            color={selectedIndex !== null ? "primary" : "default"}
-            sx={{
-              bgcolor: "rgba(0,0,0,0.7)",
-              color: "white",
-              backdropFilter: "blur(4px)",
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              boxShadow: 3
-            }}
-          />
-        </Box>
+        {/* Overlay Info - Moved to top-right */}
+        {editMode && selectedIndex !== null && (
+          <Box
+            position="absolute"
+            top={12}
+            right={12}
+            sx={{ pointerEvents: "none" }}
+          >
+            <Chip
+              icon={<EditIcon />}
+              label="Press SPACE to set timestamp"
+              color="primary"
+              size="small"
+              sx={{
+                bgcolor: "rgba(0,0,0,0.75)",
+                color: "white",
+                backdropFilter: "blur(6px)",
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                boxShadow: 2,
+                px: 0.5
+              }}
+            />
+          </Box>
+        )}
       </Paper>
 
       {/* RIGHT: Subtitle List */}
@@ -324,15 +356,61 @@ export default function EditorView({
               Transcript Editor
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {subtitles.length} segments • {editedIndices.size} edited
+              {filteredSubtitles.length} of {subtitles.length} segments • {editedIndices.size} edited
             </Typography>
           </Box>
-          <Box>
-            <Tooltip title="Edited lines are marked orange">
-              <IconButton size="small" disabled>
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+          <Box display="flex" alignItems="center" gap={2}>
+            {/* Confidence Filter */}
+            <ToggleButtonGroup
+              value={confidenceFilter}
+              exclusive
+              onChange={(e, newFilter) => {
+                if (newFilter !== null) {
+                  setConfidenceFilter(newFilter);
+                }
+              }}
+              size="small"
+            >
+              <ToggleButton value="all" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem' }}>
+                All
+              </ToggleButton>
+              <ToggleButton value="edited" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem', color: 'warning.main' }}>
+                Edited
+              </ToggleButton>
+              <ToggleButton value="high" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem', color: 'success.main' }}>
+                High
+              </ToggleButton>
+              <ToggleButton value="medium" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem', color: 'warning.main' }}>
+                Medium
+              </ToggleButton>
+              <ToggleButton value="low" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem', color: 'error.main' }}>
+                Low
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            {/* View/Edit Toggle */}
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={editMode}
+                  onChange={(e) => {
+                    setEditMode(e.target.checked);
+                    if (!e.target.checked) {
+                      setSelectedIndex(null);
+                    }
+                  }}
+                  color="primary"
+                />
+              }
+              label={
+                <Box display="flex" alignItems="center" gap={1}>
+                  {editMode ? <EditIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                  <Typography variant="caption" fontWeight={600}>
+                    {editMode ? "Edit" : "View"}
+                  </Typography>
+                </Box>
+              }
+            />
           </Box>
         </Box>
 
@@ -342,21 +420,27 @@ export default function EditorView({
               <TableRow>
                 <TableCell style={{ width: 40, background: theme.palette.background.paper }}></TableCell>
                 <TableCell style={{ width: 100, background: theme.palette.background.paper, fontWeight: 600 }}>Start</TableCell>
+                <TableCell style={{ width: 80, background: theme.palette.background.paper, fontWeight: 600, textAlign: 'center' }}>Confidence</TableCell>
                 <TableCell style={{ background: theme.palette.background.paper, fontWeight: 600 }}>Text</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {subtitles.map((sub, index) => (
-                <SubtitleRow
-                  key={index}
-                  sub={sub}
-                  index={index}
-                  isActive={index === activeIndex} // Highlight what's playing
-                  isSelected={index === selectedIndex} // Highlight what's selected for edit
-                  isEdited={editedIndices.has(index)}
-                  onRowClick={handleRowClick}
-                />
-              ))}
+              {filteredSubtitles.map((sub, index) => {
+                // Get original index from the full subtitles array
+                const originalIndex = subtitles.indexOf(sub);
+                return (
+                  <SubtitleRow
+                    key={originalIndex}
+                    sub={sub}
+                    index={originalIndex}
+                    isActive={originalIndex === activeIndex} // Highlight what's playing
+                    isSelected={originalIndex === selectedIndex} // Highlight what's selected for edit
+                    isEdited={editedIndices.has(originalIndex)}
+                    onRowClick={handleRowClick}
+                    editMode={editMode}
+                  />
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
