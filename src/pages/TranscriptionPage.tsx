@@ -370,7 +370,8 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               severity="info"
               sx={{ mb: 3 }}
               action={
-                <Button color="inherit" size="small" onClick={async () => {
+                <Box display="flex" gap={1}>
+                  <Button color="inherit" size="small" onClick={async () => {
                   // Restore Videos (all of them in order)
                   setVideos(resumeData.videos.map((v: any, idx: number) => ({
                     id: `${Date.now()}-${idx}`,
@@ -401,6 +402,17 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
                 }}>
                   Resume Previous Session
                 </Button>
+                <Button 
+                  color="inherit" 
+                  size="small"
+                  onClick={() => {
+                    localStorage.removeItem("lastSession");
+                    setResumeData(null);
+                  }}
+                >
+                  ✕
+                </Button>
+              </Box>
               }
             >
               <AlertTitle>Resume Session?</AlertTitle>
