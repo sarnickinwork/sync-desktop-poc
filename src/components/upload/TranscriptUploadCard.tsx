@@ -12,11 +12,13 @@ import {
 type Props = {
   transcript: File | string | null;
   setTranscript: (f: File | null) => void;
+  onBrowse?: () => void;
 };
 
 export default function TranscriptUploadCard({
   transcript,
   setTranscript,
+  onBrowse,
 }: Props) {
   const theme = useTheme();
 
@@ -57,6 +59,14 @@ export default function TranscriptUploadCard({
             bgcolor: isActive
               ? alpha(theme.palette.primary.main, 0.1)
               : "transparent",
+          }}
+          onClick={(e) => {
+            if (onBrowse) {
+              // Prevent Dropzone from opening its dialog if we have a custom browser
+              e.stopPropagation();
+              onBrowse();
+            }
+            // Otherwise, let Dropzone handle it (defaults to opening file dialog)
           }}
         >
           <input {...getInputProps()} />
