@@ -19,10 +19,13 @@ import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningIcon from "@mui/icons-material/Warning";
 import TimerIcon from "@mui/icons-material/Timer";
-import { MappedSentenceResult } from "../utils/types";
+import SyncedPlayer from "./sync/SyncedPlayer";
+import { MappedSentenceResult, VideoItem } from "../utils/types";
 
 interface ResultsDisplayProps {
     mappedResults: MappedSentenceResult[];
+    videos: VideoItem[];
+    splitPoints: number[];
     smiContent: string | null;
     dvtContent?: string | null;
     synContent?: string | null;
@@ -53,17 +56,11 @@ function getConfidenceColor(confidence: number, theme: any): string {
     return theme.palette.error.main;
 }
 
-/**
- * Get confidence label based on confidence score
- */
-function getConfidenceLabel(confidence: number): string {
-    if (confidence >= 80) return "High";
-    if (confidence >= 60) return "Medium";
-    return "Low";
-}
 
 export default function ResultsDisplay({
     mappedResults,
+    videos,
+    splitPoints,
     smiContent,
     dvtContent,
     synContent,
@@ -82,6 +79,13 @@ export default function ResultsDisplay({
     const highConfCount = mappedResults.filter((r) => r.confidence >= 80).length;
     const mediumConfCount = mappedResults.filter((r) => r.confidence >= 60 && r.confidence < 80).length;
     const lowConfCount = mappedResults.filter((r) => r.confidence < 60).length;
+
+    // Convert mappedResults to format expected by SyncedPlayer
+    const lines = mappedResults.map(r => ({
+        text: r.sentence,
+        start: r.start,
+        end: r.end
+    }));
 
     return (
         <Box>
@@ -200,107 +204,84 @@ export default function ResultsDisplay({
                 </CardContent>
             </Card>
 
-            {/* Results Table */}
-            <Card variant="outlined">
-                <CardContent>
-                    <Typography variant="h6" fontWeight={600} mb={2}>
-                        Mapped Transcript Results
-                    </Typography>
+            {/* Split View: Video (Left) + Table (Right) */}
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3}>
+                <Box>
+                    <SyncedPlayer
+                        videos={videos}
+                        splitPoints={splitPoints}
+                        lines={lines}
+                        hideTranscript={true}
+                    />
+                </Box>
 
-                    <TableContainer
-                        component={Paper}
-                        variant="outlined"
-                        sx={{ maxHeight: 600 }}
-                    >
-                        <Table stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 600, width: "60px" }}>
-                                        #
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: 600 }}>
-                                        Sentence
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: 600, width: "120px" }}>
-                                        Start Time
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: 600, width: "120px" }}>
-                                        End Time
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: 600, width: "140px" }}>
-                                        Confidence
-                                    </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {mappedResults.map((result, index) => (
-                                    <TableRow
-                                        key={index}
-                                        hover
-                                        sx={{
-                                            "&:nth-of-type(odd)": {
-                                                backgroundColor: alpha(
-                                                    theme.palette.primary.main,
-                                                    0.02
-                                                ),
-                                            },
-                                        }}
-                                    >
-                                        <TableCell>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {index + 1}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2">
-                                                {result.sentence}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography
-                                                variant="body2"
-                                                sx={{
-                                                    fontFamily: "monospace",
-                                                    color: theme.palette.primary.main,
-                                                }}
-                                            >
-                                                {formatTime(result.start)}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography
-                                                variant="body2"
-                                                sx={{
-                                                    fontFamily: "monospace",
-                                                    color: theme.palette.primary.main,
-                                                }}
-                                            >
-                                                {formatTime(result.end)}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={`${result.confidence.toFixed(1)}% (${getConfidenceLabel(result.confidence)})`}
-                                                size="small"
-                                                sx={{
-                                                    backgroundColor: alpha(
-                                                        getConfidenceColor(result.confidence, theme),
-                                                        0.1
-                                                    ),
-                                                    color: getConfidenceColor(result.confidence, theme),
-                                                    fontWeight: 600,
-                                                    borderColor: getConfidenceColor(result.confidence, theme),
-                                                }}
-                                                variant="outlined"
-                                            />
-                                        </TableCell>
+                {/* Results Table */}
+                <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="h6" fontWeight={600} mb={2}>
+                            Mapped Transcript
+                        </Typography>
+
+                        <TableContainer
+                            component={Paper}
+                            variant="outlined"
+                            sx={{ flex: 1, maxHeight: 400 }} // Limit height to match video approx
+                        >
+                            <Table stickyHeader size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ fontWeight: 600 }}>Time</TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>Sentence</TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>Conf</TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </CardContent>
-            </Card>
+                                </TableHead>
+                                <TableBody>
+                                    {mappedResults.map((result, index) => (
+                                        <TableRow
+                                            key={index}
+                                            hover
+                                            sx={{
+                                                "&:nth-of-type(odd)": {
+                                                    backgroundColor: alpha(
+                                                        theme.palette.primary.main,
+                                                        0.02
+                                                    ),
+                                                },
+                                            }}
+                                        >
+                                            <TableCell sx={{ whiteSpace: 'nowrap', fontFamily: "monospace", color: theme.palette.primary.main }}>
+                                                {formatTime(result.start)}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2">
+                                                    {result.sentence}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={`${result.confidence.toFixed(0)}%`}
+                                                    size="small"
+                                                    sx={{
+                                                        backgroundColor: alpha(
+                                                            getConfidenceColor(result.confidence, theme),
+                                                            0.1
+                                                        ),
+                                                        color: getConfidenceColor(result.confidence, theme),
+                                                        borderColor: getConfidenceColor(result.confidence, theme),
+                                                        height: 20,
+                                                        fontSize: '0.75rem'
+                                                    }}
+                                                    variant="outlined"
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </CardContent>
+                </Card>
+            </Box>
         </Box>
     );
 }

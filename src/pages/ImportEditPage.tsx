@@ -166,9 +166,72 @@ export default function ImportEditPage({ onBack }: Props) {
         }
     };
 
-    const mp4File = mediaFiles.find(f => f.type === 'mp4');
-  
-    const showEditor = projectPath && mp4File && parsedSubtitles.length > 0;
+    const [splitPoints, setSplitPoints] = useState<number[]>([]);
+    const [videoItems, setVideoItems] = useState<{ id: string; path: string; name: string }[]>([]);
+
+    // Helper to get video duration
+    const getVideoDuration = (path: string): Promise<number> => {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = () => {
+                const duration = video.duration * 1000;
+                resolve(duration);
+            };
+            video.onerror = () => reject("Failed to load video metadata");
+            // Use convertFileSrc for local files in Tauri
+            // Note: Import convertFileSrc if not imported, or rely on it being available
+            // Actually better to pass a src that works. 
+            // We need to import convertFileSrc from @tauri-apps/api/core
+            import('@tauri-apps/api/core').then(({ convertFileSrc }) => {
+                video.src = convertFileSrc(path);
+            });
+        });
+    };
+
+    // Calculate split points when media files change
+    useEffect(() => {
+        const calculateDurations = async () => {
+            const mp4Files = mediaFiles.filter(f => f.type === 'mp4').sort((a, b) => a.name.localeCompare(b.name));
+
+            if (mp4Files.length === 0) {
+                setVideoItems([]);
+                setSplitPoints([]);
+                return;
+            }
+
+            const items = mp4Files.map(f => ({
+                id: f.name, // Use name as ID for now
+                path: f.path,
+                name: f.name
+            }));
+            setVideoItems(items);
+
+            // Calculate durations
+            // We need cumulative duration
+            const points: number[] = [];
+            let total = 0;
+
+            // Sequential loading to ensure order
+            for (const file of items) {
+                try {
+                    const duration = await getVideoDuration(file.path);
+                    total += duration;
+                    points.push(total);
+                } catch (err) {
+                    console.error(`Could not get duration for ${file.name}`, err);
+                    // Fallback: If fail, assume 0? Or stop? 
+                    // We'll just push current total to avoid breaking everything
+                    points.push(total);
+                }
+            }
+            setSplitPoints(points);
+        };
+
+        calculateDurations();
+    }, [mediaFiles]);
+
+    const showEditor = projectPath && videoItems.length > 0 && parsedSubtitles.length > 0 && splitPoints.length > 0;
 
     return (
         <Box p={4} maxWidth={showEditor ? '100%' : 1100} mx="auto">
@@ -221,7 +284,7 @@ export default function ImportEditPage({ onBack }: Props) {
                     <Box>
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                             <Typography variant="h6" color="primary">
-                                {showEditor ? `Editing: ${mp4File?.name}` : 'Package Loaded'}
+                                {showEditor ? `Editing: ${videoItems[0]?.name} ${videoItems.length > 1 ? `(+${videoItems.length - 1} more)` : ''}` : 'Package Loaded'}
                             </Typography>
                             <Tooltip title="Reset / Import Different Package">
                                 <Button
@@ -232,6 +295,8 @@ export default function ImportEditPage({ onBack }: Props) {
                                         setParsedSubtitles([]);
                                         setOriginalSynData(null);
                                         clearImport();
+                                        setSplitPoints([]);
+                                        setVideoItems([]);
                                     }}
                                 >
                                     Reset
@@ -251,7 +316,8 @@ export default function ImportEditPage({ onBack }: Props) {
                         ) : showEditor ? (
                             /* EDITOR VIEW */
                             <EditorView
-                                videoPath={mp4File!.path}
+                                videos={videoItems}
+                                splitPoints={splitPoints}
                                 subtitles={parsedSubtitles}
                                 onUpdateSubtitles={setParsedSubtitles}
                             />
@@ -265,7 +331,7 @@ export default function ImportEditPage({ onBack }: Props) {
                                         No supported media files (.mp4, .smi, .syn) found in the project.
                                     </Alert>
                                 )}
-                                {(!mp4File || parsedSubtitles.length === 0) && mediaFiles.length > 0 && (
+                                {(videoItems.length === 0 || parsedSubtitles.length === 0) && mediaFiles.length > 0 && (
                                     <Alert severity="info" sx={{ mt: 3 }}>
                                         To enable the editor, the package must contain a video (.mp4) and subtitle data (.smi or .syn).
                                     </Alert>

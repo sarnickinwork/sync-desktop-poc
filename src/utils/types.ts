@@ -75,3 +75,9 @@ export interface SYNMetadata {
     sentences: MappedSentenceResult[];
 }
 
+
+export interface VideoItem {
+    id: string; // Unique ID for dnd-kit
+    path: string;
+    name: string;
+}

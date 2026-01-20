@@ -11,6 +11,7 @@ import {
   extractHumanTranscriptFromContent,
   performTextMapping,
 } from "../utils";
+import { VideoItem } from "../utils/types";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -46,13 +47,19 @@ export function useTranscriptionWorkflow() {
 
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
 
-  // Updated signature to accept text and line number
+  // Updated signature to accept VideoItem[] (multiple videos)
   const handleWorkflow = async (
-    videoPath: string,
+    videos: VideoItem[],
     manualTranscript: string | null,
     startLine: number = 0
   ) => {
-    let audioPath = "";
+    if (videos.length === 0) {
+      log("No videos provided.");
+      return;
+    }
+
+    // Use first video for naming/project creation
+    const firstVideo = videos[0];
 
     try {
       setIsProcessing(true);
@@ -70,94 +77,101 @@ export function useTranscriptionWorkflow() {
 
       // --- STEP 0: CREATE PROJECT FOLDER STRUCTURE ---
       log("Creating project folder structure...");
-      
+
       // Extract project name from video path
-      const videoFileName = videoPath.split("\\").pop() || videoPath.split("/").pop() || "project";
-      const projectName = videoFileName.replace(/\.[^/.]+$/, "").trim();
-      
+      const projectDisplayName = firstVideo.name.replace(/\.[^/.]+$/, "").trim();
+
       // Create project folder in Downloads
       const downloadsPath = await downloadDir();
-      const projectFolder = await join(downloadsPath, projectName);
-      
+      const projectFolder = await join(downloadsPath, projectDisplayName);
+
       // Create main project folder
       if (!(await exists(projectFolder))) {
         await mkdir(projectFolder);
       }
-      
+
       // Create subfolders
       const mediaFolder = await join(projectFolder, "media");
       const transcriptionFolder = await join(projectFolder, "transcription");
-      
+
       if (!(await exists(mediaFolder))) {
         await mkdir(mediaFolder);
       }
       if (!(await exists(transcriptionFolder))) {
         await mkdir(transcriptionFolder);
       }
-      
+
       // Store project folder path
       setProjectFolderPath(projectFolder);
       log(`Project folder created: ${projectFolder}`);
-      
+
       // Create initial .syn file (resume checkpoint)
-      const initialSynPath = await join(projectFolder, `${projectName}.syn`);
+      const initialSynPath = await join(projectFolder, `${projectDisplayName}.syn`);
       const { generateSYN } = await import('../utils/synGenerationUtils');
       const initialSyn = generateSYN({
-        videoFilename: videoFileName,
-        videoPath: `media/${videoFileName}`,
+        videoFilename: firstVideo.name,
+        videoPath: `media/${firstVideo.name}`,
         videoDuration: 0, // Will be updated later
-        subtitleFilename: `${projectName}.smi`,
-        subtitlePath: `media/${projectName}.smi`,
+        subtitleFilename: `${projectDisplayName}.smi`,
+        subtitlePath: `media/${projectDisplayName}.smi`,
         transcriptFilename: manualTranscript ? "transcript.txt" : "generated_transcript.txt",
         transcriptPath: `transcription/${manualTranscript ? "transcript.txt" : "generated_transcript.txt"}`,
         startLine,
         sentences: [] // Will be populated after processing
       });
-      
+
       await writeTextFile(initialSynPath, initialSyn);
       log("Initial .syn file created (resume checkpoint)");
 
-      // --- STEP 1: LOCAL AUDIO EXTRACTION (FFmpeg) ---
-      log(`Processing local video: ${videoPath}`);
-
+      // --- STEP 1: LOCAL AUDIO EXTRACTION (FFmpeg) FOR ALL VIDEOS ---
       const appData = await appDataDir();
       if (!(await exists(appData))) {
         await mkdir(appData);
       }
 
-      // Define temp path for the audio
-      audioPath = await join(appData, "temp_audio.mp3");
+      const audioFilesForUpload: File[] = [];
 
-      log("Extracting audio with FFmpeg (Sidecar)...");
-      const command = Command.sidecar("binaries/ffmpeg", [
-        "-i",
-        videoPath,
-        "-vn", // No video
-        "-acodec",
-        "libmp3lame", // Encode to MP3
-        "-y", // Overwrite if exists
-        audioPath,
-      ]);
+      for (let i = 0; i < videos.length; i++) {
+        const video = videos[i];
+        log(`Processing video ${i + 1}/${videos.length}: ${video.name}`);
 
-      const output = await command.execute();
+        // Define temp path for the audio
+        const audioPath = await join(appData, `temp_audio_${i}.mp3`);
 
-      if (output.code !== 0) {
-        throw new Error(`FFmpeg failed: ${output.stderr}`);
+        log(`Extracting audio from ${video.name}...`);
+        const command = Command.sidecar("binaries/ffmpeg", [
+          "-i",
+          video.path,
+          "-vn", // No video
+          "-acodec",
+          "libmp3lame", // Encode to MP3
+          "-y", // Overwrite if exists
+          audioPath,
+        ]);
+
+        const output = await command.execute();
+
+        if (output.code !== 0) {
+          throw new Error(`FFmpeg failed for ${video.name}: ${output.stderr}`);
+        }
+        log(`Audio extracted for ${video.name}.`);
+
+        // Read into memory
+        const audioData = await readFile(audioPath);
+        const audioBlob = new Blob([audioData], { type: "audio/mp3" });
+        const audioFile = new File([audioBlob], `audio_${i}.mp3`, { type: "audio/mp3" });
+        audioFilesForUpload.push(audioFile);
+
+        // Remove temp file from disk as we have it in memory
+        await remove(audioPath);
       }
-      log("Audio extracted successfully.");
-
-      // --- STEP 2: READ FILES INTO MEMORY ---
-      log("Reading extracted audio file...");
-      const audioData = await readFile(audioPath);
-      // Create a Blob/File from the raw bytes
-      const audioBlob = new Blob([audioData], { type: "audio/mp3" });
-      const audioFile = new File([audioBlob], "audio.mp3", {
-        type: "audio/mp3",
-      });
 
       // --- STEP 3: PREPARE FORM DATA FOR BACKEND ---
       const formData = new FormData();
-      formData.append("AudioFiles", audioFile); // The small MP3 file
+      // Append all audio files. Backend must assume the order in FormData is the playback order.
+      audioFilesForUpload.forEach(file => {
+        formData.append("AudioFiles", file);
+      });
       formData.append("startLine", startLine.toString());
 
       if (manualTranscript) {
@@ -170,7 +184,7 @@ export function useTranscriptionWorkflow() {
       }
 
       // --- STEP 4: SEND TO BACKEND ---
-      log(`Sending to backend (${API_URL}/finaltranscript)...`);
+      log(`Sending ${audioFilesForUpload.length} audio files to backend...`);
 
       // Start timer
       const startTime = Date.now();
@@ -239,14 +253,15 @@ export function useTranscriptionWorkflow() {
         setSmiContent(smi);
         log("SMI content generated successfully!");
 
-        // Generate DVT file
+        // Generate DVT (DepoView) file
         log("Generating DVT (DepoView) file...");
         const { generateDVT } = await import('../utils/dvtGenerationUtils');
-        const videoFilename = videoPath.split('\\').pop() || 'video.mp4';
+
+        // Use first video for metadata reference
         const dvt = generateDVT({
-          title: `Deposition - ${videoFilename}`,
-          videoFilename,
-          videoPath: `media/${videoFilename}`,
+          title: `Deposition - ${projectDisplayName}`,
+          videoFilename: firstVideo.name,
+          videoPath: `media/${firstVideo.name}`,
           duration: mappingResult.sentences[mappingResult.sentences.length - 1]?.end || 0,
           createdDate: new Date().toISOString(),
           sentences: mappingResult.sentences
@@ -258,8 +273,8 @@ export function useTranscriptionWorkflow() {
         log("Generating SYN (proprietary) file...");
         const { generateSYN } = await import('../utils/synGenerationUtils');
         const syn = generateSYN({
-          videoFilename,
-          videoPath: `media/${videoFilename}`,
+          videoFilename: firstVideo.name,
+          videoPath: `media/${firstVideo.name}`,
           videoDuration: mappingResult.sentences[mappingResult.sentences.length - 1]?.end || 0,
           subtitleFilename: 'subtitle.smi',
           subtitlePath: 'media/subtitle.smi',
@@ -270,10 +285,10 @@ export function useTranscriptionWorkflow() {
         });
         setSynContent(syn);
         log("SYN content generated successfully!");
-        
+
         // Update .syn file in project folder with complete data
         if (projectFolder) {
-          const synPath = await join(projectFolder, `${projectName}.syn`);
+          const synPath = await join(projectFolder, `${projectDisplayName}.syn`);
           await writeTextFile(synPath, syn);
           log("Updated .syn file in project folder with complete data");
         }
@@ -285,9 +300,7 @@ export function useTranscriptionWorkflow() {
       }
 
       // --- STEP 8: CLEANUP ---
-      log("Cleaning up temporary files...");
-      await remove(audioPath);
-      log("Cleanup successful. Workflow complete!");
+      log("Workflow complete!");
     } catch (err: any) {
       // Stop timer on error as well
       if (apiStartTime) {
@@ -314,4 +327,3 @@ export function useTranscriptionWorkflow() {
     handleWorkflow,
   };
 }
-
