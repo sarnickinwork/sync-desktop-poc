@@ -2,6 +2,9 @@
  * Utility for parsing SYN (proprietary) files
  */
 
+// Import shared types to ensure consistency (optional, but good practice if we can)
+import { SimpleTranscriptDto } from './types';
+
 export interface SynSentence {
     text: string;
     start: number;
@@ -25,6 +28,16 @@ export interface SynData {
         filename: string;
         path: string;
         startLine: number;
+        sanitizedText?: string | null;
+    };
+    rawResponse?: Partial<SimpleTranscriptDto> | null;
+    stats?: {
+        apiElapsedTime?: number;
+    };
+    processingState?: {
+        isApiComplete: boolean;
+        isSanitizationComplete: boolean;
+        isMappingComplete: boolean;
     };
     synchronization: {
         sentences: SynSentence[];
