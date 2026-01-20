@@ -17,6 +17,7 @@ import UpdateDialog from "./components/UpdateDialog";
 
 // Hooks
 import { useAppUpdater } from "./hooks/useAppUpdater";
+import { useWindowPersistence } from "./hooks/useWindowPersistence";
 
 export default function App() {
   // 1. Initialize the Updater
@@ -31,17 +32,28 @@ export default function App() {
     clearError,
   } = useAppUpdater();
 
+  // 1b. Initialize Window Persistence
+  useWindowPersistence();
+
   // Navigation State
   const [currentPage, setCurrentPage] = useState<"home" | "import">("home");
 
   // 2. Theme State Management
-  const [mode, setMode] = useState<"light" | "dark">("light");
+  // Initialize from localStorage or default to light
+  const [mode, setMode] = useState<"light" | "dark">(() => {
+    const savedMode = localStorage.getItem("themeMode");
+    return (savedMode === "dark" || savedMode === "light") ? savedMode : "light";
+  });
 
   const colorMode = useMemo(
     () => ({
       mode,
       toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+        setMode((prevMode) => {
+          const newMode = prevMode === "light" ? "dark" : "light";
+          localStorage.setItem("themeMode", newMode);
+          return newMode;
+        });
       },
     }),
     [mode]

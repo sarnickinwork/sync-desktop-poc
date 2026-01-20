@@ -9,7 +9,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { join } from "@tauri-apps/api/path";
-import { writeTextFile, copyFile } from "@tauri-apps/plugin-fs";
+import { writeTextFile, copyFile, readTextFile } from "@tauri-apps/plugin-fs";
+import { Alert, AlertTitle } from "@mui/material";
 
 // Icons
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -75,14 +76,46 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [transcriptText, setTranscriptText] = useState<string | null>(null);
   const [transcriptFileName, setTranscriptFileName] = useState<string | null>(null);
+  const [transcriptPath, setTranscriptPath] = useState<string | null>(null);
+  const [resumeData, setResumeData] = useState<any>(null);
 
   // Export State
   const [isExporting, setIsExporting] = useState(false);
   const [startLine, setStartLine] = useState<string>("");
 
+  // --- SESSION RECOVERY ---
+  useEffect(() => {
+    const loadSession = async () => {
+      const saved = localStorage.getItem("lastSession");
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          // Only offer resume if we have a valid video path
+          if (data.videoPath) {
+            setResumeData(data);
+          }
+        } catch (e) {
+          console.error("Failed to parse saved session", e);
+        }
+      }
+    };
+    loadSession();
+  }, []);
+
+  const saveSession = (vid: VideoItem, tPath: string | null, sLine: string) => {
+    localStorage.setItem("lastSession", JSON.stringify({
+      videoPath: vid.path,
+      videoName: vid.name,
+      transcriptPath: tPath,
+      startLine: sLine,
+      date: new Date().toISOString()
+    }));
+  };
+
   const {
     logs,
     isProcessing,
+    error,
     transcriptResult,
     mappedResult,
     smiContent, // <--- This contains the backend SAMI file
@@ -287,6 +320,9 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       await writeTextFile(synPath, finalSynContent!);
       console.log(".syn file updated at:", synPath);
 
+      // Clear the session so it doesn't prompt to resume next time
+      localStorage.removeItem("lastSession");
+
       alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
     } catch (error: any) {
       console.error("Export Failed:", error);
@@ -330,13 +366,121 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3} height={400}>
             {/* Draggable Video List */}
             <VideoUploadCard videos={videos} setVideos={setVideos} />
+          {/* RESUME BANNER */}
+          {resumeData && !video && (
+            <Alert
+              severity="info"
+              sx={{ mb: 3 }}
+              action={
+                <Button color="inherit" size="small" onClick={async () => {
+                  // Restore Video
+                  setVideo({ path: resumeData.videoPath, name: resumeData.videoName });
+
+                  // Restore Transcript
+                  if (resumeData.transcriptPath) {
+                    try {
+                      const text = await readTextFile(resumeData.transcriptPath);
+                      setTranscriptText(text);
+                      setTranscriptPath(resumeData.transcriptPath);
+                      setTranscriptFileName(resumeData.transcriptPath.split(/[\\/]/).pop() || "transcript.txt");
+                    } catch (e) {
+                      console.error("Failed to load prev transcript", e);
+                      // We trigger error but still allow resume of video
+                      alert("Could not load previous transcript file. You may need to select it again.");
+                    }
+                  }
+
+                  // Restore StartLine
+                  setStartLine(resumeData.startLine || "0");
+
+                  // Clear resume data to hide banner
+                  setResumeData(null);
+                  // Auto-advance
+                  setStep(1);
+                }}>
+                  Resume Previous Session
+                </Button>
+              }
+            >
+              <AlertTitle>Resume Session?</AlertTitle>
+              Continue with <strong>{resumeData.videoName}</strong> {resumeData.transcriptPath ? " and transcript" : ""}?
+            </Alert>
+          )}
+
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography fontWeight={600}>Video</Typography>
+                <Box
+                  onClick={async () => {
+                    const selected = await open({
+                      multiple: false,
+                      filters: [
+                        {
+                          name: "Video",
+                          extensions: ["mp4", "mkv", "avi", "mov"],
+                        },
+                      ],
+                    });
+                    if (!selected || Array.isArray(selected)) return;
+                    setVideo({
+                      path: selected,
+                      name: selected.split("\\").pop() || selected,
+                    });
+                  }}
+                  sx={{
+                    border: "2px dashed",
+                    borderColor: video ? "success.main" : "text.secondary",
+                    borderRadius: 2,
+                    p: 3,
+                    mt: 2,
+                    textAlign: "center",
+                    cursor: "pointer",
+                    bgcolor: video
+                      ? alpha(theme.palette.success.main, 0.1)
+                      : "transparent",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <Typography color="textPrimary">
+                    {video ? "Video selected" : "Click to select video"}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {video ? video.name : "Supports MP4, MKV, AVI, MOV"}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
 
             <TranscriptUploadCard
               transcript={transcriptText}
               setTranscript={(file) => {
+                // Handle Drag & Drop (No path available usually)
                 if (!file) return;
                 setTranscriptFileName(file.name);
+                // Clear path since drag-drop file object path is unreliable/missing
+                setTranscriptPath(null);
                 file.text().then(setTranscriptText);
+              }}
+              onBrowse={async () => {
+                const selected = await open({
+                  multiple: false,
+                  filters: [{ name: "Text", extensions: ["txt", "srt", "smi"] }]
+                });
+
+                if (!selected || Array.isArray(selected)) return;
+
+                try {
+                  const fileName = selected.split(/[\\/]/).pop() || "transcript.txt";
+                  const text = await readTextFile(selected);
+
+                  setTranscriptFileName(fileName);
+                  setTranscriptPath(selected); // Save the persistent path!
+                  setTranscriptText(text);
+                } catch (err) {
+                  console.error("Failed to read transcript", err);
+                  alert("Failed to read file");
+                }
               }}
             />
           </Box>
@@ -348,6 +492,13 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               endIcon={<ArrowForwardIcon />}
               disabled={videos.length === 0}
               onClick={() => setStep(1)}
+              disabled={!video}
+              onClick={() => {
+                if (video) {
+                  saveSession(video, transcriptPath, startLine);
+                }
+                setStep(1);
+              }}
               sx={{ px: 4, py: 1.5, borderRadius: 2 }}
             >
               Next Step
@@ -408,7 +559,13 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               variant="contained"
               size="large"
               endIcon={<ArrowForwardIcon />}
-              onClick={() => setStep(2)}
+              onClick={() => {
+                // Update session with Step 1 details (Start Line)
+                if (video) {
+                  saveSession(video, transcriptPath, startLine);
+                }
+                setStep(2);
+              }}
               sx={{ px: 4 }}
             >
               Proceed to Sync
@@ -427,16 +584,26 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
             variant="contained"
             size="large"
             disabled={isProcessing}
+            color={error ? "warning" : "primary"}
             onClick={() =>
               handleWorkflow(videos, transcriptText, parseInt(startLine) || 0)
             }
-            startIcon={!isProcessing && <PlayArrowIcon />}
+            startIcon={!isProcessing ? (error ? <RestartAltIcon /> : <PlayArrowIcon />) : null}
             sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
           >
             {isProcessing
               ? "Extracting & Uploading..."
-              : "Start Auto-Sync Workflow"}
+              : error
+                ? "Retry Auto-Sync Workflow"
+                : "Start Auto-Sync Workflow"}
           </Button>
+
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, maxWidth: 600 }}>
+              <AlertTitle>Workflow Failed</AlertTitle>
+              {error}
+            </Alert>
+          )}
 
           {isProcessing && (
             <Box

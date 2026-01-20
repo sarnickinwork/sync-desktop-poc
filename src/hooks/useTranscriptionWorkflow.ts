@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Command } from "@tauri-apps/plugin-shell";
-import { readFile, mkdir, exists, remove, writeTextFile } from "@tauri-apps/plugin-fs";
+import { readFile, readTextFile, mkdir, exists, remove, writeTextFile } from "@tauri-apps/plugin-fs";
 import { appDataDir, join, downloadDir } from "@tauri-apps/api/path";
 
 import {
@@ -10,6 +10,9 @@ import {
   mergeTranscripts,
   extractHumanTranscriptFromContent,
   performTextMapping,
+  generateSYN,
+  parseSYN,
+  SYNMetadata
 } from "../utils";
 import { VideoItem } from "../utils/types";
 
@@ -36,6 +39,7 @@ function convertToSimpleTranscriptDto(rawResponse: any): SimpleTranscriptDto {
 export function useTranscriptionWorkflow() {
   const [logs, setLogs] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [transcriptResult, setTranscriptResult] = useState<any>(null);
   const [mappedResult, setMappedResult] = useState<MappedSentenceResult[] | null>(null);
   const [smiContent, setSmiContent] = useState<string | null>(null);
@@ -63,6 +67,7 @@ export function useTranscriptionWorkflow() {
 
     try {
       setIsProcessing(true);
+      setError(null);
       setLogs([]);
       setTranscriptResult(null);
       setMappedResult(null);
@@ -87,7 +92,36 @@ export function useTranscriptionWorkflow() {
 
       // Create main project folder
       if (!(await exists(projectFolder))) {
+      const videoFileName = videoPath.split("\\").pop() || videoPath.split("/").pop() || "project";
+      const projectName = videoFileName.replace(/\.[^/.]+$/, "").trim();
+
+      // Create project folder in Downloads
+      const downloadsPath = await downloadDir();
+      const projectFolder = await join(downloadsPath, projectName);
+
+      // Check if project folder already exists
+      let existingSynData: any = null;
+      if (await exists(projectFolder)) {
+        log(`Project folder exists: ${projectFolder}`);
+        setProjectFolderPath(projectFolder);
+
+        // Check for existing .syn file
+        const synPath = await join(projectFolder, `${projectName}.syn`);
+        if (await exists(synPath)) {
+          log("Found existing .syn file. Attempting to resume...");
+          try {
+            const synContentRaw = await readTextFile(synPath);
+            existingSynData = parseSYN(synContentRaw);
+            log("Successfully parsed existing .syn file.");
+          } catch (e) {
+            log(`Warning: Failed to parse existing .syn file: ${e}`);
+          }
+        }
+      } else {
+        // Create project folder
         await mkdir(projectFolder);
+        setProjectFolderPath(projectFolder);
+        log(`Project folder created: ${projectFolder}`);
       }
 
       // Create subfolders
@@ -173,71 +207,226 @@ export function useTranscriptionWorkflow() {
         formData.append("AudioFiles", file);
       });
       formData.append("startLine", startLine.toString());
+      // Create subfolders if they don't exist
+      const mediaFolder = await join(projectFolder, "media");
+      const transcriptionFolder = await join(projectFolder, "transcription");
 
-      if (manualTranscript) {
-        const textBlob = new Blob([manualTranscript], { type: "text/plain" });
-        const textFile = new File([textBlob], "transcript.txt", {
-          type: "text/plain",
+      if (!(await exists(mediaFolder))) await mkdir(mediaFolder);
+      if (!(await exists(transcriptionFolder))) await mkdir(transcriptionFolder);
+
+      // Initialize or load .syn file
+      const synPath = await join(projectFolder, `${projectName}.syn`);
+      let currentSynData = existingSynData;
+
+      if (!currentSynData) {
+        // Create initial .syn file
+        // generateSYN is already imported from ../utils
+        const initialSyn = generateSYN({
+          videoFilename: videoFileName,
+          videoPath: `media/${videoFileName}`,
+          videoDuration: 0,
+          subtitleFilename: `${projectName}.smi`,
+          subtitlePath: `media/${projectName}.smi`,
+          transcriptFilename: manualTranscript ? "transcript.txt" : "generated_transcript.txt",
+          transcriptPath: `transcription/${manualTranscript ? "transcript.txt" : "generated_transcript.txt"}`,
+          startLine,
+          sentences: []
         });
-        formData.append("transcript", textFile);
-        log("Attached manual transcript file.");
+
+        await writeTextFile(synPath, initialSyn);
+        log("Initial .syn file created (resume checkpoint)");
+      } else {
+        // Check for API timer resume
+        if (currentSynData.stats?.apiElapsedTime) {
+          setApiElapsedTime(currentSynData.stats.apiElapsedTime);
+        }
       }
+
+      // --- STEP 1 & 2: AUDIO EXTRACTION & API CALL (Or Resume) ---
+      let mergedTranscript: SimpleTranscriptDto;
+
+      // Check if we already have the raw transcript in .syn
+      if (currentSynData && currentSynData.rawResponse) {
+        log("RESUMING: Found cached AI transcript in .syn file.");
+        log("Skipping audio extraction and API call.");
+
+        // Reconstruct the SimpleTranscriptDto from the partial data
+        // We cast it because we know the structure matches what we saved
+        mergedTranscript = currentSynData.rawResponse as SimpleTranscriptDto;
+
+        setTranscriptResult(mergedTranscript); // Update UI state
+      } else {
+        // --- PERFORM NORMAL API WORKFLOW ---
+
+        // Local Audio Extraction
+        log(`Processing local video: ${videoPath}`);
 
       // --- STEP 4: SEND TO BACKEND ---
       log(`Sending ${audioFilesForUpload.length} audio files to backend...`);
+        const appData = await appDataDir();
+        if (!(await exists(appData))) {
+          await mkdir(appData);
+        }
 
-      // Start timer
-      const startTime = Date.now();
-      setApiStartTime(startTime);
+        // Define temp path for the audio
+        audioPath = await join(appData, "temp_audio.mp3");
 
-      const response = await fetch(`${API_URL}/finaltranscript`, {
-        method: "POST",
-        body: formData,
-      });
+        log("Extracting audio with FFmpeg (Sidecar)...");
+        const command = Command.sidecar("binaries/ffmpeg", [
+          "-i",
+          videoPath,
+          "-vn", // No video
+          "-acodec",
+          "libmp3lame", // Encode to MP3
+          "-y", // Overwrite if exists
+          audioPath,
+        ]);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Server error (${response.status}): ${errorText}`);
+        const output = await command.execute();
+
+        if (output.code !== 0) {
+          throw new Error(`FFmpeg failed: ${output.stderr}`);
+        }
+        log("Audio extracted successfully.");
+
+        // Read extracted audio file
+        log("Reading extracted audio file...");
+        const audioData = await readFile(audioPath);
+        const audioBlob = new Blob([audioData], { type: "audio/mp3" });
+        const audioFile = new File([audioBlob], "audio.mp3", {
+          type: "audio/mp3",
+        });
+
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append("AudioFiles", audioFile);
+        formData.append("startLine", startLine.toString());
+
+        if (manualTranscript) {
+          const textBlob = new Blob([manualTranscript], { type: "text/plain" });
+          const textFile = new File([textBlob], "transcript.txt", {
+            type: "text/plain",
+          });
+          formData.append("transcript", textFile);
+          log("Attached manual transcript file.");
+        }
+
+        // Send to Backend
+        log(`Sending to backend (${API_URL}/finaltranscript)...`);
+        const startTime = Date.now();
+        setApiStartTime(startTime);
+
+        const response = await fetch(`${API_URL}/finaltranscript`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server error (${response.status}): ${errorText}`);
+        }
+
+        const json = await response.json();
+
+        const elapsedTime = Date.now() - startTime;
+        setApiElapsedTime(elapsedTime);
+        log(`Backend processing complete! (${(elapsedTime / 1000).toFixed(2)}s)`);
+        setTranscriptResult(json);
+
+        // Post-processing: Merge chunks if needed
+        let transcriptsArray: SimpleTranscriptDto[];
+        if (Array.isArray(json)) {
+          transcriptsArray = json.map((item: any) => convertToSimpleTranscriptDto(item));
+        } else {
+          transcriptsArray = [convertToSimpleTranscriptDto(json)];
+        }
+        mergedTranscript = mergeTranscripts(transcriptsArray);
+        log(`Merged transcript has ${mergedTranscript.words.length} words.`);
+
+        // --- SAVE CHECKPOINT: RAW TRANSCRIPT ---
+        log("Saving API response to .syn file (Checkpoint)...");
+
+        // Construct updated metadata
+        const checkpointMetadata: SYNMetadata = {
+          videoFilename: videoFileName,
+          videoPath: `media/${videoFileName}`,
+          videoDuration: 0,
+          subtitleFilename: `${projectName}.smi`,
+          subtitlePath: `media/${projectName}.smi`,
+          transcriptFilename: manualTranscript ? "transcript.txt" : "generated_transcript.txt",
+          transcriptPath: `transcription/${manualTranscript ? "transcript.txt" : "generated_transcript.txt"}`,
+          startLine,
+          sentences: [], // Not mapped yet
+          // New Fields
+          rawTranscript: mergedTranscript,
+          apiElapsedTime: elapsedTime,
+          processingState: {
+            isApiComplete: true,
+            isSanitizationComplete: false,
+            isMappingComplete: false
+          }
+        };
+
+        const synContent = generateSYN(checkpointMetadata);
+        await writeTextFile(synPath, synContent);
+        log("Checkpoint saved: RAW TRANSCRIPT.");
+
+        // Cleanup audio file immediately since we have the data
+        await remove(audioPath);
+        audioPath = ""; // Prevent cleanup from trying to delete it again
       }
-
-      const json = await response.json();
-
-      // Stop timer
-      const elapsedTime = Date.now() - startTime;
-      setApiElapsedTime(elapsedTime);
-      log(`Backend processing complete! (${(elapsedTime / 1000).toFixed(2)}s)`);
-      setTranscriptResult(json);
-
-      // --- STEP 5: POST-PROCESSING ---
-      log("Starting post-processing...");
-
-      // Convert response(s) to SimpleTranscriptDto format
-      // Handle both single response and array of responses
-      let transcriptsArray: SimpleTranscriptDto[];
-
-      if (Array.isArray(json)) {
-        log(`Received ${json.length} transcript chunks. Merging...`);
-        transcriptsArray = json.map((item: any) => convertToSimpleTranscriptDto(item));
-      } else {
-        log("Received single transcript response.");
-        transcriptsArray = [convertToSimpleTranscriptDto(json)];
-      }
-
-      // Merge all transcripts into one
-      const mergedTranscript = mergeTranscripts(transcriptsArray);
-      log(`Merged transcript has ${mergedTranscript.words.length} words.`);
 
       // --- STEP 6: TEXT MAPPING (if manual transcript provided) ---
       if (manualTranscript) {
         log(`Extracting human transcript from line ${startLine}...`);
 
-        // Sanitize and extract from the given line number
-        const sanitizedHumanText = extractHumanTranscriptFromContent(
-          manualTranscript,
-          startLine
-        );
+        let sanitizedHumanText = "";
+
+        // Check if we already have sanitized text in .syn
+        if (currentSynData && currentSynData.transcript?.sanitizedText && currentSynData.transcript.startLine === startLine) {
+          log("RESUMING: Found sanitized text in .syn file.");
+          sanitizedHumanText = currentSynData.transcript.sanitizedText;
+        } else {
+          // Sanitize and extract from the given line number
+          sanitizedHumanText = extractHumanTranscriptFromContent(
+            manualTranscript,
+            startLine
+          );
+
+          // --- SAVE CHECKPOINT: SANITIZED TEXT ---
+          log("Saving sanitized text to .syn file (Checkpoint)...");
+          const checkpointMetadata: SYNMetadata = {
+            videoFilename: videoFileName,
+            videoPath: `media/${videoFileName}`,
+            videoDuration: 0,
+            subtitleFilename: `${projectName}.smi`,
+            subtitlePath: `media/${projectName}.smi`,
+            transcriptFilename: manualTranscript ? "transcript.txt" : "generated_transcript.txt",
+            transcriptPath: `transcription/${manualTranscript ? "transcript.txt" : "generated_transcript.txt"}`,
+            startLine,
+            sentences: [], // Not mapped yet
+            // Preserve previous fields
+            rawTranscript: mergedTranscript,
+            apiElapsedTime: apiElapsedTime || (currentSynData?.stats?.apiElapsedTime || 0),
+            // New field
+            sanitizedTranscript: sanitizedHumanText,
+            processingState: {
+              isApiComplete: true,
+              isSanitizationComplete: true,
+              isMappingComplete: false
+            }
+          };
+
+          const synContent = generateSYN(checkpointMetadata);
+          await writeTextFile(synPath, synContent);
+          log("Checkpoint saved: SANITIZED TEXT.");
+          // throw new Error("SIMULATED CRASH: App died after Sanitization!"); // FOR TESTING
+        }
 
         log(`Extracted ${sanitizedHumanText.split(' ').length} words from human transcript.`);
+
+        // Give UI a moment to update/render before heavy blocking calc
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         // Perform DTW text mapping
         log("Performing DTW text mapping...");
@@ -271,7 +460,7 @@ export function useTranscriptionWorkflow() {
 
         // Generate SYN file
         log("Generating SYN (proprietary) file...");
-        const { generateSYN } = await import('../utils/synGenerationUtils');
+        // generateSYN is imported from utils
         const syn = generateSYN({
           videoFilename: firstVideo.name,
           videoPath: `media/${firstVideo.name}`,
@@ -289,6 +478,34 @@ export function useTranscriptionWorkflow() {
         // Update .syn file in project folder with complete data
         if (projectFolder) {
           const synPath = await join(projectFolder, `${projectDisplayName}.syn`);
+        // Update .syn file in project folder with complete data
+        // Update .syn file in project folder with complete data
+        if (projectFolder) {
+          const finalMetadata: SYNMetadata = {
+            videoFilename: videoFileName,
+            videoPath: `media/${videoFileName}`,
+            videoDuration: mappingResult.sentences[mappingResult.sentences.length - 1]?.end || 0,
+            subtitleFilename: `${projectName}.smi`,
+            subtitlePath: `media/${projectName}.smi`,
+            transcriptFilename: manualTranscript ? "transcript.txt" : "generated_transcript.txt",
+            transcriptPath: `transcription/${manualTranscript ? "transcript.txt" : "generated_transcript.txt"}`,
+            startLine,
+            sentences: mappingResult.sentences,
+            // Keep our resumable fields
+            rawTranscript: mergedTranscript,
+            sanitizedTranscript: sanitizedHumanText,
+            apiElapsedTime: apiElapsedTime || (currentSynData?.stats?.apiElapsedTime || 0),
+            processingState: {
+              isApiComplete: true,
+              isSanitizationComplete: true,
+              isMappingComplete: true
+            }
+          };
+
+          const syn = generateSYN(finalMetadata);
+          setSynContent(syn); // Update state
+
+          // const synPath = await join(projectFolder, `${projectName}.syn`); // Already defined above
           await writeTextFile(synPath, syn);
           log("Updated .syn file in project folder with complete data");
         }
@@ -301,6 +518,11 @@ export function useTranscriptionWorkflow() {
 
       // --- STEP 8: CLEANUP ---
       log("Workflow complete!");
+      log("Cleaning up temporary files...");
+      if (audioPath && await exists(audioPath)) {
+        await remove(audioPath);
+      }
+      log("Cleanup successful. Workflow complete!");
     } catch (err: any) {
       // Stop timer on error as well
       if (apiStartTime) {
@@ -308,7 +530,9 @@ export function useTranscriptionWorkflow() {
         setApiElapsedTime(elapsedTime);
       }
       console.error(err);
-      log(`Error: ${err.message || err}`);
+      const errorMsg = err.message || JSON.stringify(err);
+      setError(errorMsg);
+      log(`Error: ${errorMsg}`);
     } finally {
       setIsProcessing(false);
     }
@@ -317,6 +541,7 @@ export function useTranscriptionWorkflow() {
   return {
     logs,
     isProcessing,
+    error,
     transcriptResult,
     mappedResult,
     smiContent,

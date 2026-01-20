@@ -18,11 +18,13 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 type Props = {
   transcript: File | string | null;
   setTranscript: (f: File | null) => void;
+  onBrowse?: () => void;
 };
 
 export default function TranscriptUploadCard({
   transcript,
   setTranscript,
+  onBrowse,
 }: Props) {
   const theme = useTheme();
 
@@ -94,6 +96,14 @@ export default function TranscriptUploadCard({
               transform: "translateY(-2px)",
               boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
             }
+          }}
+          onClick={(e) => {
+            if (onBrowse) {
+              // Prevent Dropzone from opening its dialog if we have a custom browser
+              e.stopPropagation();
+              onBrowse();
+            }
+            // Otherwise, let Dropzone handle it (defaults to opening file dialog)
           }}
         >
           <input {...getInputProps()} />

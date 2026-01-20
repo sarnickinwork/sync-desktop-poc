@@ -73,6 +73,15 @@ export interface SYNMetadata {
     transcriptPath: string;
     startLine: number;
     sentences: MappedSentenceResult[];
+    // Resumable workflow fields
+    rawTranscript?: SimpleTranscriptDto;
+    sanitizedTranscript?: string;
+    apiElapsedTime?: number;
+    processingState?: {
+        isApiComplete: boolean;
+        isSanitizationComplete: boolean;
+        isMappingComplete: boolean;
+    };
 }
 
 

@@ -23,7 +23,23 @@ export function generateSYN(metadata: SYNMetadata): string {
         transcript: {
             filename: metadata.transcriptFilename,
             path: metadata.transcriptPath,
-            startLine: metadata.startLine
+            startLine: metadata.startLine,
+            // Add sanitized text if available
+            sanitizedText: metadata.sanitizedTranscript || null
+        },
+        // Store raw backend response for component-level resume
+        rawResponse: metadata.rawTranscript ? {
+            fullText: metadata.rawTranscript.fullText,
+            words: metadata.rawTranscript.words,
+            // sentences: metadata.rawTranscript.sentences // Optional, we mostly care about words
+        } : null,
+        stats: {
+             apiElapsedTime: metadata.apiElapsedTime || 0
+        },
+        processingState: metadata.processingState || {
+             isApiComplete: !!metadata.rawTranscript,
+             isSanitizationComplete: !!metadata.sanitizedTranscript,
+             isMappingComplete: metadata.sentences.length > 0
         },
         synchronization: {
             totalSentences: metadata.sentences.length,
