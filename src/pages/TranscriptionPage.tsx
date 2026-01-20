@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   useTheme,
   alpha,
@@ -10,8 +8,6 @@ import {
   TextField,
   CircularProgress,
 } from "@mui/material";
-import { open } from "@tauri-apps/plugin-dialog";
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { join } from "@tauri-apps/api/path";
 import { writeTextFile, copyFile, readTextFile } from "@tauri-apps/plugin-fs";
 import { Alert, AlertTitle } from "@mui/material";
@@ -33,17 +29,15 @@ import TranscriptViewer from "../components/TranscriptViewer";
 import VideoPreview from "../components/preview/VideoPreview";
 import TranscriptPreview from "../components/preview/TranscriptPreview";
 import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
+// import VideoUploadCard from "../components/upload/VideoUploadCard"; // Use updated one
+import VideoUploadCard from "../components/upload/VideoUploadCard";
 import SyncedPlayer from "../components/sync/SyncedPlayer";
 import ThemeToggle from "../components/ThemeToggle";
 import ResultsDisplay from "../components/ResultsDisplay";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
 import { downloadSMI, downloadDVT, downloadSYN } from "../utils";
-
-type VideoItem = {
-  path: string;
-  name: string;
-};
+import { VideoItem } from "../utils/types";
 
 type SyncedLine = {
   text: string;
@@ -79,7 +73,7 @@ type Props = {
 export default function TranscriptionPage({ onNavigateToImport }: Props) {
   const theme = useTheme();
   const [step, setStep] = useState(0);
-  const [video, setVideo] = useState<VideoItem | null>(null);
+  const [videos, setVideos] = useState<VideoItem[]>([]);
   const [transcriptText, setTranscriptText] = useState<string | null>(null);
   const [transcriptFileName, setTranscriptFileName] = useState<string | null>(null);
   const [transcriptPath, setTranscriptPath] = useState<string | null>(null);
@@ -133,6 +127,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
   } = useTranscriptionWorkflow();
 
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
+  const [splitPoints, setSplitPoints] = useState<number[]>([]);
   const [liveElapsedTime, setLiveElapsedTime] = useState<number>(0);
 
   useEffect(() => {
@@ -152,32 +147,64 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
     };
   }, [isProcessing]);
 
-  function generateSentencesFromAssembly(apiResult: any): SyncedLine[] {
-    if (!apiResult?.words) return [];
+  function processAssemblyResult(apiResult: any) {
+    if (!apiResult) return;
+
+    let allWords: any[] = [];
+    let currentOffset = 0;
+    const splits: number[] = [];
+
+    // Handle array vs single object
+    const chunks = Array.isArray(apiResult) ? apiResult : [apiResult];
+
+    chunks.forEach((chunk: any) => {
+      if (!chunk.words) return;
+
+      let lastWordEnd = 0;
+      chunk.words.forEach((w: any) => {
+        allWords.push({
+          text: w.text,
+          start: w.start + currentOffset,
+          end: w.end + currentOffset,
+          confidence: w.confidence
+        });
+        if (w.end > lastWordEnd) lastWordEnd = w.end;
+      });
+
+      currentOffset += lastWordEnd;
+      splits.push(currentOffset);
+    });
+
+    setSplitPoints(splits);
+
+    // Generate sentences from merged words
     const sentences: SyncedLine[] = [];
     let currentSentenceWords: string[] = [];
     let startTime: number | null = null;
-    apiResult.words.forEach((word: any) => {
+
+    allWords.forEach((word: any) => {
       if (startTime === null) startTime = word.start;
       currentSentenceWords.push(word.text);
       if (/[.!?]$/.test(word.text)) {
         sentences.push({
           text: currentSentenceWords.join(" "),
           start: startTime!,
-          end: word.end,
+          end: word.end, // word.end already has offset
         });
         currentSentenceWords = [];
         startTime = null;
       }
     });
+
     if (currentSentenceWords.length > 0 && startTime !== null) {
       sentences.push({
         text: currentSentenceWords.join(" "),
         start: startTime,
-        end: apiResult.words[apiResult.words.length - 1].end,
+        end: allWords[allWords.length - 1].end,
       });
     }
-    return sentences;
+
+    setSyncedLines(sentences);
   }
 
   // --- RUST-BASED EXPORT ---
@@ -187,7 +214,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         ? (mappedResult as any[])
         : syncedLines;
 
-    if (!video || dataToExport.length === 0) {
+    if (videos.length === 0 || dataToExport.length === 0) {
       alert("No synced data available to export.");
       return;
     }
@@ -197,12 +224,14 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       return;
     }
 
+    // Use first video for naming conventions
+    const primaryVideo = videos[0];
+
     try {
       setIsExporting(true);
 
-      // 1. Prepare Paths - Keep original filenames
-      const rawProjectName = video.name.replace(/\.[^/.]+$/, "").trim();
-      const originalVideoName = video.name;
+      // 1. Prepare Paths
+      const rawProjectName = primaryVideo.name.replace(/\.[^/.]+$/, "").trim();
       const finalTranscriptFileName = transcriptFileName || "transcript.txt";
 
       // 2. Prepare Content
@@ -217,7 +246,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         ? transcriptText
         : dataToExport.map((l) => l.text).join(" ");
 
-      // C. DVT Content
+      // C. DVT Content (already generated in hook if mapped, else generate here)
       let finalDvtContent = dvtContent;
       if (!finalDvtContent) {
         const { generateDVT } = await import("../utils/dvtGenerationUtils");
@@ -228,9 +257,9 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
           confidence: line.confidence || 1.0,
         }));
         finalDvtContent = generateDVT({
-          title: `Deposition - ${originalVideoName}`,
-          videoFilename: originalVideoName,
-          videoPath: `media/${originalVideoName}`,
+          title: `Deposition - ${rawProjectName}`,
+          videoFilename: primaryVideo.name,
+          videoPath: `media/${primaryVideo.name}`,
           duration: dataToExport[dataToExport.length - 1]?.end || 0,
           createdDate: new Date().toISOString(),
           sentences: sentencesForDVT,
@@ -248,8 +277,8 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
           confidence: line.confidence || 1.0,
         }));
         finalSynContent = generateSYN({
-          videoFilename: originalVideoName,
-          videoPath: `media/${originalVideoName}`,
+          videoFilename: primaryVideo.name,
+          videoPath: `media/${primaryVideo.name}`,
           videoDuration: dataToExport[dataToExport.length - 1]?.end || 0,
           subtitleFilename: `${rawProjectName}.smi`,
           subtitlePath: `media/${rawProjectName}.smi`,
@@ -263,10 +292,13 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       // 3. Write files to project folder
       console.log("Exporting to project folder:", projectFolderPath);
 
-      // Copy video file to media folder
-      const videoDestPath = await join(projectFolderPath, "media", originalVideoName);
-      await copyFile(video.path, videoDestPath);
-      console.log("Video copied to:", videoDestPath);
+      // Copy ALL video files to media folder?
+      // Yes, otherwise multi-video export is incomplete.
+      for (const v of videos) {
+        const vDest = await join(projectFolderPath, "media", v.name);
+        await copyFile(v.path, vDest);
+        console.log(`Video ${v.name} copied to:`, vDest);
+      }
 
       // Write .smi file to media folder
       const smiPath = await join(projectFolderPath, "media", `${rawProjectName}.smi`);
@@ -280,12 +312,12 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
 
       // Write .dvt file to project root
       const dvtPath = await join(projectFolderPath, `${rawProjectName}.dvt`);
-      await writeTextFile(dvtPath, finalDvtContent);
+      await writeTextFile(dvtPath, finalDvtContent!);
       console.log(".dvt file written to:", dvtPath);
 
       // Update .syn file at project root
       const synPath = await join(projectFolderPath, `${rawProjectName}.syn`);
-      await writeTextFile(synPath, finalSynContent);
+      await writeTextFile(synPath, finalSynContent!);
       console.log(".syn file updated at:", synPath);
 
       // Clear the session so it doesn't prompt to resume next time
@@ -310,7 +342,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         mb={3}
       >
         <Typography variant="h5" fontWeight={600}>
-          Sync App POC v1.0.5
+          Sync App POC v1.1 Multi-Video
         </Typography>
         <Box display="flex" gap={2}>
           {onNavigateToImport && (
@@ -331,6 +363,9 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       {/* STEP 0: UPLOAD */}
       {step === 0 && (
         <>
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3} height={400}>
+            {/* Draggable Video List */}
+            <VideoUploadCard videos={videos} setVideos={setVideos} />
           {/* RESUME BANNER */}
           {resumeData && !video && (
             <Alert
@@ -455,6 +490,8 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               variant="contained"
               size="large"
               endIcon={<ArrowForwardIcon />}
+              disabled={videos.length === 0}
+              onClick={() => setStep(1)}
               disabled={!video}
               onClick={() => {
                 if (video) {
@@ -471,10 +508,10 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       )}
 
       {/* STEP 1: PREVIEW */}
-      {step === 1 && video && (
+      {step === 1 && videos.length > 0 && (
         <>
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
-            <VideoPreview videoPath={convertFileSrc(video.path)} />
+            <VideoPreview videos={videos} />
             {transcriptText ? (
               <TranscriptPreview transcript={transcriptText} />
             ) : (
@@ -538,7 +575,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       )}
 
       {/* STEP 2: SYNC */}
-      {step === 2 && video && (
+      {step === 2 && videos.length > 0 && (
         <Box mt={3}>
           <Typography mb={3} color="text.secondary">
             Click below to extract audio locally and sync via backend.
@@ -549,7 +586,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
             disabled={isProcessing}
             color={error ? "warning" : "primary"}
             onClick={() =>
-              handleWorkflow(video.path, transcriptText, parseInt(startLine) || 0)
+              handleWorkflow(videos, transcriptText, parseInt(startLine) || 0)
             }
             startIcon={!isProcessing ? (error ? <RestartAltIcon /> : <PlayArrowIcon />) : null}
             sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
@@ -623,8 +660,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
                 size="large"
                 endIcon={<ArrowForwardIcon />}
                 onClick={() => {
-                  const lines = generateSentencesFromAssembly(transcriptResult);
-                  setSyncedLines(lines);
+                  processAssemblyResult(transcriptResult);
                   setStep(3);
                 }}
               >
@@ -636,7 +672,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       )}
 
       {/* STEP 3: RESULT */}
-      {step === 3 && video && (
+      {step === 3 && videos.length > 0 && (
         <Box>
           <Box mb={3} display="flex" gap={2} flexWrap="wrap">
             <Button
@@ -645,7 +681,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               color="inherit"
               onClick={() => {
                 setStep(0);
-                setVideo(null);
+                setVideos([]);
                 setTranscriptText(null);
                 setTranscriptFileName(null);
                 setSyncedLines([]);
@@ -669,13 +705,15 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
                 )
               }
             >
-              {isExporting ? "Zipping (Native)..." : "Export Project Zip"}
+              {isExporting ? "Zipping..." : "Export Project Zip"}
             </Button>
           </Box>
 
           {mappedResult && mappedResult.length > 0 ? (
             <ResultsDisplay
               mappedResults={mappedResult}
+              videos={videos}
+              splitPoints={splitPoints}
               smiContent={smiContent}
               dvtContent={dvtContent}
               synContent={synContent}
@@ -688,21 +726,22 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               onDownloadDVT={() => {
                 if (dvtContent) {
                   const videoName =
-                    video?.name.replace(/\.[^/.]+$/, "") || "deposition";
+                    videos[0]?.name.replace(/\.[^/.]+$/, "") || "deposition";
                   downloadDVT(dvtContent, `${videoName}.dvt`);
                 }
               }}
               onDownloadSYN={() => {
                 if (synContent) {
                   const videoName =
-                    video?.name.replace(/\.[^/.]+$/, "") || "sync";
+                    videos[0]?.name.replace(/\.[^/.]+$/, "") || "sync";
                   downloadSYN(synContent, `${videoName}.syn`);
                 }
               }}
             />
           ) : syncedLines.length > 0 ? (
             <SyncedPlayer
-              videoUrl={convertFileSrc(video.path)}
+              videos={videos}
+              splitPoints={splitPoints}
               lines={syncedLines}
             />
           ) : (
