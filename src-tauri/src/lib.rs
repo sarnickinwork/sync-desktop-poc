@@ -1,5 +1,5 @@
-use std::fs::File;
-use std::io::{Read, Write};
+use std::fs;
+use std::io::Write;
 use std::path::Path;
 use tauri::command;
 
