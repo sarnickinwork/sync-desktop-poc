@@ -288,6 +288,9 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       await writeTextFile(synPath, finalSynContent);
       console.log(".syn file updated at:", synPath);
 
+      // Clear the session so it doesn't prompt to resume next time
+      localStorage.removeItem("lastSession");
+
       alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
     } catch (error: any) {
       console.error("Export Failed:", error);
@@ -547,7 +550,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
           >
             {isProcessing
               ? "Extracting & Uploading..."
-              : error 
+              : error
                 ? "Retry Auto-Sync Workflow"
                 : "Start Auto-Sync Workflow"}
           </Button>

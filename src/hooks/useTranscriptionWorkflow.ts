@@ -320,6 +320,7 @@ export function useTranscriptionWorkflow() {
           const synContent = generateSYN(checkpointMetadata);
           await writeTextFile(synPath, synContent);
           log("Checkpoint saved: SANITIZED TEXT.");
+          // throw new Error("SIMULATED CRASH: App died after Sanitization!"); // FOR TESTING
         }
 
         log(`Extracted ${sanitizedHumanText.split(' ').length} words from human transcript.`);
