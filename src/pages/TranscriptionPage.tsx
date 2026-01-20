@@ -522,7 +522,13 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               variant="contained"
               size="large"
               endIcon={<ArrowForwardIcon />}
-              onClick={() => setStep(2)}
+              onClick={() => {
+                // Update session with Step 1 details (Start Line)
+                if (video) {
+                  saveSession(video, transcriptPath, startLine);
+                }
+                setStep(2);
+              }}
               sx={{ px: 4 }}
             >
               Proceed to Sync

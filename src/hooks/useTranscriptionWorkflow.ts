@@ -325,6 +325,9 @@ export function useTranscriptionWorkflow() {
 
         log(`Extracted ${sanitizedHumanText.split(' ').length} words from human transcript.`);
 
+        // Give UI a moment to update/render before heavy blocking calc
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         // Perform DTW text mapping
         log("Performing DTW text mapping...");
         const mappingResult = performTextMapping(sanitizedHumanText, mergedTranscript);
