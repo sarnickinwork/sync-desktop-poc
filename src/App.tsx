@@ -64,11 +64,70 @@ export default function App() {
       createTheme({
         palette: {
           mode,
-          primary: { main: "#1976d2" },
-          // We define specific background colors to ensure contrast in both modes
+          primary: {
+            main: "#0D9488", // Teal-600
+            light: "#14B8A6", // Teal-500
+            dark: "#0F766E", // Teal-700
+          },
+          secondary: {
+            main: "#3B82F6", // Blue-500
+          },
+          success: {
+            main: "#10B981", // Green-500
+            light: "#34D399",
+          },
+          warning: {
+            main: "#F59E0B", // Amber-500
+          },
+          error: {
+            main: "#EF4444", // Red-500
+          },
+          info: {
+            main: "#3B82F6",
+          },
           background: {
-            default: mode === "light" ? "#f4f6f8" : "#121212",
-            paper: mode === "light" ? "#ffffff" : "#1e1e1e",
+            default: mode === "light" ? "#F9FAFB" : "#0F172A",
+            paper: mode === "light" ? "#FFFFFF" : "#1E293B",
+          },
+          divider: mode === "light" ? "#E5E7EB" : "#334155",
+        },
+        typography: {
+          fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+          h4: {
+            fontWeight: 700,
+          },
+          h5: {
+            fontWeight: 700,
+          },
+          h6: {
+            fontWeight: 600,
+          },
+        },
+        shape: {
+          borderRadius: 12,
+        },
+        components: {
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                textTransform: 'none',
+                fontWeight: 600,
+                borderRadius: 8,
+              },
+              contained: {
+                boxShadow: 'none',
+                '&:hover': {
+                  boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)',
+                },
+              },
+            },
+          },
+          MuiCard: {
+            styleOverrides: {
+              root: {
+                borderRadius: 12,
+              },
+            },
           },
         },
       }),

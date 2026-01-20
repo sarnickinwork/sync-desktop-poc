@@ -35,6 +35,7 @@ import VideoUploadCard from "../components/upload/VideoUploadCard";
 import SyncedPlayer from "../components/sync/SyncedPlayer";
 import ThemeToggle from "../components/ThemeToggle";
 import ResultsDisplay from "../components/ResultsDisplay";
+import JobSummaryCard from "../components/JobSummaryCard";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
 import { downloadSMI, downloadDVT, downloadSYN } from "../utils";
@@ -321,6 +322,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
 
       // Clear the session so it doesn't prompt to resume next time
       localStorage.removeItem("lastSession");
+      setStep(4); // Navigate to Job Summary
 
       alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
     } catch (error: any) {
@@ -357,7 +359,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         </Box>
       </Box>
 
-      <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result"]} />
+      <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result", "Job Summary"]} />
 
       {/* STEP 0: UPLOAD */}
       {step === 0 && (
@@ -712,6 +714,49 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               </Typography>
             </Box>
           )}
+        </Box>
+      )}
+
+
+      {/* STEP 4: JOB SUMMARY */}
+      {step === 4 && mappedResult && mappedResult.length > 0 && (
+        <Box>
+          <Box mb={3} display="flex" gap={2} flexWrap="wrap">
+            <Button
+              variant="outlined"
+              startIcon={<RestartAltIcon />}
+              color="inherit"
+              onClick={() => {
+                setStep(0);
+                setVideos([]);
+                setTranscriptText(null);
+                setTranscriptFileName(null);
+                setSyncedLines([]);
+                setStartLine("");
+              }}
+            >
+              Start New Project
+            </Button>
+
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => setStep(3)}
+            >
+              Back to Results
+            </Button>
+          </Box>
+
+          <JobSummaryCard
+            videoCount={videos.length}
+            totalDuration={splitPoints[splitPoints.length - 1] / 1000 || 0}
+            sentenceCount={mappedResult.length}
+            avgConfidence={
+              mappedResult.reduce((sum, r) => sum + (r.confidence || 0), 0) / mappedResult.length
+            }
+            processingTime={apiElapsedTime || 0}
+            estimatedCost={(splitPoints[splitPoints.length - 1] / 1000 || 0) * 0.00025}
+          />
         </Box>
       )}
 
