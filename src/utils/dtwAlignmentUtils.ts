@@ -3,12 +3,89 @@ import { WordDTO, MappedSentenceResult, FinalTranscriptWordAlignment } from './t
 import { normalizeWord, isSalutation } from './textProcessingUtils';
 
 /**
+ * Perform chunked DTW alignment for large transcripts to prevent memory crashes
+ * Processes the transcript in overlapping chunks
+ * @param humanWords - Array of words from human transcript
+ * @param aiWords - Array of word DTOs from AI transcript
+ * @param chunkSize - Size of each chunk (default: 1500)
+ * @param overlapSize - Size of overlap between chunks (default: 150)
+ * @param onProgress - Optional callback for progress updates
+ * @returns Array of mapped sentence results
+ */
+export function alignWithChunkedDTW(
+    humanWords: string[],
+    aiWords: WordDTO[],
+    chunkSize: number = 1500,
+    overlapSize: number = 150,
+    onProgress?: (current: number, total: number) => void
+): MappedSentenceResult[] {
+    const totalHumanWords = humanWords.length;
+    const totalAiWords = aiWords.length;
+
+    // If small enough, use original DTW
+    if (totalHumanWords <= chunkSize * 2 && totalAiWords <= chunkSize * 2) {
+        return buildSentenceResults(alignWithDTW(humanWords, aiWords));
+    }
+
+    console.log(`Using chunked DTW: ${totalHumanWords} human words, ${totalAiWords} AI words`);
+
+    const allAlignments: FinalTranscriptWordAlignment[] = [];
+    let humanStart = 0;
+    let chunkIndex = 0;
+    const estimatedChunks = Math.ceil(totalHumanWords / chunkSize);
+
+    while (humanStart < totalHumanWords) {
+        const humanEnd = Math.min(humanStart + chunkSize + overlapSize, totalHumanWords);
+        const humanChunk = humanWords.slice(humanStart, humanEnd);
+
+        // Estimate AI chunk size proportionally
+        const progressRatio = humanStart / totalHumanWords;
+        const estimatedAiStart = Math.floor(progressRatio * totalAiWords);
+        const aiChunkSize = Math.floor((humanChunk.length / totalHumanWords) * totalAiWords * 1.2); // 20% buffer
+        const aiEnd = Math.min(estimatedAiStart + aiChunkSize + overlapSize, totalAiWords);
+        const aiChunk = aiWords.slice(estimatedAiStart, aiEnd);
+
+        console.log(`Processing chunk ${chunkIndex + 1}/${estimatedChunks}: Human[${humanStart}:${humanEnd}], AI[${estimatedAiStart}:${aiEnd}]`);
+
+        if (onProgress) {
+            onProgress(chunkIndex + 1, estimatedChunks);
+        }
+
+        // Process this chunk
+        const chunkAlignments = alignWithDTW(humanChunk, aiChunk);
+
+        // Adjust indices to global positions
+        for (const alignment of chunkAlignments) {
+            alignment.humanIndex = humanStart + alignment.humanIndex;
+            if (alignment.aiIndex >= 0) {
+                alignment.aiIndex = estimatedAiStart + alignment.aiIndex;
+            }
+        }
+
+        // For first chunk, add all
+        if (chunkIndex === 0) {
+            allAlignments.push(...chunkAlignments);
+        } else {
+            // For subsequent chunks, skip the overlap portion (first 'overlapSize' human words)
+            const skipCount = Math.min(overlapSize, chunkAlignments.length);
+            allAlignments.push(...chunkAlignments.slice(skipCount));
+        }
+
+        humanStart += chunkSize;
+        chunkIndex++;
+    }
+
+    console.log(`Chunked DTW complete: ${allAlignments.length} total alignments`);
+    return buildSentenceResults(allAlignments);
+}
+
+/**
  * Perform DTW (Dynamic Time Warping) alignment between human words and AI words
  * @param humanWords - Array of words from human transcript
  * @param aiWords - Array of word DTOs from AI transcript
- * @returns Array of mapped sentence results
+ * @returns Array of word alignments (not sentences)
  */
-export function alignWithDTW(humanWords: string[], aiWords: WordDTO[]): MappedSentenceResult[] {
+export function alignWithDTW(humanWords: string[], aiWords: WordDTO[]): FinalTranscriptWordAlignment[] {
     const m = humanWords.length;
     const n = aiWords.length;
 
@@ -31,7 +108,7 @@ export function alignWithDTW(humanWords: string[], aiWords: WordDTO[]): MappedSe
     }
 
     const alignments = backtrackDTW(dtw, humanWords, aiWords);
-    return buildSentenceResults(alignments);
+    return alignments;
 }
 
 /**

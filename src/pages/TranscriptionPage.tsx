@@ -7,10 +7,14 @@ import {
   Button,
   TextField,
   CircularProgress,
+  Card,
+  CardContent,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
 import { join } from "@tauri-apps/api/path";
 import { writeTextFile, copyFile, readTextFile } from "@tauri-apps/plugin-fs";
-import { Alert, AlertTitle } from "@mui/material";
+import { open } from "@tauri-apps/plugin-dialog";
 
 // Icons
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -29,7 +33,6 @@ import TranscriptViewer from "../components/TranscriptViewer";
 import VideoPreview from "../components/preview/VideoPreview";
 import TranscriptPreview from "../components/preview/TranscriptPreview";
 import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
-// import VideoUploadCard from "../components/upload/VideoUploadCard"; // Use updated one
 import VideoUploadCard from "../components/upload/VideoUploadCard";
 import SyncedPlayer from "../components/sync/SyncedPlayer";
 import ThemeToggle from "../components/ThemeToggle";
@@ -90,8 +93,8 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       if (saved) {
         try {
           const data = JSON.parse(saved);
-          // Only offer resume if we have a valid video path
-          if (data.videoPath) {
+          // Only offer resume if we have valid videos
+          if (data.videos && data.videos.length > 0) {
             setResumeData(data);
           }
         } catch (e) {
@@ -102,10 +105,9 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
     loadSession();
   }, []);
 
-  const saveSession = (vid: VideoItem, tPath: string | null, sLine: string) => {
+  const saveSession = (vids: VideoItem[], tPath: string | null, sLine: string) => {
     localStorage.setItem("lastSession", JSON.stringify({
-      videoPath: vid.path,
-      videoName: vid.name,
+      videos: vids.map(v => ({ path: v.path, name: v.name })),
       transcriptPath: tPath,
       startLine: sLine,
       date: new Date().toISOString()
@@ -118,7 +120,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
     error,
     transcriptResult,
     mappedResult,
-    smiContent, // <--- This contains the backend SAMI file
+    smiContent,
     dvtContent,
     synContent,
     apiElapsedTime,
@@ -189,7 +191,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         sentences.push({
           text: currentSentenceWords.join(" "),
           start: startTime!,
-          end: word.end, // word.end already has offset
+          end: word.end,
         });
         currentSentenceWords = [];
         startTime = null;
@@ -292,8 +294,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       // 3. Write files to project folder
       console.log("Exporting to project folder:", projectFolderPath);
 
-      // Copy ALL video files to media folder?
-      // Yes, otherwise multi-video export is incomplete.
+      // Copy ALL video files to media folder
       for (const v of videos) {
         const vDest = await join(projectFolderPath, "media", v.name);
         await copyFile(v.path, vDest);
@@ -363,18 +364,19 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       {/* STEP 0: UPLOAD */}
       {step === 0 && (
         <>
-          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3} height={400}>
-            {/* Draggable Video List */}
-            <VideoUploadCard videos={videos} setVideos={setVideos} />
           {/* RESUME BANNER */}
-          {resumeData && !video && (
+          {resumeData && videos.length === 0 && (
             <Alert
               severity="info"
               sx={{ mb: 3 }}
               action={
                 <Button color="inherit" size="small" onClick={async () => {
-                  // Restore Video
-                  setVideo({ path: resumeData.videoPath, name: resumeData.videoName });
+                  // Restore Videos (all of them in order)
+                  setVideos(resumeData.videos.map((v: any, idx: number) => ({
+                    id: `${Date.now()}-${idx}`,
+                    path: v.path,
+                    name: v.name
+                  })));
 
                   // Restore Transcript
                   if (resumeData.transcriptPath) {
@@ -385,7 +387,6 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
                       setTranscriptFileName(resumeData.transcriptPath.split(/[\\/]/).pop() || "transcript.txt");
                     } catch (e) {
                       console.error("Failed to load prev transcript", e);
-                      // We trigger error but still allow resume of video
                       alert("Could not load previous transcript file. You may need to select it again.");
                     }
                   }
@@ -403,54 +404,13 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               }
             >
               <AlertTitle>Resume Session?</AlertTitle>
-              Continue with <strong>{resumeData.videoName}</strong> {resumeData.transcriptPath ? " and transcript" : ""}?
+              Continue with <strong>{resumeData.videos?.length || 0} video(s)</strong> {resumeData.transcriptPath ? " and transcript" : ""}?
             </Alert>
           )}
 
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography fontWeight={600}>Video</Typography>
-                <Box
-                  onClick={async () => {
-                    const selected = await open({
-                      multiple: false,
-                      filters: [
-                        {
-                          name: "Video",
-                          extensions: ["mp4", "mkv", "avi", "mov"],
-                        },
-                      ],
-                    });
-                    if (!selected || Array.isArray(selected)) return;
-                    setVideo({
-                      path: selected,
-                      name: selected.split("\\").pop() || selected,
-                    });
-                  }}
-                  sx={{
-                    border: "2px dashed",
-                    borderColor: video ? "success.main" : "text.secondary",
-                    borderRadius: 2,
-                    p: 3,
-                    mt: 2,
-                    textAlign: "center",
-                    cursor: "pointer",
-                    bgcolor: video
-                      ? alpha(theme.palette.success.main, 0.1)
-                      : "transparent",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <Typography color="textPrimary">
-                    {video ? "Video selected" : "Click to select video"}
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    {video ? video.name : "Supports MP4, MKV, AVI, MOV"}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
+            {/* Draggable Video List */}
+            <VideoUploadCard videos={videos} setVideos={setVideos} />
 
             <TranscriptUploadCard
               transcript={transcriptText}
@@ -475,7 +435,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
                   const text = await readTextFile(selected);
 
                   setTranscriptFileName(fileName);
-                  setTranscriptPath(selected); // Save the persistent path!
+                  setTranscriptPath(selected);
                   setTranscriptText(text);
                 } catch (err) {
                   console.error("Failed to read transcript", err);
@@ -491,11 +451,9 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               size="large"
               endIcon={<ArrowForwardIcon />}
               disabled={videos.length === 0}
-              onClick={() => setStep(1)}
-              disabled={!video}
               onClick={() => {
-                if (video) {
-                  saveSession(video, transcriptPath, startLine);
+                if (videos.length > 0) {
+                  saveSession(videos, transcriptPath, startLine);
                 }
                 setStep(1);
               }}
@@ -560,9 +518,8 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               size="large"
               endIcon={<ArrowForwardIcon />}
               onClick={() => {
-                // Update session with Step 1 details (Start Line)
-                if (video) {
-                  saveSession(video, transcriptPath, startLine);
+                if (videos.length > 0) {
+                  saveSession(videos, transcriptPath, startLine);
                 }
                 setStep(2);
               }}

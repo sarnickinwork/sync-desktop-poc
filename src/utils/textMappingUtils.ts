@@ -1,6 +1,6 @@
 import { SimpleTranscriptDto, FinalTranscriptResponse } from './types';
 import { splitIntoSentences, sanitizeSentences, extractWords } from './textProcessingUtils';
-import { alignWithDTW, fixSentenceTimestamps } from './dtwAlignmentUtils';
+import { alignWithChunkedDTW, fixSentenceTimestamps } from './dtwAlignmentUtils';
 
 /**
  * Perform text mapping between human transcript and AI transcript using DTW alignment
@@ -25,8 +25,19 @@ export function performTextMapping(
     const sanitizedHumanSentences = sanitizeSentences(humanSentences);
     const humanWords = extractWords(sanitizedHumanSentences);
 
-    // Perform DTW alignment
-    let sentenceResults = alignWithDTW(humanWords, aiTranscript.words);
+    console.log(`Text mapping: ${humanWords.length} human words, ${aiTranscript.words.length} AI words`);
+
+    // Use chunked DTW for large transcripts (>3000 words)
+    const useChunked = humanWords.length > 3000 || aiTranscript.words.length > 3000;
+    
+    if (useChunked) {
+        console.log("Using chunked DTW for large transcript...");
+    }
+
+    // Perform DTW alignment (chunked for large files)
+    let sentenceResults = alignWithChunkedDTW(humanWords, aiTranscript.words, 1500, 150, (current, total) => {
+        console.log(`Processing chunk ${current}/${total}...`);
+    });
 
     // Fix any remaining sentences with zero timestamps
     sentenceResults = fixSentenceTimestamps(sentenceResults);
