@@ -324,7 +324,7 @@ export function useTranscriptionWorkflow() {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           // SIMULATED CRASH FOR TESTING - Remove this line after testing
-          // throw new Error("SIMULATED CRASH: App died before text mapping!");
+          throw new Error("SIMULATED CRASH: App died before text mapping!");
 
           log("Performing DTW text mapping...");
           mappingResult = performTextMapping(sanitizedHumanText, mergedTranscript);
