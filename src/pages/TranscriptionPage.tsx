@@ -343,7 +343,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         mb={3}
       >
         <Typography variant="h5" fontWeight={600}>
-          Sync App POC v1.1 Multi-Video
+          Sync App POC v2.0.0
         </Typography>
         <Box display="flex" gap={2}>
           {onNavigateToImport && (
