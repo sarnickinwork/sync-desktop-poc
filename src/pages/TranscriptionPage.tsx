@@ -372,47 +372,47 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               action={
                 <Box display="flex" gap={1}>
                   <Button color="inherit" size="small" onClick={async () => {
-                  // Restore Videos (all of them in order)
-                  setVideos(resumeData.videos.map((v: any, idx: number) => ({
-                    id: `${Date.now()}-${idx}`,
-                    path: v.path,
-                    name: v.name
-                  })));
+                    // Restore Videos (all of them in order)
+                    setVideos(resumeData.videos.map((v: any, idx: number) => ({
+                      id: `${Date.now()}-${idx}`,
+                      path: v.path,
+                      name: v.name
+                    })));
 
-                  // Restore Transcript
-                  if (resumeData.transcriptPath) {
-                    try {
-                      const text = await readTextFile(resumeData.transcriptPath);
-                      setTranscriptText(text);
-                      setTranscriptPath(resumeData.transcriptPath);
-                      setTranscriptFileName(resumeData.transcriptPath.split(/[\\/]/).pop() || "transcript.txt");
-                    } catch (e) {
-                      console.error("Failed to load prev transcript", e);
-                      alert("Could not load previous transcript file. You may need to select it again.");
+                    // Restore Transcript
+                    if (resumeData.transcriptPath) {
+                      try {
+                        const text = await readTextFile(resumeData.transcriptPath);
+                        setTranscriptText(text);
+                        setTranscriptPath(resumeData.transcriptPath);
+                        setTranscriptFileName(resumeData.transcriptPath.split(/[\\/]/).pop() || "transcript.txt");
+                      } catch (e) {
+                        console.error("Failed to load prev transcript", e);
+                        alert("Could not load previous transcript file. You may need to select it again.");
+                      }
                     }
-                  }
 
-                  // Restore StartLine
-                  setStartLine(resumeData.startLine || "0");
+                    // Restore StartLine
+                    setStartLine(resumeData.startLine || "0");
 
-                  // Clear resume data to hide banner
-                  setResumeData(null);
-                  // Auto-advance
-                  setStep(1);
-                }}>
-                  Resume Previous Session
-                </Button>
-                <Button 
-                  color="inherit" 
-                  size="small"
-                  onClick={() => {
-                    localStorage.removeItem("lastSession");
+                    // Clear resume data to hide banner
                     setResumeData(null);
-                  }}
-                >
-                  ✕
-                </Button>
-              </Box>
+                    // Auto-advance
+                    setStep(1);
+                  }}>
+                    Resume Previous Session
+                  </Button>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={() => {
+                      localStorage.removeItem("lastSession");
+                      setResumeData(null);
+                    }}
+                  >
+                    ✕
+                  </Button>
+                </Box>
               }
             >
               <AlertTitle>Resume Session?</AlertTitle>
