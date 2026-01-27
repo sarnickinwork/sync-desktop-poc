@@ -1,17 +1,8 @@
 import { DVTMetadata } from './types';
 
 /**
- * Format milliseconds to seconds with decimal precision for DVT timecodes
- * @param ms - Milliseconds
- * @returns Seconds as decimal string
- */
-function formatDVTTimecode(ms: number): string {
-    return (ms / 1000).toFixed(3);
-}
-
-/**
  * Escape XML special characters while preserving whitespace
- * @param text: Text to escape
+ * @param text - Text to escape
  * @returns Escaped text
  */
 function escapeXml(text: string): string {
@@ -24,11 +15,62 @@ function escapeXml(text: string): string {
 }
 
 /**
+ * Replace regular spaces with non-breaking spaces for DVT format
+ * @param text - Text to process
+ * @returns Text with \xa0 instead of spaces
+ */
+function replaceSpaces(text: string): string {
+    return text.replace(/ /g, '\xa0');
+}
+
+/**
+ * Detect QA (Question/Answer) type from line text
+ * @param text - Line text to analyze
+ * @returns 'Q' for question, 'A' for answer, '-' for neither
+ */
+function detectQA(text: string): string {
+    const trimmed = text.trim();
+    
+    // Check for explicit Q. or A. markers
+    if (/^Q\.\s/i.test(trimmed) || /^QUESTION:/i.test(trimmed)) {
+        return 'Q';
+    }
+    if (/^A\.\s/i.test(trimmed) || /^ANSWER:/i.test(trimmed)) {
+        return 'A';
+    }
+    
+    // Check for common answer phrases
+    if (/^(THE\s+WITNESS|MR\.|MS\.|MRS\.|DR\.)/i.test(trimmed)) {
+        return 'A';
+    }
+    
+    // Default to no Q/A marker
+    return '-';
+}
+
+/**
+ * Check if a line is a page header (just a page number centered)
+ * @param text - Line text
+ * @returns true if this is a page header line
+ */
+function isPageHeader(text: string): boolean {
+    const trimmed = text.trim();
+    // Page headers are typically just numbers, possibly with some whitespace
+    return /^\d{1,4}$/.test(trimmed);
+}
+
+/**
  * Generate OpenDVT (DepoView-compatible) XML content
  * @param metadata - DVT metadata including video info and synchronized sentences
  * @returns XML-formatted DVT content matching OpenDVT 2.0 specification
  */
 export function generateDVT(metadata: DVTMetadata): string {
+    // Filter out empty lines and page headers
+    const validLines = metadata.sentences.filter(s => {
+        const cleanText = (s.text || s.sentence).trim();
+        return cleanText.length > 0 && !isPageHeader(cleanText);
+    });
+
     const lines: string[] = [
         '<?xml version="1.0" encoding="ISO-8859-1"?>',
         '<!-- Copyright (C) 2013-2018 ExhibitView LLC.  All rights reserved. -->',
@@ -45,10 +87,10 @@ export function generateDVT(metadata: DVTMetadata): string {
         '    <Case>',
         '      <MatterNumber></MatterNumber>',
         '    </Case>',
-        '    <Witness>',
+        '    <Case>',
         `      <FirstName>${escapeXml(metadata.title)}</FirstName>`,
         '      <LastName></LastName>',
-        '    </Witness>',
+        '    </Case>',
         '    <ReportingFirm>',
         '      <Name></Name>',
         '    </ReportingFirm>',
@@ -58,28 +100,32 @@ export function generateDVT(metadata: DVTMetadata): string {
         '    <Volume>1</Volume>',
         `    <TakenOn>${metadata.createdDate}</TakenOn>`,
         '  </Information>',
-        `  <Lines Count="${metadata.sentences.length}">`
+        `  <Lines Count="${validLines.length}">`
     ];
 
-    // Add each sentence as a Line element
-    for (let i = 0; i < metadata.sentences.length; i++) {
-        const sentence = metadata.sentences[i];
-        // Use clean text (without line numbers) if available, otherwise use sentence
+    // Add each valid line
+    for (let i = 0; i < validLines.length; i++) {
+        const sentence = validLines[i];
+        // Use clean text (without line numbers) if available
         const cleanText = sentence.text || sentence.sentence;
-        const escapedText = escapeXml(cleanText);
+        // Replace spaces with \xa0 and escape XML
+        const formattedText = replaceSpaces(cleanText);
+        const escapedText = escapeXml(formattedText);
+        
+        // Detect Q/A type
+        const qaType = detectQA(cleanText);
 
         lines.push(`    <Line ID="${i}">`);
-        lines.push(`      <PageNo>${sentence.pageNumber || 1}</PageNo>`);
-        lines.push(`      <LineNo>${sentence.lineNumber || (i + 1)}</LineNo>`);
         
-        // Only include timestamps if they exist (> 0)
+        // Add Stream and TimeMs if timestamp exists
         if (sentence.start > 0) {
-            const startTime = formatDVTTimecode(sentence.start);
-            const endTime = formatDVTTimecode(sentence.end);
-            lines.push(`      <StartTime>${startTime}</StartTime>`);
-            lines.push(`      <EndTime>${endTime}</EndTime>`);
+            lines.push('      <Stream>0</Stream>');
+            lines.push(`      <TimeMs>${Math.round(sentence.start)}</TimeMs>`);
         }
         
+        lines.push(`      <PageNo>${sentence.pageNumber || 1}</PageNo>`);
+        lines.push(`      <LineNo>${sentence.lineNumber || (i + 1)}</LineNo>`);
+        lines.push(`      <QA>${qaType}</QA>`);
         lines.push(`      <Text>${escapedText}</Text>`);
         lines.push('    </Line>');
     }

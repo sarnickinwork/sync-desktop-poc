@@ -22,6 +22,16 @@ export {
     extractHumanTranscriptFromContent
 } from './textProcessingUtils';
 
+// Text sanitization utilities (for alignment)
+export {
+    sanitizeLineForAlignment,
+    sanitizeLines,
+    isNonSpokenLine,
+    getSpokenContentRatio,
+    reconstructSentences,
+    isSpeakerLabelOnly
+} from './textSanitization';
+
 // Transcript merge utilities
 export { mergeTranscripts } from './transcriptMergeUtils';
 
