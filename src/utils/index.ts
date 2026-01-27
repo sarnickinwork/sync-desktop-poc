@@ -52,7 +52,7 @@ export {
 export { performTextMapping } from './textMappingUtils';
 
 // SMI generation utilities
-export { generateSMI, downloadSMI, generateAndDownloadSMI } from './smiGenerationUtils';
+export { generateSMI, downloadSMI, generateAndDownloadSMI, generateSMIFromAI } from './smiGenerationUtils';
 export { parseSMI } from './smiParsingUtils';
 
 // DVT generation utilities
