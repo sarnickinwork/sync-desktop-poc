@@ -8,6 +8,9 @@ import {
   CircularProgress,
   Alert,
   AlertTitle,
+  Card,
+  CardContent,
+  Chip,
 } from "@mui/material";
 import { join } from "@tauri-apps/api/path";
 import { writeTextFile, copyFile, readTextFile } from "@tauri-apps/plugin-fs";
@@ -20,6 +23,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningIcon from "@mui/icons-material/Warning";
 import TimerIcon from "@mui/icons-material/Timer";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 
@@ -33,11 +37,12 @@ import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
 import VideoUploadCard from "../components/upload/VideoUploadCard";
 import SyncedPlayer from "../components/sync/SyncedPlayer";
 import ThemeToggle from "../components/ThemeToggle";
+import EditorView from "../components/import/EditorView";
 import ResultsDisplay from "../components/ResultsDisplay";
 import JobSummaryCard from "../components/JobSummaryCard";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
-// import { downloadSMI, downloadDVT, downloadSYN } from "../utils";
+import { SmiSubtitle } from "../utils/smiParsingUtils";
 import { VideoItem } from "../utils/types";
 
 type SyncedLine = {
@@ -46,8 +51,9 @@ type SyncedLine = {
   end: number;
 };
 
+
 // --- HELPER: Local Fallback Generator ---
-const generateSamiContent = (lines: SyncedLine[], title: string) => {
+const generateSamiContent = (lines: SmiSubtitle[], title: string) => {
   const bodyContent = lines
     .map((line) => {
       const startMs = Math.round(line.start);
@@ -118,17 +124,29 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
     error,
     transcriptResult,
     mappedResult,
-    smiContent,
-    dvtContent,
-    synContent,
     apiElapsedTime,
     projectFolderPath,
     handleWorkflow,
   } = useTranscriptionWorkflow();
 
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
+  const [editedSubtitles, setEditedSubtitles] = useState<SmiSubtitle[]>([]);
   const [splitPoints, setSplitPoints] = useState<number[]>([]);
   const [liveElapsedTime, setLiveElapsedTime] = useState<number>(0);
+
+  // Initialize editedSubtitles from mappedResult
+  useEffect(() => {
+    if (mappedResult && mappedResult.length > 0) {
+      setEditedSubtitles(
+        mappedResult.map((r) => ({
+          text: r.sentence,
+          start: r.start,
+          end: r.end,
+          confidence: r.confidence,
+        }))
+      );
+    }
+  }, [mappedResult]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -209,10 +227,17 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
 
   // --- RUST-BASED EXPORT ---
   const handleExportZip = async () => {
-    const dataToExport: SyncedLine[] =
-      mappedResult && mappedResult.length > 0
-        ? (mappedResult as any[])
-        : syncedLines;
+    // Prefer edited subtitles if available (from mappedResult flow)
+    // otherwise fallback to syncedLines (simple assemblyAI result flow without mapping)
+    const dataToExport =
+      editedSubtitles.length > 0
+        ? editedSubtitles
+        : syncedLines.map(sl => ({
+          text: sl.text,
+          start: sl.start,
+          end: sl.end,
+          confidence: 1.0
+        } as SmiSubtitle));
 
     if (videos.length === 0 || dataToExport.length === 0) {
       alert("No synced data available to export.");
@@ -237,23 +262,28 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       // 2. Prepare Content
 
       // A. SAMI Content
-      const finalSamiContent = smiContent
-        ? smiContent
-        : generateSamiContent(dataToExport, rawProjectName);
+      // Always regenerate to reflect edits
+      const finalSamiContent = generateSamiContent(dataToExport, rawProjectName);
 
       // B. Transcript Content
       const finalTxtContent = transcriptText
         ? transcriptText
         : dataToExport.map((l) => l.text).join(" ");
 
-      // C. DVT Content (already generated in hook if mapped, else generate here)
-      let finalDvtContent = dvtContent;
+      // C. DVT Content
+      // Always regenerate if we have edited subtitles to ensure sync
+      let finalDvtContent = null; // Reset to force regeneration based on latest edits
+
+      // ... unless we want to use the hook's content safely? 
+      // Actually, if user edited, hook's content is stale.
+      // So let's just regenerate.
+
       if (!finalDvtContent) {
         const { generateDVT } = await import("../utils/dvtGenerationUtils");
-        const sentencesForDVT = dataToExport.map((line: any) => ({
-          sentence: line.sentence || line.text,
+        const sentencesForDVT = dataToExport.map((line) => ({
+          sentence: line.text, // SmiSubtitle has 'text', Mapped has 'sentence'
           start: line.start,
-          end: line.end,
+          end: line.end || (line.start + 2000), // Safety for missing end
           confidence: line.confidence || 1.0,
         }));
         finalDvtContent = generateDVT({
@@ -267,13 +297,14 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       }
 
       // D. SYN Content
-      let finalSynContent = synContent;
+      let finalSynContent = null; // Force regeneration
+
       if (!finalSynContent) {
         const { generateSYN } = await import("../utils/synGenerationUtils");
-        const sentencesForSYN = dataToExport.map((line: any) => ({
-          sentence: line.sentence || line.text,
+        const sentencesForSYN = dataToExport.map((line) => ({
+          sentence: line.text,
           start: line.start,
-          end: line.end,
+          end: line.end || (line.start + 2000),
           confidence: line.confidence || 1.0,
         }));
         finalSynContent = generateSYN({
@@ -321,7 +352,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
 
       // Clear the session so it doesn't prompt to resume next time
       localStorage.removeItem("lastSession");
-      setStep(4); // Navigate to Job Summary
+      setStep(5); // Navigate to Job Summary
 
       alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
     } catch (error: any) {
@@ -358,7 +389,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         </Box>
       </Box>
 
-      <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result", "Job Summary"]} />
+      <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result", "Edit", "Job Summary"]} />
 
       {/* STEP 0: UPLOAD */}
       {step === 0 && (
@@ -426,8 +457,15 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
             <TranscriptUploadCard
               transcript={transcriptText}
               setTranscript={(file) => {
-                // Handle Drag & Drop (No path available usually)
-                if (!file) return;
+                // If file is null (removed), clear state
+                if (!file) {
+                  setTranscriptFileName(null);
+                  setTranscriptPath(null);
+                  setTranscriptText(null);
+                  return;
+                }
+
+                // Handle Drag & Drop
                 setTranscriptFileName(file.name);
                 // Clear path since drag-drop file object path is unreliable/missing
                 setTranscriptPath(null);
@@ -660,7 +698,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       {/* STEP 3: RESULT */}
       {step === 3 && videos.length > 0 && (
         <Box>
-          <Box mb={3} display="flex" gap={2} flexWrap="wrap">
+          <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="space-between">
             <Button
               variant="outlined"
               startIcon={<RestartAltIcon />}
@@ -675,6 +713,81 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               }}
             >
               Start New Project
+            </Button>
+
+            <Box display="flex" gap={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleExportZip}
+                disabled={isExporting}
+                startIcon={
+                  isExporting ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <SaveAltIcon />
+                  )
+                }
+              >
+                {isExporting ? "Zipping..." : "Export Zip"}
+              </Button>
+
+              <Button
+                variant="contained"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => setStep(4)}
+                sx={{ px: 4 }}
+              >
+                Proceed to Editor
+              </Button>
+            </Box>
+          </Box>
+
+          {mappedResult && mappedResult.length > 0 ? (
+            <ResultsDisplay
+              mappedResults={mappedResult}
+              videos={videos}
+              splitPoints={splitPoints}
+              apiElapsedTime={apiElapsedTime}
+            />
+          ) : syncedLines.length > 0 ? (
+            <Box>
+              <Box mb={2}>
+                <Typography variant="h6">Basic Synchronization</Typography>
+                <Typography variant="body2" color="text.secondary">No advanced mapping available.</Typography>
+              </Box>
+              <SyncedPlayer
+                videos={videos}
+                splitPoints={splitPoints}
+                lines={syncedLines}
+              />
+            </Box>
+          ) : (
+            <Box
+              p={4}
+              textAlign="center"
+              border="1px dashed"
+              borderColor="divider"
+              borderRadius={2}
+            >
+              <Typography color="text.secondary">
+                No results available.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {/* STEP 4: EDIT */}
+      {step === 4 && videos.length > 0 && (
+        <Box>
+          <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="space-between">
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => setStep(3)}
+            >
+              Back to Results
             </Button>
 
             {/* EXPORT BUTTON */}
@@ -695,38 +808,19 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
             </Button>
           </Box>
 
-          {mappedResult && mappedResult.length > 0 ? (
-            <ResultsDisplay
-              mappedResults={mappedResult}
-              videos={videos}
-              splitPoints={splitPoints}
-              apiElapsedTime={apiElapsedTime}
-            />
-          ) : syncedLines.length > 0 ? (
-            <SyncedPlayer
-              videos={videos}
-              splitPoints={splitPoints}
-              lines={syncedLines}
-            />
-          ) : (
-            <Box
-              p={4}
-              textAlign="center"
-              border="1px dashed"
-              borderColor="divider"
-              borderRadius={2}
-            >
-              <Typography color="text.secondary">
-                No results available.
-              </Typography>
-            </Box>
-          )}
+          <EditorView
+            videos={videos}
+            splitPoints={splitPoints}
+            subtitles={editedSubtitles.length > 0 ? editedSubtitles : (mappedResult ? mappedResult.map(r => ({ text: r.sentence, start: r.start, end: r.end, confidence: r.confidence })) : [])}
+            onUpdateSubtitles={setEditedSubtitles}
+            startLine={parseInt(startLine) || 0}
+          />
         </Box>
       )}
 
 
-      {/* STEP 4: JOB SUMMARY */}
-      {step === 4 && mappedResult && mappedResult.length > 0 && (
+      {/* STEP 5: JOB SUMMARY */}
+      {step === 5 && mappedResult && mappedResult.length > 0 && (
         <Box>
           <Box mb={3} display="flex" gap={2} flexWrap="wrap">
             <Button
@@ -748,9 +842,9 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
-              onClick={() => setStep(3)}
+              onClick={() => setStep(4)}
             >
-              Back to Results
+              Back to Editor
             </Button>
           </Box>
 
