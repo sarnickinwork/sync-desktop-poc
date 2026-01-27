@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, alpha } from "@mui/material";
+import { Box, Typography, useTheme, alpha, CircularProgress } from "@mui/material";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { parseCourtTranscript, getTranscriptSummary } from "../../utils/courtTranscriptParser";
 
@@ -53,42 +53,52 @@ export default function TranscriptPreview({
   };
 
   const visibleLines = annotatedLines.slice(0, displayedCount);
+  
+  // Determine colors based on theme mode for better aesthetics
+  const isDark = theme.palette.mode === 'dark';
+  const bgColor = isDark ? alpha(theme.palette.background.paper, 0.6) : '#fafafa';
+  const headerColor = isDark ? theme.palette.background.paper : '#ffffff';
+  const borderColor = theme.palette.divider;
 
   return (
     <Box
       sx={{
         border: 1,
-        borderColor: "divider",
+        borderColor: borderColor,
         borderRadius: 2,
         height: "100%",
         overflowY: "auto",
-        bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#fafafa',
+        bgcolor: bgColor,
+        backdropFilter: isDark ? "blur(10px)" : "none", // Subtle glass effect in dark mode
         color: theme.palette.text.primary,
         display: "flex",
         flexDirection: "column",
-        fontFamily: 'Consolas, "Courier New", monospace'
+        fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace', // Better font stack
+        boxShadow: theme.shadows[1]
       }}
     >
       <Box 
         sx={{ 
-          p: 1.5, 
+          px: 2,
+          py: 1.5,
           borderBottom: 1, 
-          borderColor: "divider",
+          borderColor: borderColor,
           position: "sticky",
           top: 0,
-          bgcolor: theme.palette.mode === 'dark' ? '#252526' : '#ffffff',
+          bgcolor: headerColor,
           zIndex: 2,
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          boxShadow: isDark ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
         }}
       >
-        <Typography variant="subtitle2" fontWeight={600}>
-          Transcript Preview (Original View)
+        <Typography variant="subtitle2" fontWeight={600} sx={{ letterSpacing: '0.5px' }}>
+          Transcript Preview
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 500 }}>
           {annotatedLines.length > 0 
-            ? `${summary.totalLines} syncable lines identified`
+            ? `${summary.totalLines} lines • Original Format`
             : "No lines"
           }
         </Typography>
@@ -106,26 +116,50 @@ export default function TranscriptPreview({
               onClick={() => isSelectable && handleLineClick(metadata!.absoluteLineNumber)}
               sx={{
                 display: 'flex',
-                bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.3) : 'transparent',
+                position: 'relative',
+                bgcolor: isSelected 
+                  ? alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1) 
+                  : 'transparent',
                 cursor: isSelectable ? 'pointer' : 'default',
+                transition: 'background-color 0.15s ease',
                 '&:hover': isSelectable ? {
                   bgcolor: isSelected 
-                    ? alpha(theme.palette.primary.main, 0.3) 
-                    : alpha(theme.palette.action.hover, 0.1)
+                    ? alpha(theme.palette.primary.main, isDark ? 0.25 : 0.15) 
+                    : alpha(theme.palette.text.primary, 0.05)
                 } : {},
-                lineHeight: 1.5,
-                minHeight: '1.5em'
+                lineHeight: 1.6, // Increased line height for readability
+                minHeight: '1.6em',
+                borderRadius: '2px', // Slight rounding
+                my: '1px' // Tiny gap between lines
               }}
             >
+               {/* Selection Indicator Bar */}
+              {isSelected && (
+                <Box 
+                  sx={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: '3px',
+                    bgcolor: 'primary.main',
+                    borderTopLeftRadius: '2px',
+                    borderBottomLeftRadius: '2px'
+                  }}
+                />
+              )}
+              
               <Typography 
                 component="pre" 
                 sx={{ 
                   m: 0, 
                   fontFamily: 'inherit', 
-                  fontSize: '14px',
+                  fontSize: '0.9rem', // Slightly larger text
                   whiteSpace: 'pre-wrap',
                   width: '100%',
-                  color: 'inherit'
+                  color: isSelected ? 'primary.main' : 'inherit',
+                  pl: isSelected ? 1 : 0, // Indent slightly when selected
+                  transition: 'padding 0.15s ease'
                 }}
               >
                 {lineCtx.originalText || " "}
@@ -136,8 +170,8 @@ export default function TranscriptPreview({
         
         {/* Scroll Target */}
         {displayedCount < annotatedLines.length && (
-           <Box ref={observerTarget} py={2} textAlign="center">
-             <Typography variant="caption" color="text.secondary">Loading more...</Typography>
+           <Box ref={observerTarget} py={3} textAlign="center" sx={{ opacity: 0.5 }}>
+             <CircularProgress size={20} thickness={4} />
            </Box>
         )}
       </Box>
