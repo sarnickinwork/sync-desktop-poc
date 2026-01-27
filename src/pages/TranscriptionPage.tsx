@@ -5,7 +5,6 @@ import {
   useTheme,
   alpha,
   Button,
-  TextField,
   CircularProgress,
   Alert,
   AlertTitle,
@@ -480,12 +479,44 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       {/* STEP 1: PREVIEW */}
       {step === 1 && videos.length > 0 && (
         <>
-          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
-            <VideoPreview videos={videos} />
+          <Box display="flex" gap={3} mt={3} height="70vh">
+            {/* Video Preview - Fixed 350px width */}
+            <Box flex="0 0 350px">
+              <VideoPreview videos={videos} />
+            </Box>
+
+            {/* Transcript Preview - Scrollable, takes remaining width */}
             {transcriptText ? (
-              <TranscriptPreview transcript={transcriptText} />
+              <Box flex="1" display="flex" flexDirection="column" gap={2}>
+                <TranscriptPreview
+                  transcript={transcriptText}
+                  onLineSelect={(lineNum) => {
+                    setStartLine(lineNum.toString());
+                  }}
+                  selectedLine={startLine ? parseInt(startLine) : null}
+                />
+
+                {/* Show selected line indicator */}
+                {startLine && (
+                  <Box
+                    p={2}
+                    bgcolor={alpha(theme.palette.primary.main, 0.08)}
+                    borderRadius={2}
+                    border={1}
+                    borderColor="primary.main"
+                  >
+                    <Typography variant="body2" color="primary.main" fontWeight={600}>
+                      ✓ Selected Starting Line: {startLine}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Click a different line in the transcript preview to change
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
             ) : (
               <Box
+                flex="1"
                 p={3}
                 border="1px dashed"
                 borderColor="divider"
@@ -499,20 +530,6 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
                 </Typography>
               </Box>
             )}
-          </Box>
-
-          <Box mt={4} maxWidth={300}>
-            <TextField
-              label="Start Line Number"
-              type="number"
-              variant="outlined"
-              size="small"
-              value={startLine}
-              onChange={(e) => setStartLine(e.target.value)}
-              placeholder="0"
-              helperText="Optional: Offset for transcription sync"
-              fullWidth
-            />
           </Box>
 
           <Box mt={4} display="flex" justifyContent="space-between">
@@ -773,8 +790,13 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       )}
 
       <Box mt={5}>
-        <LogsPanel logs={logs} />
-        <TranscriptViewer data={transcriptResult} />
+        {/* Hide logs and raw viewer during Preview step (step 1) to keep UI clean */}
+        {step !== 1 && (
+          <>
+            <LogsPanel logs={logs} />
+            <TranscriptViewer data={transcriptResult} />
+          </>
+        )}
       </Box>
     </Box>
   );
