@@ -1,24 +1,10 @@
 import {
     Box,
-    Card,
-    CardContent,
     Typography,
-
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Chip,
     useTheme,
     alpha,
 } from "@mui/material";
 
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import WarningIcon from "@mui/icons-material/Warning";
-import TimerIcon from "@mui/icons-material/Timer";
 import SyncedPlayer from "./sync/SyncedPlayer";
 import { MappedSentenceResult, VideoItem } from "../utils/types";
 
@@ -41,16 +27,6 @@ function formatTime(ms: number): string {
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(3, "0")}`;
 }
 
-/**
- * Get confidence color based on confidence score
- */
-function getConfidenceColor(confidence: number, theme: any): string {
-    if (confidence >= 80) return theme.palette.success.main;
-    if (confidence >= 60) return theme.palette.warning.main;
-    return theme.palette.error.main;
-}
-
-
 export default function ResultsDisplay({
     mappedResults,
     videos,
@@ -59,15 +35,6 @@ export default function ResultsDisplay({
 }: ResultsDisplayProps) {
     const theme = useTheme();
 
-    const averageConfidence =
-        mappedResults.length > 0
-            ? mappedResults.reduce((sum, r) => sum + r.confidence, 0) / mappedResults.length
-            : 0;
-
-    const highConfCount = mappedResults.filter((r) => r.confidence >= 80).length;
-    const mediumConfCount = mappedResults.filter((r) => r.confidence >= 60 && r.confidence < 80).length;
-    const lowConfCount = mappedResults.filter((r) => r.confidence < 60).length;
-
     // Convert mappedResults to format expected by SyncedPlayer
     const lines = mappedResults.map(r => ({
         text: r.sentence,
@@ -75,72 +42,17 @@ export default function ResultsDisplay({
         end: r.end
     }));
 
+    // Aesthetics similar to TranscriptPreview
+    const isDark = theme.palette.mode === 'dark';
+    const listBgColor = isDark ? alpha(theme.palette.background.paper, 0.6) : '#fafafa';
+    const borderColor = theme.palette.divider;
+
     return (
         <Box>
-            {/* Summary Card */}
-            <Card
-                variant="outlined"
-                sx={{
-                    mb: 3,
-                    background: `linear-gradient(135deg, ${alpha(
-                        theme.palette.primary.main,
-                        0.1
-                    )} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-                    borderColor: theme.palette.primary.main,
-                }}
-            >
-                <CardContent>
-                    <Box display="flex" alignItems="center" gap={2} mb={2}>
-                        <CheckCircleIcon
-                            sx={{ fontSize: 40, color: theme.palette.success.main }}
-                        />
-                        <Box>
-                            <Typography variant="h5" fontWeight={600}>
-                                Processing Complete!
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {mappedResults.length} sentences mapped with{" "}
-                                {averageConfidence.toFixed(1)}% average confidence
-                            </Typography>
-                        </Box>
-                    </Box>
-
-                    <Box display="flex" gap={2} flexWrap="wrap" mt={2}>
-                        <Chip
-                            icon={<CheckCircleIcon />}
-                            label={`${highConfCount} High Confidence`}
-                            color="success"
-                            variant="outlined"
-                        />
-                        <Chip
-                            icon={<WarningIcon />}
-                            label={`${mediumConfCount} Medium Confidence`}
-                            color="warning"
-                            variant="outlined"
-                        />
-                        <Chip
-                            icon={<WarningIcon />}
-                            label={`${lowConfCount} Low Confidence`}
-                            color="error"
-                            variant="outlined"
-                        />
-                        {apiElapsedTime !== null && apiElapsedTime !== undefined && (
-                            <Chip
-                                icon={<TimerIcon />}
-                                label={`API Response: ${(apiElapsedTime / 1000).toFixed(2)}s`}
-                                color="info"
-                                variant="filled"
-                                sx={{ fontWeight: 600 }}
-                            />
-                        )}
-                    </Box>
-
-                </CardContent>
-            </Card>
-
-            {/* Split View: Video (Left) + Table (Right) */}
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3}>
-                <Box>
+            {/* Split View: Video (Small Fixed Left) + Transcript List (Main Focus Right) */}
+            <Box display="flex" gap={3} height="80vh">
+                {/* Smaller Video Width - 200px */}
+                <Box flex="0 0 200px">
                     <SyncedPlayer
                         videos={videos}
                         splitPoints={splitPoints}
@@ -149,72 +61,137 @@ export default function ResultsDisplay({
                     />
                 </Box>
 
-                {/* Results Table */}
-                <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant="h6" fontWeight={600} mb={2}>
+                {/* Results List - EXACT copy of TranscriptPreview structure */}
+                <Box
+                    sx={{
+                        flex: 1,
+                        border: 1,
+                        borderColor: borderColor,
+                        borderRadius: 2,
+                        height: "100%",
+                        overflowY: "auto",
+                        overflowX: "auto", // Allow horizontal scroll if lines are long
+                        bgcolor: listBgColor,
+                        backdropFilter: isDark ? "blur(10px)" : "none",
+                        color: theme.palette.text.primary,
+                        display: "flex",
+                        flexDirection: "column",
+                        fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace',
+                        boxShadow: theme.shadows[1]
+                    }}
+                >
+                    {/* Header - same as TranscriptPreview */}
+                    <Box
+                        sx={{
+                            px: 2,
+                            py: 1.5,
+                            borderBottom: 1,
+                            borderColor: borderColor,
+                            position: "sticky",
+                            top: 0,
+                            bgcolor: isDark ? theme.palette.background.paper : '#ffffff',
+                            zIndex: 2,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            boxShadow: isDark ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
+                        }}
+                    >
+                        <Typography variant="subtitle2" fontWeight={600} sx={{ letterSpacing: '0.5px' }}>
                             Mapped Transcript
                         </Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 500 }}>
+                            {mappedResults.length > 0
+                                ? `${mappedResults.length} lines • Synced`
+                                : "No lines"
+                            }
+                        </Typography>
+                    </Box>
 
-                        <TableContainer
-                            component={Paper}
-                            variant="outlined"
-                            sx={{ flex: 1, maxHeight: 400 }} // Limit height to match video approx
-                        >
-                            <Table stickyHeader size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell sx={{ fontWeight: 600 }}>Time</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Sentence</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Conf</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {mappedResults.map((result, index) => (
-                                        <TableRow
-                                            key={index}
-                                            hover
+                    {/* Content area - same as TranscriptPreview */}
+                    <Box sx={{ flexGrow: 1, p: 2, pb: 10 }}>
+                        {mappedResults.map((result, index) => {
+                            const confColor = result.confidence >= 80 ? theme.palette.success.main :
+                                result.confidence >= 60 ? theme.palette.warning.main : theme.palette.error.main;
+
+                            return (
+                                <Box
+                                    key={index}
+                                    sx={{
+                                        display: 'flex',
+                                        position: 'relative',
+                                        bgcolor: 'transparent',
+                                        cursor: 'default',
+                                        transition: 'background-color 0.15s ease',
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.text.primary, 0.05)
+                                        },
+                                        lineHeight: 1.6,
+                                        minHeight: '1.6em',
+                                        borderRadius: '2px',
+                                        my: '1px',
+                                        pl: 10  // Make room for timestamp overlay
+                                    }}
+                                >
+                                    {/* Timestamp floating on the left - only show if > 0 */}
+                                    {result.start > 0 && (
+                                        <Typography
+                                            component="span"
                                             sx={{
-                                                "&:nth-of-type(odd)": {
-                                                    backgroundColor: alpha(
-                                                        theme.palette.primary.main,
-                                                        0.02
-                                                    ),
-                                                },
+                                                position: 'absolute',
+                                                left: 0,
+                                                top: 0,
+                                                width: 80,
+                                                color: 'primary.main',
+                                                fontSize: '0.75rem',
+                                                opacity: 0.7,
+                                                userSelect: 'none',
+                                                textAlign: 'right',
+                                                pr: 1
                                             }}
                                         >
-                                            <TableCell sx={{ whiteSpace: 'nowrap', fontFamily: "monospace", color: theme.palette.primary.main }}>
-                                                {formatTime(result.start)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography variant="body2">
-                                                    {result.sentence}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={`${result.confidence.toFixed(0)}%`}
-                                                    size="small"
-                                                    sx={{
-                                                        backgroundColor: alpha(
-                                                            getConfidenceColor(result.confidence, theme),
-                                                            0.1
-                                                        ),
-                                                        color: getConfidenceColor(result.confidence, theme),
-                                                        borderColor: getConfidenceColor(result.confidence, theme),
-                                                        height: 20,
-                                                        fontSize: '0.75rem'
-                                                    }}
-                                                    variant="outlined"
-                                                />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </CardContent>
-                </Card>
+                                            {formatTime(result.start)}
+                                        </Typography>
+                                    )}
+
+                                    {/* Original line text - NO WRAPPING */}
+                                    <Typography
+                                        component="pre"
+                                        sx={{
+                                            m: 0,
+                                            fontFamily: 'inherit',
+                                            fontSize: '0.9rem',
+                                            whiteSpace: 'pre',  // No wrapping
+                                            width: 'auto',
+                                            minWidth: '100%',
+                                            color: 'inherit',
+                                            pr: 6  // Make room for confidence badge
+                                        }}
+                                    >
+                                        {result.sentence || " "}
+                                    </Typography>
+
+                                    {/* Confidence - floating on the right - only show if > 0 */}
+                                    {result.confidence > 0 && (
+                                        <Typography
+                                            component="span"
+                                            sx={{
+                                                position: 'absolute',
+                                                right: 8,
+                                                top: 0,
+                                                color: alpha(confColor, 0.6),
+                                                fontSize: '0.7rem',
+                                                userSelect: 'none'
+                                            }}
+                                        >
+                                            {result.confidence.toFixed(0)}%
+                                        </Typography>
+                                    )}
+                                </Box>
+                            );
+                        })}
+                    </Box>
+                </Box>
             </Box>
         </Box>
     );

@@ -2,6 +2,7 @@ import { SYNMetadata } from './types';
 
 /**
  * Generate SYN (proprietary) JSON content for SyncExpress app
+ * Includes full confidence, page, and line metadata
  * @param metadata - SYN metadata including video, subtitle, and synchronization data
  * @returns JSON-formatted SYN content
  */
@@ -43,11 +44,16 @@ export function generateSYN(metadata: SYNMetadata): string {
         },
         synchronization: {
             totalSentences: metadata.sentences.length,
-            sentences: metadata.sentences.map((s: { sentence: string; start: number; end: number; confidence: number }) => ({
-                text: s.sentence,
+            sentences: metadata.sentences.map((s) => ({
+                // Display text (with original formatting)
+                displayText: s.sentence,
+                // Clean text (without line numbers) for processing
+                text: s.text || s.sentence,
                 start: s.start,
                 end: s.end,
-                confidence: s.confidence
+                confidence: s.confidence,
+                pageNumber: s.pageNumber,
+                lineNumber: s.lineNumber
             }))
         }
     };

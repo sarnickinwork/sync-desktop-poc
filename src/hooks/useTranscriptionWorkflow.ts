@@ -300,42 +300,41 @@ export function useTranscriptionWorkflow() {
         log(`Extracted ${sanitizedHumanText.split(' ').length} words from human transcript.`);
 
         // Check if text mapping is already complete
-        let mappingResult: any;
+        let mappedSentences: MappedSentenceResult[];
 
         if (existingSynData && existingSynData.processingState?.isMappingComplete &&
           existingSynData.synchronization?.sentences &&
           existingSynData.synchronization.sentences.length > 0) {
           log("RESUMING: Found completed text mapping in .syn file.");
-          log("Skipping DTW text mapping...");
-
+          
           // Use cached mapping result
-          mappingResult = {
-            totalSentences: existingSynData.synchronization.sentences.length,
-            sentences: existingSynData.synchronization.sentences.map((s: any) => ({
-              sentence: s.text,
+          mappedSentences = existingSynData.synchronization.sentences.map((s: any) => ({
+              sentence: s.text, // or s.sentence
               start: s.start,
               end: s.end,
               confidence: s.confidence
-            }))
-          };
-          setMappedResult(mappingResult.sentences);
+          }));
+          setMappedResult(mappedSentences);
         } else {
-          // Perform text mapping`
+          // Perform SIMPLE line mapping (preserving original structure)
           await new Promise(resolve => setTimeout(resolve, 100));
 
-          // SIMULATED CRASH FOR TESTING - Remove this line after testing
-          // throw new Error("SIMULATED CRASH: App died before text mapping!");
-
-          log("Performing DTW text mapping...");
-          mappingResult = performTextMapping(sanitizedHumanText, mergedTranscript);
-          log(`Text mapping complete! ${mappingResult.totalSentences} sentences mapped.`);
-          setMappedResult(mappingResult.sentences);
+          log("Performing Simple Line Mapping (preserving format)...");
+          
+          // Import dynamically or assume it's available via utils
+          const { performSimpleLineMapping } = await import('../utils/simpleLineMapping');
+          
+          // Uses the raw manualTranscript and startLine
+          mappedSentences = performSimpleLineMapping(manualTranscript, mergedTranscript, startLine);
+          
+          log(`Mapping complete! ${mappedSentences.length} lines synced.`);
+          setMappedResult(mappedSentences);
         }
 
         // Generate output files
         log("Generating SMI subtitle content...");
         const { generateSMI } = await import('../utils/smiGenerationUtils');
-        const smi = generateSMI(mappingResult.sentences);
+        const smi = generateSMI(mappedSentences);
         setSmiContent(smi);
         log("SMI content generated successfully!");
 
@@ -345,9 +344,9 @@ export function useTranscriptionWorkflow() {
           title: `Deposition - ${projectDisplayName}`,
           videoFilename: firstVideo.name,
           videoPath: `media/${firstVideo.name}`,
-          duration: mappingResult.sentences[mappingResult.sentences.length - 1]?.end || 0,
+          duration: mappedSentences[mappedSentences.length - 1]?.end || 0,
           createdDate: new Date().toISOString(),
-          sentences: mappingResult.sentences
+          sentences: mappedSentences
         });
         setDvtContent(dvt);
         log("DVT content generated successfully!");
@@ -356,13 +355,13 @@ export function useTranscriptionWorkflow() {
         const finalMetadata: SYNMetadata = {
           videoFilename: firstVideo.name,
           videoPath: `media/${firstVideo.name}`,
-          videoDuration: mappingResult.sentences[mappingResult.sentences.length - 1]?.end || 0,
+          videoDuration: mappedSentences[mappedSentences.length - 1]?.end || 0,
           subtitleFilename: `${projectDisplayName}.smi`,
           subtitlePath: `media/${projectDisplayName}.smi`,
           transcriptFilename: "transcript.txt",
           transcriptPath: `transcription/transcript.txt`,
           startLine,
-          sentences: mappingResult.sentences,
+          sentences: mappedSentences,
           rawTranscript: mergedTranscript,
           sanitizedTranscript: sanitizedHumanText,
           apiElapsedTime: apiElapsedTime || (existingSynData?.apiElapsedTime || 0),

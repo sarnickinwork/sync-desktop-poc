@@ -27,10 +27,13 @@ export interface FinalTranscriptResponse {
 }
 
 export interface MappedSentenceResult {
-    sentence: string;
+    sentence: string;          // Original line with formatting (for display)
+    text?: string;             // Clean text without line numbers (for DVT/SYN)
     start: number;
     end: number;
     confidence: number;
+    pageNumber?: number;       // Optional page number from court transcript
+    lineNumber?: number;       // Optional line number from court transcript
 }
 
 // Internal helper for DTW

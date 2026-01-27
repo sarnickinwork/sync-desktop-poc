@@ -1,23 +1,17 @@
 import { DVTMetadata } from './types';
 
 /**
- * Format milliseconds to HH:MM:SS.mmm timecode format
+ * Format milliseconds to seconds with decimal precision for DVT timecodes
  * @param ms - Milliseconds
- * @returns Formatted timecode string
+ * @returns Seconds as decimal string
  */
-function formatTimecode(ms: number): string {
-    const totalSeconds = Math.floor(ms / 1000);
-    const milliseconds = Math.floor(ms % 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+function formatDVTTimecode(ms: number): string {
+    return (ms / 1000).toFixed(3);
 }
 
 /**
- * Escape XML special characters
- * @param text - Text to escape
+ * Escape XML special characters while preserving whitespace
+ * @param text: Text to escape
  * @returns Escaped text
  */
 function escapeXml(text: string): string {
@@ -30,37 +24,79 @@ function escapeXml(text: string): string {
 }
 
 /**
- * Generate DVT (DepoView-compatible) XML content
+ * Generate OpenDVT (DepoView-compatible) XML content
  * @param metadata - DVT metadata including video info and synchronized sentences
- * @returns XML-formatted DVT content
+ * @returns XML-formatted DVT content matching OpenDVT 2.0 specification
  */
 export function generateDVT(metadata: DVTMetadata): string {
     const lines: string[] = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<DepositionVideo>',
-        '  <Metadata>',
-        `    <Title>${escapeXml(metadata.title)}</Title>`,
-        `    <VideoFile>${escapeXml(metadata.videoPath)}</VideoFile>`,
-        `    <Duration>${metadata.duration.toFixed(3)}</Duration>`,
-        `    <CreatedDate>${metadata.createdDate}</CreatedDate>`,
-        `    <TotalLines>${metadata.sentences.length}</TotalLines>`,
-        '  </Metadata>',
-        '  <Transcript>'
+        '<?xml version="1.0" encoding="ISO-8859-1"?>',
+        '<!-- Copyright (C) 2013-2018 ExhibitView LLC.  All rights reserved. -->',
+        '<OpenDVT UUID="{C475858E-138F-47C9-8775-536BCE1C9C94}" ShortID="XXXXXXX" Type="Deposition" Version="2.0">',
+        '  <Information>',
+        '    <Origination>',
+        '      <ID>{726017C0-3402-4DCE-9834-7748390ABAD1}</ID>',
+        '      <AppName>SyncExpress</AppName>',
+        '      <AppVersion>1.0</AppVersion>',
+        '      <VendorName>SyncExpress</VendorName>',
+        '      <VendorPhone></VendorPhone>',
+        '      <VendorURL></VendorURL>',
+        '    </Origination>',
+        '    <Case>',
+        '      <MatterNumber></MatterNumber>',
+        '    </Case>',
+        '    <Witness>',
+        `      <FirstName>${escapeXml(metadata.title)}</FirstName>`,
+        '      <LastName></LastName>',
+        '    </Witness>',
+        '    <ReportingFirm>',
+        '      <Name></Name>',
+        '    </ReportingFirm>',
+        '    <FirstPageNo>1</FirstPageNo>',
+        '    <LastPageNo>0</LastPageNo>',
+        '    <MaxLinesPerPage>25</MaxLinesPerPage>',
+        '    <Volume>1</Volume>',
+        `    <TakenOn>${metadata.createdDate}</TakenOn>`,
+        '  </Information>',
+        `  <Lines Count="${metadata.sentences.length}">`
     ];
 
-    // Add each synchronized sentence as a transcript line
-    for (const sentence of metadata.sentences) {
-        const startTimecode = formatTimecode(sentence.start);
-        const endTimecode = formatTimecode(sentence.end);
-        const escapedText = escapeXml(sentence.sentence);
+    // Add each sentence as a Line element
+    for (let i = 0; i < metadata.sentences.length; i++) {
+        const sentence = metadata.sentences[i];
+        // Use clean text (without line numbers) if available, otherwise use sentence
+        const cleanText = sentence.text || sentence.sentence;
+        const escapedText = escapeXml(cleanText);
 
-        lines.push(`    <Line timecode="${startTimecode}" end="${endTimecode}" confidence="${sentence.confidence.toFixed(4)}">`);
+        lines.push(`    <Line ID="${i}">`);
+        lines.push(`      <PageNo>${sentence.pageNumber || 1}</PageNo>`);
+        lines.push(`      <LineNo>${sentence.lineNumber || (i + 1)}</LineNo>`);
+        
+        // Only include timestamps if they exist (> 0)
+        if (sentence.start > 0) {
+            const startTime = formatDVTTimecode(sentence.start);
+            const endTime = formatDVTTimecode(sentence.end);
+            lines.push(`      <StartTime>${startTime}</StartTime>`);
+            lines.push(`      <EndTime>${endTime}</EndTime>`);
+        }
+        
         lines.push(`      <Text>${escapedText}</Text>`);
         lines.push('    </Line>');
     }
 
-    lines.push('  </Transcript>');
-    lines.push('</DepositionVideo>');
+    lines.push('  </Lines>');
+    lines.push('  <Streams Count="1">');
+    lines.push('    <Stream ID="0">');
+    lines.push(`      <URI>${escapeXml(metadata.videoPath)}</URI>`);
+    lines.push(`      <URIRelative>\\media\\${escapeXml(metadata.videoPath.split(/[/\\]/).pop() || 'video.mp4')}</URIRelative>`);
+    lines.push('      <VolumeID></VolumeID>');
+    lines.push('      <FileSize>0</FileSize>');
+    lines.push(`      <FileDate>${metadata.createdDate}</FileDate>`);
+    lines.push(`      <DurationMs>${Math.floor(metadata.duration)}</DurationMs>`);
+    lines.push('      <VolumeLabel></VolumeLabel>');
+    lines.push('    </Stream>');
+    lines.push('  </Streams>');
+    lines.push('</OpenDVT>');
 
     return lines.join('\r\n');
 }
