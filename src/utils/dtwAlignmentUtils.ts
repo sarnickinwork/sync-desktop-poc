@@ -12,19 +12,28 @@ import { normalizeWord, isSalutation } from './textProcessingUtils';
  * @param onProgress - Optional callback for progress updates
  * @returns Array of mapped sentence results
  */
-export function alignWithChunkedDTW(
+/**
+ * Perform chunked DTW alignment and return raw word alignments
+ * @param humanWords - Array of words from human transcript
+ * @param aiWords - Array of word DTOs from AI transcript
+ * @param chunkSize - Size of each chunk (default: 1500)
+ * @param overlapSize - Size of overlap between chunks (default: 150)
+ * @param onProgress - Optional callback for progress updates
+ * @returns Array of word alignments
+ */
+export function getChunkedWordAlignments(
     humanWords: string[],
     aiWords: WordDTO[],
     chunkSize: number = 1500,
     overlapSize: number = 150,
     onProgress?: (current: number, total: number) => void
-): MappedSentenceResult[] {
+): FinalTranscriptWordAlignment[] {
     const totalHumanWords = humanWords.length;
     const totalAiWords = aiWords.length;
 
     // If small enough, use original DTW
     if (totalHumanWords <= chunkSize * 2 && totalAiWords <= chunkSize * 2) {
-        return buildSentenceResults(alignWithDTW(humanWords, aiWords));
+        return alignWithDTW(humanWords, aiWords);
     }
 
     console.log(`Using chunked DTW: ${totalHumanWords} human words, ${totalAiWords} AI words`);
@@ -76,7 +85,28 @@ export function alignWithChunkedDTW(
     }
 
     console.log(`Chunked DTW complete: ${allAlignments.length} total alignments`);
-    return buildSentenceResults(allAlignments);
+    return allAlignments;
+}
+
+/**
+ * Perform chunked DTW alignment for large transcripts to prevent memory crashes
+ * Processes the transcript in overlapping chunks
+ * @param humanWords - Array of words from human transcript
+ * @param aiWords - Array of word DTOs from AI transcript
+ * @param chunkSize - Size of each chunk (default: 1500)
+ * @param overlapSize - Size of overlap between chunks (default: 150)
+ * @param onProgress - Optional callback for progress updates
+ * @returns Array of mapped sentence results
+ */
+export function alignWithChunkedDTW(
+    humanWords: string[],
+    aiWords: WordDTO[],
+    chunkSize: number = 1500,
+    overlapSize: number = 150,
+    onProgress?: (current: number, total: number) => void
+): MappedSentenceResult[] {
+    const alignments = getChunkedWordAlignments(humanWords, aiWords, chunkSize, overlapSize, onProgress);
+    return buildSentenceResults(alignments);
 }
 
 /**
