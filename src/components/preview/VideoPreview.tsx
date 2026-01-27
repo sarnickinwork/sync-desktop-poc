@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { Box, Typography, List, ListItem, ListItemText, ListItemButton, Paper } from "@mui/material";
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import { VideoItem } from "../../utils/types";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
-export default function VideoPreview({ videos }: { videos: VideoItem[] }) {
+const VideoPreview = ({ videos }: { videos: VideoItem[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -69,4 +69,10 @@ export default function VideoPreview({ videos }: { videos: VideoItem[] }) {
       </Paper>
     </Box>
   );
-}
+};
+
+export default memo(VideoPreview, (prevProps, nextProps) => {
+  // Only re-render if videos array actually changes length or content (ID-based check)
+  if (prevProps.videos.length !== nextProps.videos.length) return false;
+  return prevProps.videos.every((v, i) => v.id === nextProps.videos[i].id);
+});

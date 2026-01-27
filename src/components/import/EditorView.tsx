@@ -347,7 +347,7 @@ export default function EditorView({
             <ToggleButtonGroup
               value={confidenceFilter}
               exclusive
-              onChange={(_, newFilter) => {
+              onChange={(_e, newFilter) => {
                 if (newFilter !== null) {
                   setConfidenceFilter(newFilter);
                 }
@@ -408,7 +408,7 @@ export default function EditorView({
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredSubtitles.map((sub, _) => {
+              {filteredSubtitles.map((sub, _index) => {
                 // Get original index from the full subtitles array
                 const originalIndex = subtitles.indexOf(sub);
                 const displayLine = startLine + originalIndex + 1;
