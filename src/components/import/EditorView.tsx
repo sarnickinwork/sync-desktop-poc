@@ -11,8 +11,8 @@ import {
   TableRow,
   useTheme,
   Chip,
-  IconButton,
-  Tooltip,
+  // IconButton,
+  // Tooltip,
   Switch,
   FormControlLabel,
   ToggleButtonGroup,
@@ -364,7 +364,7 @@ export default function EditorView({
             <ToggleButtonGroup
               value={confidenceFilter}
               exclusive
-              onChange={(e, newFilter) => {
+              onChange={(_e, newFilter) => {
                 if (newFilter !== null) {
                   setConfidenceFilter(newFilter);
                 }
@@ -425,7 +425,7 @@ export default function EditorView({
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredSubtitles.map((sub, index) => {
+              {filteredSubtitles.map((sub, _index) => {
                 // Get original index from the full subtitles array
                 const originalIndex = subtitles.indexOf(sub);
                 return (
