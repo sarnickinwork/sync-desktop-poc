@@ -37,7 +37,7 @@ import ResultsDisplay from "../components/ResultsDisplay";
 import JobSummaryCard from "../components/JobSummaryCard";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
-import { downloadSMI, downloadDVT, downloadSYN } from "../utils";
+// import { downloadSMI, downloadDVT, downloadSYN } from "../utils";
 import { VideoItem } from "../utils/types";
 
 type SyncedLine = {
@@ -700,29 +700,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               mappedResults={mappedResult}
               videos={videos}
               splitPoints={splitPoints}
-              smiContent={smiContent}
-              dvtContent={dvtContent}
-              synContent={synContent}
               apiElapsedTime={apiElapsedTime}
-              onDownloadSMI={() => {
-                if (smiContent) {
-                  downloadSMI(smiContent, "synced_subtitle.smi");
-                }
-              }}
-              onDownloadDVT={() => {
-                if (dvtContent) {
-                  const videoName =
-                    videos[0]?.name.replace(/\.[^/.]+$/, "") || "deposition";
-                  downloadDVT(dvtContent, `${videoName}.dvt`);
-                }
-              }}
-              onDownloadSYN={() => {
-                if (synContent) {
-                  const videoName =
-                    videos[0]?.name.replace(/\.[^/.]+$/, "") || "sync";
-                  downloadSYN(synContent, `${videoName}.syn`);
-                }
-              }}
             />
           ) : syncedLines.length > 0 ? (
             <SyncedPlayer
