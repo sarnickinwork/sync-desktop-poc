@@ -239,11 +239,11 @@ export default function ImportEditPage({ onBack }: Props) {
                 // but standard DVT expects lines. We will assign line 0 for header or just increment)
                 // Actually, for DVT, if it's a page header, DVT generator ignores it later.
                 // But for SYN, we want valid metadata.
-                
+
                 // If this is NOT a page header, increment line count
                 if (!pageMatch) {
                     currentLine++;
-                    
+
                     // Fallback pagination if no headers seen for a long time (25 lines/page default)
                     if (!foundExplicitPageStart && currentLine > 25) {
                         currentPage++;
@@ -256,7 +256,7 @@ export default function ImportEditPage({ onBack }: Props) {
                     text: sub.text,
                     start: sub.start,
                     end: end,
-                    confidence: sub.confidence || 1.0,
+                    confidence: sub.confidence !== undefined ? sub.confidence : 1.0,
                     pageNumber: currentPage,
                     lineNumber: pageMatch ? 0 : currentLine // Use 0 for page headers
                 };
@@ -396,11 +396,11 @@ export default function ImportEditPage({ onBack }: Props) {
 
                             {/* Google Docs-style Auto-save Indicator */}
                             {autoSaveStatus !== 'idle' && (
-                                <Box 
-                                    display="flex" 
-                                    alignItems="center" 
+                                <Box
+                                    display="flex"
+                                    alignItems="center"
                                     gap={0.5}
-                                    sx={{ 
+                                    sx={{
                                         color: autoSaveStatus === 'saved' ? 'success.main' : 'text.secondary',
                                         transition: 'color 0.3s ease'
                                     }}

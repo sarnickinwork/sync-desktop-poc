@@ -49,6 +49,7 @@ const SubtitleLine = memo(
     onLineClick,
     onLineDoubleClick,
     editMode,
+    startLine,
   }: {
     sub: SmiSubtitle;
     index: number;
@@ -58,13 +59,22 @@ const SubtitleLine = memo(
     onLineClick: (index: number) => void;
     onLineDoubleClick: (index: number) => void;
     editMode: boolean;
+    startLine: number;
   }) => {
     const theme = useTheme();
     const lineRef = useRef<HTMLDivElement>(null);
 
     // Determine if line has a valid timestamp (matching ResultsDisplay pattern)
+    // 1. Must not be a page number header
     const isPageNumLine = /^\d+$/.test((sub.text || "").trim());
-    const hasTimestamp = sub.start > 0 && !isPageNumLine;
+    // 2. Must not be an empty line
+    const isEmptyLine = !(sub.text || "").trim();
+    // 3. Must be at or after the selected start line (1-based index vs 0-based prop)
+    // If startLine is provided (e.g. 50), then index 0..48 (lines 1..49) should be ignored.
+    // startLine is 1-based line number. current line number is index + 1.
+    const isBeforeStart = startLine ? (index + 1) < startLine : false;
+
+    const hasTimestamp = sub.start > 0 && !isPageNumLine && !isEmptyLine && !isBeforeStart;
 
     // Calculate confidence indicator color (matching ResultsDisplay pattern)
     let indicatorColor = theme.palette.success.main;
@@ -202,7 +212,8 @@ const SubtitleLine = memo(
       prev.sub === next.sub &&
       prev.index === next.index &&
       prev.isEdited === next.isEdited &&
-      prev.editMode === next.editMode
+      prev.editMode === next.editMode &&
+      prev.startLine === next.startLine // Add startLine to comparison
     );
   }
 );
@@ -213,6 +224,7 @@ export default function EditorView({
   splitPoints,
   subtitles,
   onUpdateSubtitles,
+  startLine = 0
 }: Props) {
   const theme = useTheme();
   const playerRef = useRef<SyncedPlayerRef>(null);
@@ -560,6 +572,7 @@ export default function EditorView({
                 onLineClick={handleLineClick}
                 onLineDoubleClick={handleLineDoubleClick}
                 editMode={editMode}
+                startLine={startLine}
               />
             );
           })}

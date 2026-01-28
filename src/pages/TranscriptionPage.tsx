@@ -359,7 +359,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
           sentence: line.text, // SmiSubtitle has 'text', Mapped has 'sentence'
           start: line.start,
           end: line.end || (line.start + 2000), // Safety for missing end
-          confidence: line.confidence || 1.0,
+          confidence: line.confidence !== undefined ? line.confidence : 1.0,
         }));
         finalDvtContent = generateDVT({
           title: `Deposition - ${rawProjectName}`,
@@ -380,7 +380,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
           sentence: line.text,
           start: line.start,
           end: line.end || (line.start + 2000),
-          confidence: line.confidence || 1.0,
+          confidence: line.confidence !== undefined ? line.confidence : 1.0,
         }));
         finalSynContent = generateSYN({
           videoFilename: primaryVideo.name,
