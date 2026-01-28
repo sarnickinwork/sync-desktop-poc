@@ -8,8 +8,9 @@ import {
   Button,
   Alert,
   AlertTitle,
-  Chip,
+
   CircularProgress,
+  Snackbar,
 } from "@mui/material";
 import { join } from "@tauri-apps/api/path";
 import { writeTextFile, copyFile, readTextFile } from "@tauri-apps/plugin-fs";
@@ -27,7 +28,7 @@ import SaveAltIcon from "@mui/icons-material/SaveAlt";
 
 // Components
 import Stepper from "../components/Stepper";
-import TranscriptViewer from "../components/TranscriptViewer";
+
 import VideoPreview from "../components/preview/VideoPreview";
 import TranscriptPreview from "../components/preview/TranscriptPreview";
 import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
@@ -71,7 +72,7 @@ ${bodyContent}
 };
 
 import { getProjectState, saveProjectState, getProjects } from "../utils/projectManager";
-import { ProjectState } from "../utils/types";
+
 
 // ... existing imports ...
 
@@ -97,6 +98,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
   // Export State
   const [isExporting, setIsExporting] = useState(false);
   const [startLine, setStartLine] = useState<string>("");
+  const [exportSuccess, setExportSuccess] = useState(false);
 
   // Other state needed for restore
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
@@ -223,13 +225,14 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
   // Auto-export when results are ready
 
 
-  useEffect(() => {
+  // Auto-export removed as per request
+  /* useEffect(() => {
     if (step === 3 && !isProcessing && mappedResult && !hasAutoExported) {
       console.log("Auto-exporting results...");
       handleExportZip();
       setHasAutoExported(true);
     }
-  }, [step, isProcessing, mappedResult, hasAutoExported]);
+  }, [step, isProcessing, mappedResult, hasAutoExported]); */
 
   function processAssemblyResult(apiResult: any) {
     if (!apiResult) return;
@@ -433,14 +436,13 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       await writeTextFile(synPath, finalSynContent!);
       console.log(".syn file updated at:", synPath);
 
-      // Clear the session so it doesn't prompt to resume next time
+       // Clear the session so it doesn't prompt to resume next time
       localStorage.removeItem("lastSession");
-      setStep(5); // Navigate to Job Summary
+      // setStep(5); // Navigate to Job Summary - REMOVED
 
       // Removed auto-navigation and alert as per request
       console.log(`Export Successful! Files saved to: ${derivedProjectFolderPath}`);
-      // setStep(4); 
-      // alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
+      setExportSuccess(true);
     } catch (error: any) {
       console.error("Export Failed:", error);
       alert(`Export Failed: ${error}`);
@@ -450,7 +452,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
   };
 
   return (
-    <Box p={4} maxWidth={1100} mx="auto">
+    <Box p={4} maxWidth={step === 4 ? '100%' : 1100} mx="auto">
       {/* HEADER */}
       <Box
         display="flex"
@@ -779,19 +781,12 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
 
             <Box display="flex" gap={2}>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
-                onClick={handleExportZip}
-                disabled={isExporting}
-                startIcon={
-                  isExporting ? (
-                    <CircularProgress size={20} color="inherit" />
-                  ) : (
-                    <SaveAltIcon />
-                  )
-                }
+                onClick={() => setStep(5)}
+                startIcon={<CheckCircleIcon />}
               >
-                {isExporting ? "Zipping..." : "Export Zip"}
+                Job Summary
               </Button>
 
               <Button
@@ -800,7 +795,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
                 onClick={() => setStep(4)}
                 sx={{ px: 4 }}
               >
-                Proceed to Editor
+                Edit
               </Button>
             </Box>
           </Box>
@@ -901,6 +896,22 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
             >
               Back to Editor
             </Button>
+            
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleExportZip}
+              disabled={isExporting}
+              startIcon={
+                isExporting ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <SaveAltIcon />
+                )
+              }
+            >
+              {isExporting ? "Exporting..." : "Export Project"}
+            </Button>
           </Box>
 
           <JobSummaryCard
@@ -916,11 +927,17 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
         </Box>
       )}
 
-      <Box mt={5}>
-        {/* Hide logs and raw viewer during Preview step (step 1) to keep UI clean */}
-        {/* <LogsPanel logs={logs} /> */}
-        <TranscriptViewer data={transcriptResult} />
-      </Box>
+
+      <Snackbar
+        open={exportSuccess}
+        autoHideDuration={4000}
+        onClose={() => setExportSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setExportSuccess(false)} severity="success" sx={{ width: '100%' }}>
+          Project exported successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

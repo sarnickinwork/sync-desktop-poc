@@ -35,7 +35,7 @@ export default function ResultsDisplay({
     mappedResults,
     videos,
     splitPoints,
-    apiElapsedTime,
+
     synContent
 }: ResultsDisplayProps) {
     const theme = useTheme();

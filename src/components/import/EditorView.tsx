@@ -3,20 +3,15 @@ import {
   Box,
   Paper,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   useTheme,
   Chip,
   Switch,
   FormControlLabel,
   ToggleButtonGroup,
-  ToggleButton
+  ToggleButton,
+  CircularProgress,
+  alpha
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 
 import { SmiSubtitle } from "../../utils/smiParsingUtils";
@@ -31,117 +26,173 @@ type Props = {
   startLine?: number;
 };
 
-// --- HELPER: HH:MM:SS.mmm ---
-const formatTimestampFull = (ms: number) => {
-  const date = new Date(ms);
-  const h = date.getUTCHours().toString().padStart(2, '0');
-  const m = date.getUTCMinutes().toString().padStart(2, '0');
-  const s = date.getUTCSeconds().toString().padStart(2, '0');
-  const mmm = date.getUTCMilliseconds().toString().padStart(3, '0');
-  return `${h}:${m}:${s}.${mmm}`;
-};
+/**
+ * Format milliseconds to human-readable time (MM:SS.mmm)
+ */
+function formatTime(ms: number): string {
+  const totalSeconds = ms / 1000;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  const milliseconds = Math.floor(ms % 1000);
 
-// --- 1. MEMOIZED ROW COMPONENT ---
-const SubtitleRow = memo(
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(3, "0")}`;
+}
+
+// --- MEMOIZED ROW COMPONENT (matching ResultsDisplay pattern) ---
+const SubtitleLine = memo(
   ({
     sub,
     index,
-    displayIndex,
     isActive,
     isSelected,
     isEdited,
-    onRowClick,
+    onLineClick,
+    onLineDoubleClick,
     editMode,
   }: {
     sub: SmiSubtitle;
     index: number;
-    displayIndex: number;
     isActive: boolean;
     isSelected: boolean;
     isEdited: boolean;
-    onRowClick: (index: number) => void;
+    onLineClick: (index: number) => void;
+    onLineDoubleClick: (index: number) => void;
     editMode: boolean;
   }) => {
     const theme = useTheme();
-    const rowRef = useRef<HTMLTableRowElement>(null);
+    const lineRef = useRef<HTMLDivElement>(null);
+
+    // Determine if line has a valid timestamp (matching ResultsDisplay pattern)
+    const isPageNumLine = /^\d+$/.test((sub.text || "").trim());
+    const hasTimestamp = sub.start > 0 && !isPageNumLine;
+
+    // Calculate confidence indicator color (matching ResultsDisplay pattern)
+    let indicatorColor = theme.palette.success.main;
+    if (hasTimestamp) {
+      if ((sub.confidence || 0) < 50) {
+        indicatorColor = theme.palette.error.main;
+      } else if ((sub.confidence || 0) < 80) {
+        indicatorColor = theme.palette.warning.main;
+      }
+    } else {
+      indicatorColor = 'transparent';
+    }
 
     useEffect(() => {
-      // Edit Mode: Only scroll to selected line (for editing focus)
-      // View Mode: Scroll to active line (following playback)
-      if (rowRef.current) {
+      if (lineRef.current) {
         if (editMode && isSelected) {
-          rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          lineRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
         } else if (!editMode && isActive) {
-          rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          lineRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
     }, [isActive, isSelected, editMode]);
 
     return (
-      <TableRow
-        ref={rowRef}
-        selected={isSelected && editMode}
-        onClick={() => onRowClick(index)}
+      <Box
+        ref={lineRef}
+        data-subtitle-index={index}
+        onClick={() => onLineClick(index)}
+        onDoubleClick={() => onLineDoubleClick(index)}
         sx={{
-          cursor: "pointer",
-          height: 24, // Compact rows like the image
-          "&:hover": { bgcolor: alpha(theme.palette.action.hover, 0.1) },
-          // Active Playing State (highlight blue like current selection in OS)
-          ...(isActive && !editMode && {
-            bgcolor: alpha(theme.palette.primary.main, 0.2) + " !important",
-          }),
-          // Selected Edit State
+          display: 'flex',
+          position: 'relative',
+          bgcolor: isSelected && editMode
+            ? alpha(theme.palette.warning.main, 0.2)
+            : isActive && !editMode
+              ? alpha(theme.palette.primary.main, 0.2)
+              : 'transparent',
+          cursor: 'pointer',
+          transition: 'background-color 0.15s ease, filter 0.15s ease',
+          '&:hover': {
+            filter: 'brightness(0.95)'
+          },
+          lineHeight: 1.6,
+          minHeight: '1.6em',
+          borderRadius: '2px',
+          my: '4px',
+          pl: 12, // Room for Time (80px) + spacing
           ...(isSelected && editMode && {
-            bgcolor: alpha(theme.palette.warning.main, 0.2) + " !important",
             borderLeft: `4px solid ${theme.palette.warning.main}`
           })
         }}
       >
-        {/* Timestamp */}
-        <TableCell
-          sx={{
-            fontFamily: "monospace",
-            width: 140,
-            fontSize: '0.85rem',
-            userSelect: 'none',
-            borderRight: `1px solid ${theme.palette.divider}`,
-            py: 0.5,
-            color: isEdited ? 'warning.main' : 'text.secondary'
-          }}
-        >
-          {formatTimestampFull(sub.start)}
-        </TableCell>
+        {/* Confidence Indicator Bar (Left edge) - only if hasTimestamp */}
+        {hasTimestamp && (
+          <Box
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '3px',
+              bgcolor: indicatorColor,
+              opacity: 0.6,
+              borderTopLeftRadius: '2px',
+              borderBottomLeftRadius: '2px',
+              transition: 'opacity 0.15s ease'
+            }}
+          />
+        )}
 
-        {/* Line Number */}
-        <TableCell
+        {/* Timestamp (Left) */}
+        <Typography
+          component="span"
           sx={{
-            width: 60,
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: 80,
+            color: 'primary.main',
+            fontSize: '0.75rem',
+            opacity: hasTimestamp ? 0.8 : 0,
+            userSelect: 'none',
             textAlign: 'right',
-            fontFamily: "monospace",
-            color: 'text.secondary',
-            borderRight: `1px solid ${theme.palette.divider}`,
-            userSelect: 'none',
-            py: 0.5,
-            px: 1
+            pr: 1,
+            pl: 0.5
           }}
         >
-          {displayIndex}
-        </TableCell>
+          {hasTimestamp ? formatTime(sub.start) : ""}
+        </Typography>
 
-        {/* Text Content */}
-        <TableCell
+        {/* Original line text */}
+        <Typography
+          component="pre"
           sx={{
-            fontSize: '0.95rem',
-            fontFamily: 'monospace', // Monospace to align Q/A
-            whiteSpace: 'pre-wrap', // Preserve alignment/indentation
-            py: 0.5,
-            color: (sub.confidence || 0) < 80 ? 'warning.main' : 'inherit'
+            m: 0,
+            fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace',
+            fontSize: '0.9rem',
+            whiteSpace: 'pre-wrap',
+            width: 'auto',
+            minWidth: '100%',
+            color: 'inherit',
+            pr: 6,
+            pl: 1
           }}
         >
           {isEdited && <EditIcon sx={{ fontSize: 12, color: 'warning.main', mr: 1, verticalAlign: 'middle' }} />}
-          {sub.text}
-        </TableCell>
-      </TableRow>
+          {sub.text || " "}
+        </Typography>
+
+        {/* Confidence Badge (Right) */}
+        {(sub.confidence || 0) > 0 && hasTimestamp && (
+          <Typography
+            component="span"
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 0,
+              color: indicatorColor,
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              opacity: 0.7,
+              userSelect: 'none'
+            }}
+          >
+            {(sub.confidence || 0).toFixed(0)}%
+          </Typography>
+        )}
+      </Box>
     );
   },
   (prev, next) => {
@@ -151,33 +202,38 @@ const SubtitleRow = memo(
       prev.sub === next.sub &&
       prev.index === next.index &&
       prev.isEdited === next.isEdited &&
-      prev.editMode === next.editMode &&
-      prev.displayIndex === next.displayIndex
+      prev.editMode === next.editMode
     );
   }
 );
 
-// --- 2. MAIN COMPONENT ---
+// --- MAIN COMPONENT ---
 export default function EditorView({
   videos,
   splitPoints,
   subtitles,
   onUpdateSubtitles,
-  startLine = 0
 }: Props) {
   const theme = useTheme();
   const playerRef = useRef<SyncedPlayerRef>(null);
 
   // State
-  const [editMode, setEditMode] = useState(false); // View/Edit mode toggle
-  const [confidenceFilter, setConfidenceFilter] = useState<'all' | 'high' | 'medium' | 'low' | 'edited'>('all'); // Confidence filter
-  const [activeIndex, setActiveIndex] = useState<number>(-1); // Index currently playing
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null); // Index selected for editing
+  const [editMode, setEditMode] = useState(false);
+  const [confidenceFilter, setConfidenceFilter] = useState<'all' | 'high' | 'medium' | 'low' | 'edited'>('all');
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [globalTime, setGlobalTime] = useState(0);
   const [editedIndices, setEditedIndices] = useState<Set<number>>(new Set());
 
+
+  // Infinite Scroll State
+  const [displayedCount, setDisplayedCount] = useState(200);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
   // Filter subtitles by confidence
   const filteredSubtitles = subtitles.filter((sub, idx) => {
+
+
     if (confidenceFilter === 'all') return true;
     if (confidenceFilter === 'edited') return editedIndices.has(idx);
     if (confidenceFilter === 'high') return (sub.confidence || 0) >= 85;
@@ -186,11 +242,36 @@ export default function EditorView({
     return true;
   });
 
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setDisplayedCount((prev) => Math.min(prev + 100, filteredSubtitles.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [filteredSubtitles.length, displayedCount]);
+
+
+
+  const visibleSubtitles = filteredSubtitles.slice(0, displayedCount);
+
   // --- TIME UPDATE HANDLER ---
   const handleTimeUpdate = useCallback((time: number) => {
     setGlobalTime(time);
 
-    // Calculate active index solely for display (highlighting currently heard line)
     const newIndex = subtitles.findIndex((sub, idx) => {
       const nextSub = subtitles[idx + 1];
       return time >= sub.start && (!nextSub || time < nextSub.start);
@@ -198,30 +279,66 @@ export default function EditorView({
     setActiveIndex((prev) => (prev !== newIndex ? newIndex : prev));
   }, [subtitles]);
 
-  // --- SHORTCUTS HANDLER ---
+  // --- DOUBLE-CLICK HANDLER: Navigate video to timestamp and PAUSE ---
+  const handleLineDoubleClick = useCallback(
+    (index: number) => {
+      const start = subtitles[index].start;
+      playerRef.current?.seek(start);
+      playerRef.current?.pause();
+    },
+    [subtitles]
+  );
+
+  // --- SINGLE-CLICK HANDLER: Select line for editing ---
+  const handleLineClick = useCallback(
+    (index: number) => {
+      if (editMode) {
+        setSelectedIndex(index);
+      }
+    },
+    [editMode]
+  );
+
+  // --- SPACEBAR HANDLER: Record timestamp and auto-advance ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only "Space" allowed for setting timestamp in Edit Mode
-      // Arrows removed per user request ("not any keys" for video control)
       if (!editMode || selectedIndex === null || !onUpdateSubtitles) return;
 
       if (e.code === "Space") {
+        console.log('🔵 SPACEBAR pressed - Edit mode active, selectedIndex:', selectedIndex);
+
         e.preventDefault();
+        e.stopPropagation();
+
+        // Record timestamp with 3-digit millisecond precision
         const syncedTime = Math.round(globalTime);
+        console.log('⏱️  Recording timestamp:', syncedTime, 'ms');
+
+        // Update subtitle
         const updated = [...subtitles];
         updated[selectedIndex] = {
           ...updated[selectedIndex],
           start: syncedTime,
-          confidence: 100
+          confidence: 100 // Set confidence to 100%
         };
+
+        // Mark as edited
         const newEdited = new Set(editedIndices);
         newEdited.add(selectedIndex);
         setEditedIndices(newEdited);
+
+        console.log('💾 Calling onUpdateSubtitles...');
+        // Update subtitles (will trigger auto-save)
         onUpdateSubtitles(updated);
 
-        // Pause just in case, though we aren't playing much
-        playerRef.current?.pause();
-        console.log(`✓ Line updated to ${syncedTime}ms`);
+        // Auto-advance to next line
+        const nextIndex = selectedIndex + 1;
+        if (nextIndex < subtitles.length) {
+          setSelectedIndex(nextIndex);
+          console.log('➡️  Auto-advanced to line:', nextIndex);
+        }
+
+        console.log(`✓ Line ${selectedIndex} → ${syncedTime}ms (confidence: 100%)`);
       }
     };
 
@@ -229,31 +346,23 @@ export default function EditorView({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [editMode, selectedIndex, subtitles, onUpdateSubtitles, globalTime, editedIndices]);
 
-  const handleRowClick = useCallback(
-    (index: number) => {
-      if (editMode) {
-        setSelectedIndex(index);
-        const start = subtitles[index].start;
-        playerRef.current?.seek(start);
-        playerRef.current?.pause();
-      } else {
-        // View Mode: Just Seek. DO NOT AUTO PLAY ("user will play pause")
-        const start = subtitles[index].start;
-        playerRef.current?.seek(start);
-        playerRef.current?.pause();
-      }
-    },
-    [subtitles, editMode]
-  );
+  // Calculate summary statistics
+  const avgConfidence = subtitles.length > 0
+    ? subtitles.reduce((sum, r) => sum + (r.confidence || 0), 0) / subtitles.length
+    : 0;
+
+  const highConfidenceCount = subtitles.filter(r => (r.confidence || 0) >= 80).length;
+  const mediumConfidenceCount = subtitles.filter(r => (r.confidence || 0) >= 50 && (r.confidence || 0) < 80).length;
+  const lowConfidenceCount = subtitles.filter(r => (r.confidence || 0) < 50).length;
+
+  // Aesthetics matching ResultsDisplay
+  const isDark = theme.palette.mode === 'dark';
+  const listBgColor = isDark ? alpha(theme.palette.background.paper, 0.6) : '#fafafa';
+  const headerColor = isDark ? theme.palette.background.paper : '#ffffff';
+  const borderColor = theme.palette.divider;
 
   return (
-    <Box
-      display="grid"
-      gridTemplateColumns="350px 1fr" // Fixed width video, expanded transcript
-      gap={2}
-      height="75vh"
-      mt={2}
-    >
+    <Box display="grid" gridTemplateColumns="350px 1fr" gap={2} height="75vh" mt={2}>
       {/* LEFT: Video Player */}
       <Paper
         elevation={3}
@@ -280,14 +389,9 @@ export default function EditorView({
 
         {/* Overlay Info */}
         {editMode && selectedIndex !== null && (
-          <Box
-            position="absolute"
-            top={12}
-            right={12}
-            sx={{ pointerEvents: "none" }}
-          >
+          <Box position="absolute" top={12} right={12} sx={{ pointerEvents: "none" }}>
             <Chip
-              icon={<EditIcon />}
+              variant="outlined"
               label="SPACE to timestamp"
               color="primary"
               size="small"
@@ -295,30 +399,41 @@ export default function EditorView({
             />
           </Box>
         )}
+
+
       </Paper>
 
-      {/* RIGHT: Subtitle List */}
-      <Paper
-        variant="outlined"
+      {/* RIGHT: Transcript List (EXACTLY like ResultsDisplay) */}
+      <Box
         sx={{
+          height: "100%",
+          minHeight: "300px",
+          border: 1,
+          borderColor: borderColor,
+          borderRadius: 2,
+          overflow: "hidden", 
+          bgcolor: listBgColor,
+          backdropFilter: isDark ? "blur(10px)" : "none",
+          color: theme.palette.text.primary,
           display: "flex",
           flexDirection: "column",
-          height: "100%",
-          overflow: "hidden",
-          borderRadius: 2,
-          borderColor: 'divider',
-          bgcolor: 'background.paper'
+          fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace',
+          boxShadow: theme.shadows[1]
         }}
       >
-        {/* Toolbar */}
+        {/* Header - Matching ResultsDisplay */}
         <Box
-          p={1}
-          borderBottom={1}
-          borderColor="divider"
-          bgcolor={alpha(theme.palette.primary.main, 0.04)}
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
+          sx={{
+            px: 2,
+            py: 1.5,
+            borderBottom: 1,
+            borderColor: borderColor,
+            bgcolor: headerColor,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            boxShadow: isDark ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
+          }}
         >
           <Box display="flex" alignItems="center" gap={2}>
             {/* View/Edit Toggle */}
@@ -341,9 +456,57 @@ export default function EditorView({
             </Typography>
           </Box>
 
+          <Box display="flex" gap={2} alignItems="center">
+            <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 500 }}>
+              {subtitles.length > 0
+                ? `${subtitles.length} lines • Avg: ${avgConfidence.toFixed(0)}%`
+                : "No lines"
+              }
+            </Typography>
+            <Box display="flex" gap={1}>
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: alpha(theme.palette.success.main, 0.8),
+                  title: `${highConfidenceCount} high confidence`
+                }}
+              />
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: alpha(theme.palette.warning.main, 0.8),
+                  title: `${mediumConfidenceCount} medium confidence`
+                }}
+              />
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: alpha(theme.palette.error.main, 0.8),
+                  title: `${lowConfidenceCount} low confidence`
+                }}
+              />
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Toolbar with Filters */}
+        <Box
+          p={1}
+          borderBottom={1}
+          borderColor="divider"
+          bgcolor={alpha(theme.palette.primary.main, 0.04)}
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="center"
+        >
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="caption" mr={1}>Filter:</Typography>
-            {/* Confidence Filter */}
             <ToggleButtonGroup
               value={confidenceFilter}
               exclusive
@@ -370,66 +533,45 @@ export default function EditorView({
                 Low
               </ToggleButton>
             </ToggleButtonGroup>
-
-            {/* View/Edit Toggle */}
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={editMode}
-                  onChange={(e) => {
-                    setEditMode(e.target.checked);
-                    if (!e.target.checked) {
-                      setSelectedIndex(null);
-                    }
-                  }}
-                  color="primary"
-                />
-              }
-              label={
-                <Box display="flex" alignItems="center" gap={1}>
-                  {editMode ? <EditIcon fontSize="small" /> : <Typography variant="caption" fontWeight={600}>VIEW</Typography>}
-                  <Typography variant="caption" fontWeight={600}>
-                    {editMode ? "Edit" : "View"}
-                  </Typography>
-                </Box>
-              }
-            />
           </Box>
         </Box>
 
-        <TableContainer sx={{ flexGrow: 1, scrollBehavior: 'smooth' }}>
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell style={{ width: 40, background: theme.palette.background.paper }}></TableCell>
-                <TableCell style={{ width: 100, background: theme.palette.background.paper, fontWeight: 600 }}>Start</TableCell>
-                <TableCell style={{ width: 80, background: theme.palette.background.paper, fontWeight: 600, textAlign: 'center' }}>Confidence</TableCell>
-                <TableCell style={{ background: theme.palette.background.paper, fontWeight: 600 }}>Text</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredSubtitles.map((sub, _index) => {
-                // Get original index from the full subtitles array
-                const originalIndex = subtitles.indexOf(sub);
-                const displayLine = startLine + originalIndex + 1;
-                return (
-                  <SubtitleRow
-                    key={originalIndex}
-                    sub={sub}
-                    index={originalIndex}
-                    displayIndex={displayLine}
-                    isActive={originalIndex === activeIndex} // Highlight what's playing
-                    isSelected={originalIndex === selectedIndex} // Highlight what's selected for edit
-                    isEdited={editedIndices.has(originalIndex)}
-                    onRowClick={handleRowClick}
-                    editMode={editMode}
-                  />
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+        {/* Content area - Matching ResultsDisplay */}
+        <Box 
+          data-transcript-container
+          sx={{ 
+            flexGrow: 1, 
+            p: 2, 
+            pb: 10,
+            overflowY: "auto",
+            overflowX: "hidden"
+          }}
+        >
+          {visibleSubtitles.map((sub) => {
+            const originalIndex = subtitles.indexOf(sub);
+            return (
+              <SubtitleLine
+                key={originalIndex}
+                sub={sub}
+                index={originalIndex}
+                isActive={originalIndex === activeIndex}
+                isSelected={originalIndex === selectedIndex}
+                isEdited={editedIndices.has(originalIndex)}
+                onLineClick={handleLineClick}
+                onLineDoubleClick={handleLineDoubleClick}
+                editMode={editMode}
+              />
+            );
+          })}
+
+          {/* Scroll Target */}
+          {displayedCount < filteredSubtitles.length && (
+            <Box ref={observerTarget} py={3} textAlign="center" sx={{ opacity: 0.5 }}>
+              <CircularProgress size={20} thickness={4} />
+            </Box>
+          )}
+        </Box>
+      </Box>
     </Box>
   );
 }

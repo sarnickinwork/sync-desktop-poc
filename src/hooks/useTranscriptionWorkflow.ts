@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Command } from "@tauri-apps/plugin-shell";
 import { readFile, readTextFile, mkdir, exists, remove, writeTextFile } from "@tauri-apps/plugin-fs";
 import { appDataDir, join, downloadDir } from "@tauri-apps/api/path";
-import { SimpleTranscriptDto, WordDTO, MappedSentenceResult, mergeTranscripts, extractHumanTranscriptFromContent, performTextMapping, generateSYN, parseSYN, SYNMetadata } from "../utils";
+import { SimpleTranscriptDto, WordDTO, MappedSentenceResult, mergeTranscripts, extractHumanTranscriptFromContent, generateSYN, parseSYN, SYNMetadata } from "../utils";
 import { VideoItem } from "../utils/types";
 
 const API_URL = import.meta.env.VITE_API_URL;

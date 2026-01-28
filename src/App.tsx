@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Snackbar, Alert, Box, Typography, Link, Stack } from "@mui/material";
+import { Snackbar, Alert, Box, Typography } from "@mui/material";
 import VerifiedIcon from '@mui/icons-material/Verified';
 
 // Context
@@ -177,71 +177,74 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
 
-        {currentPage === "landing" && (
-          <LandingPage
-            onProjectSelect={handleOpenProject}
-            onNavigateToImport={() => setCurrentPage("import")}
-          />
-        )}
+        <Box display="flex" flexDirection="column" minHeight="100vh">
+          <Box component="main" flexGrow={1}>
+            {currentPage === "landing" && (
+              <LandingPage
+                onProjectSelect={handleOpenProject}
+                onNavigateToImport={() => setCurrentPage("import")}
+              />
+            )}
 
-        {currentPage === "project" && currentProjectId && (
-          <TranscriptionPage
-            projectId={currentProjectId}
-            onBackToHome={handleGoHome}
-          />
-        )}
+            {currentPage === "project" && currentProjectId && (
+              <TranscriptionPage
+                projectId={currentProjectId}
+                onBackToHome={handleGoHome}
+              />
+            )}
 
-        {currentPage === "import" && (
-          <ImportEditPage onBack={handleGoHome} />
-        )}
+            {currentPage === "import" && (
+              <ImportEditPage onBack={handleGoHome} />
+            )}
 
-        {/* Update Dialog ... */}
+            {/* Update Dialog */}
+            <UpdateDialog
+              open={updateAvailable}
+              updateInfo={updateInfo}
+              isDownloading={isDownloading}
+              downloadProgress={downloadProgress}
+              onConfirm={installUpdate}
+              onCancel={closeUpdateDialog}
+            />
 
-        {/* Update Dialog */}
-        <UpdateDialog
-          open={updateAvailable}
-          updateInfo={updateInfo}
-          isDownloading={isDownloading}
-          downloadProgress={downloadProgress}
-          onConfirm={installUpdate}
-          onCancel={closeUpdateDialog}
-        />
+            {/* Error Notification */}
+            {error && (
+              <Snackbar
+                open={!!error}
+                autoHideDuration={8000}
+                onClose={clearError}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                sx={{ mb: 4 }}
+              >
+                <Alert severity="error" variant="filled" onClose={clearError}>
+                  Update Error: {error}
+                </Alert>
+              </Snackbar>
+            )}
+          </Box>
 
-        {/* Error Notification */}
-        {error && (
-          <Snackbar
-            open={!!error}
-            autoHideDuration={8000}
-            onClose={clearError}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-            sx={{ mb: 4 }}
+          {/* FOOTER */}
+          <Box
+            component="footer"
+            py={3}
+            textAlign="center"
+            bgcolor={mode === "light" ? "grey.50" : "grey.900"}
+            borderTop={1}
+            borderColor="divider"
+            mt="auto"
           >
-            <Alert severity="error" variant="filled" onClose={clearError}>
-              Update Error: {error}
-            </Alert>
-          </Snackbar>
-        )}
-        {/* FOOTER */}
-        <Box
-          component="footer"
-          py={3}
-          textAlign="center"
-          bgcolor={mode === "light" ? "grey.50" : "grey.900"}
-          borderTop={1}
-          borderColor="divider"
-          mt="auto"
-        >
-          <Typography variant="body2" color="text.secondary" display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-            © {new Date().getFullYear()} SyncExpress Live. Developed by{" "}
-            <Typography component="span" fontWeight="bold" color="primary">
-              Kaustubh Paul
-            </Typography>{" "}
-            and{" "}
-            <Typography component="span" fontWeight="bold" color="primary">
-              Sarnick Chakraborty
+            <Typography variant="body2" color="text.secondary" display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+              © {new Date().getFullYear()} SyncExpress Live. Developed by{" "}
+              <Typography component="span" fontWeight="bold" color="primary">
+                Kaustubh Paul
+              </Typography>{" "}
+              and{" "}
+              <Typography component="span" fontWeight="bold" color="primary">
+                Sarnick Chakraborty
+              </Typography>
+              <VerifiedIcon color="primary" fontSize="small" sx={{ width: 16, height: 16 }} />
             </Typography>
-            <VerifiedIcon color="primary" fontSize="small" sx={{ width: 16, height: 16 }} />
-          </Typography>
+          </Box>
         </Box>
       </ThemeProvider>
     </ColorModeContext.Provider>
