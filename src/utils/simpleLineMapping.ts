@@ -158,6 +158,16 @@ export function performSimpleLineMapping(
         }
     }
 
-    // 6. Fix zero timestamps (interpolation) - only for lines that should have timestamps
-    return fixSentenceTimestamps(results);
+    // 6. Fix zero timestamps (interpolation) - strictly starting from user-selected line
+    // Find the array index corresponding to the startLine
+    let startIndexForFixing = 0;
+    for (let i = 0; i < results.length; i++) {
+        const lineMetadata = annotatedLines[i]?.metadata;
+        if (lineMetadata && lineMetadata.absoluteLineNumber >= startLine) {
+            startIndexForFixing = i;
+            break;
+        }
+    }
+
+    return fixSentenceTimestamps(results, startIndexForFixing);
 }

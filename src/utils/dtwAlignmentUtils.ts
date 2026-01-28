@@ -400,10 +400,11 @@ export function createSentenceResult(words: FinalTranscriptWordAlignment[]): Map
  * @param sentences - Array of sentence results
  * @returns Fixed sentence array
  */
-export function fixSentenceTimestamps(sentences: MappedSentenceResult[]): MappedSentenceResult[] {
+export function fixSentenceTimestamps(sentences: MappedSentenceResult[], startIndex: number = 0): MappedSentenceResult[] {
     if (!sentences || sentences.length === 0) return sentences;
 
-    for (let i = 0; i < sentences.length; i++) {
+    for (let i = startIndex; i < sentences.length; i++) {
+        // Find a block of sentences with missing timestamps (start=0, end=0)
         if (sentences[i].start === 0 && sentences[i].end === 0) {
             let rangeStart = i;
             let rangeEnd = i;
@@ -411,35 +412,96 @@ export function fixSentenceTimestamps(sentences: MappedSentenceResult[]): Mapped
             while (rangeEnd < sentences.length && sentences[rangeEnd].start === 0 && sentences[rangeEnd].end === 0) {
                 rangeEnd++;
             }
-            rangeEnd--; // Adjust back to last zero index
+            rangeEnd--; // Point to the last zero-timestamp sentence
 
-            let prevIdx = -1;
-            let nextIdx = -1;
+            // Find valid previous boundary
+            let prevIdx = rangeStart - 1;
+            while (prevIdx >= startIndex && (sentences[prevIdx].start === 0 && sentences[prevIdx].end === 0)) {
+                prevIdx--;
+            }
+            if (prevIdx < startIndex) prevIdx = -1;
 
-            for (let j = rangeStart - 1; j >= 0; j--) {
-                if (sentences[j].start > 0 || sentences[j].end > 0) { prevIdx = j; break; }
+            // Find valid next boundary
+            let nextIdx = rangeEnd + 1;
+            while (nextIdx < sentences.length && (sentences[nextIdx].start === 0 && sentences[nextIdx].end === 0)) {
+                nextIdx++;
             }
-            for (let j = rangeEnd + 1; j < sentences.length; j++) {
-                if (sentences[j].start > 0 || sentences[j].end > 0) { nextIdx = j; break; }
-            }
+            // Adjust nextIdx if it went out of bounds
+            if (nextIdx >= sentences.length) nextIdx = -1;
+            // Adjust prevIdx if it went of out bounds (less than 0)
+            if (prevIdx < 0) prevIdx = -1;
+
 
             if (prevIdx !== -1 && nextIdx !== -1) {
-                const startTime = sentences[prevIdx].end;
-                const endTime = sentences[nextIdx].start;
-                const sentenceCount = rangeEnd - rangeStart + 1;
+                // CASE 1: Gap enclosed by valid timestamps
+                let startTime = sentences[prevIdx].end;
+                let endTime = sentences[nextIdx].start;
+                const gapCount = rangeEnd - rangeStart + 1;
 
-                if (endTime > startTime && sentenceCount > 0) {
-                    const timePerSentence = (endTime - startTime) / sentenceCount;
-                    for (let j = rangeStart; j <= rangeEnd; j++) {
-                        const offset = j - rangeStart;
-                        sentences[j].start = startTime + (timePerSentence * offset);
-                        sentences[j].end = startTime + (timePerSentence * (offset + 1));
-                        const combinedConf = (sentences[prevIdx].confidence + sentences[nextIdx].confidence) / 2 * 0.7;
-                        sentences[j].confidence = combinedConf;
-                    }
+                // Handle illogical timestamps (e.g. overlaps) or extremely small gaps
+                // Enforce at least 500ms per line to avoid "stacking" timestamps
+                const minDuration = gapCount * 500;
+                if (endTime - startTime < minDuration) {
+                    endTime = startTime + minDuration;
+                    // Note: This effectively overlaps into the 'next' segment, but ensures readability
                 }
+
+                const duration = endTime - startTime;
+                const timePerSentence = duration / gapCount;
+
+                for (let j = rangeStart; j <= rangeEnd; j++) {
+                    const offset = j - rangeStart;
+                    sentences[j].start = Number((startTime + (timePerSentence * offset)).toFixed(0));
+                    sentences[j].end = Number((startTime + (timePerSentence * (offset + 1))).toFixed(0));
+                    
+                    // Derive confidence from neighbors (penalized)
+                    const combinedConf = (sentences[prevIdx].confidence + sentences[nextIdx].confidence) / 2 * 0.6;
+                    sentences[j].confidence = Number(combinedConf.toFixed(2));
+                }
+
+            } else if (prevIdx !== -1) {
+                // CASE 2: End of file gap (Extrapolate forward)
+                const startTime = sentences[prevIdx].end;
+                const timePerSentence = 2500; // Assume 2.5s per line for extrapolation
+                
+                for (let j = rangeStart; j <= rangeEnd; j++) {
+                    const offset = j - rangeStart;
+                    sentences[j].start = Number((startTime + (timePerSentence * offset)).toFixed(0));
+                    sentences[j].end = Number((startTime + (timePerSentence * (offset + 1))).toFixed(0));
+                    sentences[j].confidence = 30; // Low confidence for extrapolation
+                }
+
+            } else if (nextIdx !== -1) {
+                // CASE 3: Start of file gap (Extrapolate backward)
+                const endTime = sentences[nextIdx].start;
+                const timePerSentence = 2500;
+                const gapCount = rangeEnd - rangeStart + 1;
+                
+                // Calculate start time, ensuring it doesn't go below 0
+                const startTime = Math.max(0, endTime - (gapCount * timePerSentence));
+                // Recalculate duration based on clamped start
+                const duration = endTime - startTime;
+                const actualTimePerSentence = duration / gapCount;
+
+                for (let j = rangeStart; j <= rangeEnd; j++) {
+                    const offset = j - rangeStart;
+                    sentences[j].start = Number((startTime + (actualTimePerSentence * offset)).toFixed(0));
+                    sentences[j].end = Number((startTime + (actualTimePerSentence * (offset + 1))).toFixed(0));
+                    sentences[j].confidence = 30;
+                }
+            } else {
+                 // CASE 4: No valid timestamps at all in the file (Fallback)
+                 let startTime = 0;
+                 const timePerSentence = 3000;
+                 for (let j = rangeStart; j <= rangeEnd; j++) {
+                     sentences[j].start = startTime;
+                     sentences[j].end = startTime + timePerSentence;
+                     sentences[j].confidence = 0;
+                     startTime += timePerSentence;
+                 }
             }
-            i = rangeEnd;
+
+            i = rangeEnd; // Skip processed block
         }
     }
     return sentences;

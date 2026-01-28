@@ -130,7 +130,7 @@ export default function TranscriptPreview({
                 lineHeight: 1.6, // Increased line height for readability
                 minHeight: '1.6em',
                 borderRadius: '2px', // Slight rounding
-                my: '1px' // Tiny gap between lines
+                my: '4px' // Tiny gap between lines
               }}
             >
                {/* Selection Indicator Bar */}

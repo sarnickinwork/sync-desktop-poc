@@ -241,7 +241,7 @@ export default function ResultsDisplay({
                                         lineHeight: 1.6,
                                         minHeight: '1.6em',
                                         borderRadius: '2px',
-                                        my: '1px',
+                                        my: '4px',
                                         pl: 12 // Room for Time (80px) + spacing
                                     }}
                                 >
