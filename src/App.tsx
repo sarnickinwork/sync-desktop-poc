@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Snackbar, Alert } from "@mui/material";
+import { Snackbar, Alert, Box, Typography, Link, Stack } from "@mui/material";
+import VerifiedIcon from '@mui/icons-material/Verified';
 
 // Context
 import { ColorModeContext } from "./themes/ThemeContext";
@@ -9,6 +10,7 @@ import { ColorModeContext } from "./themes/ThemeContext";
 // Pages
 import TranscriptionPage from "./pages/TranscriptionPage";
 import ImportEditPage from "./pages/ImportEditPage";
+import LandingPage from "./components/landing/LandingPage";
 
 // ... imports ...
 
@@ -36,7 +38,20 @@ export default function App() {
   useWindowPersistence();
 
   // Navigation State
-  const [currentPage, setCurrentPage] = useState<"home" | "import">("home");
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<"landing" | "project" | "import">("landing");
+
+  // Handler to open a project
+  const handleOpenProject = (projectId: string) => {
+    setCurrentProjectId(projectId);
+    setCurrentPage("project");
+  }
+
+  // Handler to go home
+  const handleGoHome = () => {
+    setCurrentProjectId(null);
+    setCurrentPage("landing");
+  }
 
   // 2. Theme State Management
   // Initialize from localStorage or default to light
@@ -75,15 +90,22 @@ export default function App() {
           success: {
             main: "#10B981", // Green-500
             light: "#34D399",
+            dark: "#059669",
           },
           warning: {
             main: "#F59E0B", // Amber-500
+            light: "#FBBF24",
+            dark: "#D97706",
           },
           error: {
             main: "#EF4444", // Red-500
+            light: "#F87171",
+            dark: "#B91C1C",
           },
           info: {
             main: "#3B82F6",
+            light: "#60A5FA",
+            dark: "#2563EB",
           },
           background: {
             default: mode === "light" ? "#F9FAFB" : "#0F172A",
@@ -102,6 +124,10 @@ export default function App() {
           h6: {
             fontWeight: 600,
           },
+          button: {
+            textTransform: 'none',
+            fontWeight: 600,
+          }
         },
         shape: {
           borderRadius: 12,
@@ -110,25 +136,37 @@ export default function App() {
           MuiButton: {
             styleOverrides: {
               root: {
-                textTransform: 'none',
-                fontWeight: 600,
                 borderRadius: 8,
               },
-              contained: {
-                boxShadow: 'none',
-                '&:hover': {
-                  boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)',
-                },
-              },
+              contained: ({ ownerState }) => ({
+                ...(ownerState.color === 'primary' && {
+                  background: 'linear-gradient(45deg, #0D9488 30%, #3B82F6 90%)',
+                  color: 'white',
+                  boxShadow: mode === 'light' ? '0 4px 14px 0 rgba(13, 148, 136, 0.3)' : '0 3px 5px 2px rgba(13, 148, 136, .3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #0F766E 30%, #2563EB 90%)',
+                    boxShadow: '0 6px 12px 4px rgba(13, 148, 136, .4)',
+                    transform: 'translateY(-1px)',
+                  },
+                }),
+              }),
             },
           },
           MuiCard: {
             styleOverrides: {
               root: {
                 borderRadius: 12,
+                boxShadow: mode === 'light' ? '0 2px 8px rgba(0,0,0,0.05)' : '0 2px 8px rgba(0,0,0,0.2)',
               },
             },
           },
+          MuiDialog: {
+            styleOverrides: {
+              paper: {
+                borderRadius: 16
+              }
+            }
+          }
         },
       }),
     [mode]
@@ -139,10 +177,22 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
 
-        {currentPage === "home" ? (
-          <TranscriptionPage onNavigateToImport={() => setCurrentPage("import")} />
-        ) : (
-          <ImportEditPage onBack={() => setCurrentPage("home")} />
+        {currentPage === "landing" && (
+          <LandingPage
+            onProjectSelect={handleOpenProject}
+            onNavigateToImport={() => setCurrentPage("import")}
+          />
+        )}
+
+        {currentPage === "project" && currentProjectId && (
+          <TranscriptionPage
+            projectId={currentProjectId}
+            onBackToHome={handleGoHome}
+          />
+        )}
+
+        {currentPage === "import" && (
+          <ImportEditPage onBack={handleGoHome} />
         )}
 
         {/* Update Dialog ... */}
@@ -164,12 +214,35 @@ export default function App() {
             autoHideDuration={8000}
             onClose={clearError}
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            sx={{ mb: 4 }}
           >
             <Alert severity="error" variant="filled" onClose={clearError}>
               Update Error: {error}
             </Alert>
           </Snackbar>
         )}
+        {/* FOOTER */}
+        <Box
+          component="footer"
+          py={3}
+          textAlign="center"
+          bgcolor={mode === "light" ? "grey.50" : "grey.900"}
+          borderTop={1}
+          borderColor="divider"
+          mt="auto"
+        >
+          <Typography variant="body2" color="text.secondary" display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+            © {new Date().getFullYear()} SyncExpress Live. Developed by{" "}
+            <Typography component="span" fontWeight="bold" color="primary">
+              Kaustubh Paul
+            </Typography>{" "}
+            and{" "}
+            <Typography component="span" fontWeight="bold" color="primary">
+              Sarnick Chakraborty
+            </Typography>
+            <VerifiedIcon color="primary" fontSize="small" sx={{ width: 16, height: 16 }} />
+          </Typography>
+        </Box>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

@@ -93,3 +93,30 @@ export interface VideoItem {
     path: string;
     name: string;
 }
+
+// --- PROJECT MANAGEMENT TYPES ---
+
+export interface ProjectMetadata {
+    id: string;
+    name: string;
+    savePath: string; // The user-selected output directory
+    createdAt: string;
+    lastModified: string;
+    status: 'active' | 'completed';
+}
+
+export interface ProjectState {
+    projectId: string;
+    step: number;
+    videos: VideoItem[];
+    transcriptText: string | null;
+    transcriptFileName: string | null;
+    transcriptPath: string | null;
+    startLine: string;
+    syncedLines: any[];
+    mappedResult: MappedSentenceResult[] | null;
+    editedSubtitles: any[];
+    splitPoints: number[];
+    isProcessing: boolean; // Maybe we don't persist 'processing' state fully, but good to know
+    hasAutoExported?: boolean;
+}
