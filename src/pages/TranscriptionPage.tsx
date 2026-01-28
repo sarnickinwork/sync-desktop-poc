@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { exists, mkdir } from "@tauri-apps/plugin-fs";
 import {
   Box,
   Typography,
@@ -7,8 +8,6 @@ import {
   Button,
   Alert,
   AlertTitle,
-  Card,
-  CardContent,
   Chip,
   CircularProgress,
 } from "@mui/material";
@@ -23,13 +22,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import WarningIcon from "@mui/icons-material/Warning";
 import TimerIcon from "@mui/icons-material/Timer";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 
 // Components
 import Stepper from "../components/Stepper";
-import LogsPanel from "../components/LogsPanel";
 import TranscriptViewer from "../components/TranscriptViewer";
 import VideoPreview from "../components/preview/VideoPreview";
 import TranscriptPreview from "../components/preview/TranscriptPreview";
@@ -73,53 +70,45 @@ ${bodyContent}
 </SAMI>`;
 };
 
+import { getProjectState, saveProjectState, getProjects } from "../utils/projectManager";
+import { ProjectState } from "../utils/types";
+
+// ... existing imports ...
+
 type Props = {
+  projectId: string;
   onNavigateToImport?: () => void;
+  onBackToHome: () => void;
 };
 
-export default function TranscriptionPage({ onNavigateToImport }: Props) {
+export default function TranscriptionPage({ projectId, onNavigateToImport, onBackToHome }: Props) {
   const theme = useTheme();
+
+  // Project Metadata
+  const projectName = getProjects().find(p => p.id === projectId)?.name || "Untitled Project";
+
+  // State
   const [step, setStep] = useState(0);
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [transcriptText, setTranscriptText] = useState<string | null>(null);
   const [transcriptFileName, setTranscriptFileName] = useState<string | null>(null);
   const [transcriptPath, setTranscriptPath] = useState<string | null>(null);
-  const [resumeData, setResumeData] = useState<any>(null);
 
   // Export State
   const [isExporting, setIsExporting] = useState(false);
   const [startLine, setStartLine] = useState<string>("");
 
-  // --- SESSION RECOVERY ---
-  useEffect(() => {
-    const loadSession = async () => {
-      const saved = localStorage.getItem("lastSession");
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          // Only offer resume if we have valid videos
-          if (data.videos && data.videos.length > 0) {
-            setResumeData(data);
-          }
-        } catch (e) {
-          console.error("Failed to parse saved session", e);
-        }
-      }
-    };
-    loadSession();
-  }, []);
+  // Other state needed for restore
+  const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
+  const [editedSubtitles, setEditedSubtitles] = useState<SmiSubtitle[]>([]);
+  const [splitPoints, setSplitPoints] = useState<number[]>([]);
+  const [hasAutoExported, setHasAutoExported] = useState(false);
 
-  const saveSession = (vids: VideoItem[], tPath: string | null, sLine: string) => {
-    localStorage.setItem("lastSession", JSON.stringify({
-      videos: vids.map(v => ({ path: v.path, name: v.name })),
-      transcriptPath: tPath,
-      startLine: sLine,
-      date: new Date().toISOString()
-    }));
-  };
+  // Local state for restoring complex objects that are usually driven by the hook
+  const [restoredMappedResult, setRestoredMappedResult] = useState<any[] | null>(null);
+  const [restoredApiElapsedTime, setRestoredApiElapsedTime] = useState<number>(0);
 
   const {
-    logs,
     isProcessing,
     error,
     transcriptResult,
@@ -129,9 +118,75 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
     handleWorkflow,
   } = useTranscriptionWorkflow();
 
-  const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
-  const [editedSubtitles, setEditedSubtitles] = useState<SmiSubtitle[]>([]);
-  const [splitPoints, setSplitPoints] = useState<number[]>([]);
+  // --- PROJECT STATE RECOVERY ---
+  useEffect(() => {
+    const state = getProjectState(projectId);
+    if (state) {
+      setStep(state.step || 0);
+      setVideos(state.videos || []);
+      setTranscriptText(state.transcriptText || null);
+      setTranscriptFileName(state.transcriptFileName || null);
+      setTranscriptPath(state.transcriptPath || null);
+      setStartLine(state.startLine || "0");
+      setSyncedLines(state.syncedLines || []);
+      // Note: mappedResult restoration is complex due to hooks, 
+      // usually we re-derive or store it. For now, we restore if available.
+      // But mappedResult is usually derived from API response. 
+      // If we want to persist api results, we need to store them.
+
+      // Detailed restore:
+      if (state.syncedLines) setSyncedLines(state.syncedLines);
+      if (state.editedSubtitles) setEditedSubtitles(state.editedSubtitles);
+      if (state.splitPoints) setSplitPoints(state.splitPoints);
+      if (state.hasAutoExported) setHasAutoExported(state.hasAutoExported);
+      if (state.mappedResult) setRestoredMappedResult(state.mappedResult);
+      if (state.syncedLines && state.syncedLines.length > 0 && !state.mappedResult) {
+        // Fallback if we have synced lines but no mapped result (e.g. from older save)
+        // We might not be able to reconstruct full mappedResult without confidence/timestamps for words
+        // But usually we save mappedResult now.
+      }
+      // Note: apiElapsedTime is not in ProjectState interface explicitly as a top level, 
+      // but we can add it or store it in metadata if needed. 
+      // Actually ProjectState definition in types.ts doesn't have apiElapsedTime?
+      // Let's check types.ts again. 
+      // It DOES NOT have apiElapsedTime.
+      // I should assume it might be saved if I add it to save. 
+      // For now, let's cast state as any to access custom props or I'll just rely on what's there.
+      // If I add it to save, I can read it back.
+      if ((state as any).apiElapsedTime) setRestoredApiElapsedTime((state as any).apiElapsedTime);
+    }
+  }, [projectId]);
+
+  // --- AUTO-SAVE ---
+  useEffect(() => {
+    // Debounce save or save on critical changes
+    const timeout = setTimeout(() => {
+      saveProjectState(projectId, {
+        step,
+        videos,
+        transcriptText,
+        transcriptFileName,
+        transcriptPath,
+        startLine,
+        syncedLines,
+        editedSubtitles,
+        splitPoints,
+        hasAutoExported,
+        mappedResult: mappedResult || restoredMappedResult,
+        // Save extra fields by casting to any or updating type definition
+        // We will cast to any to avoid changing type definition file right now
+        // or just rely on the fact that JS allows it.
+        apiElapsedTime: apiElapsedTime || restoredApiElapsedTime
+      } as any);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [projectId, step, videos, transcriptText, transcriptPath, startLine, syncedLines, editedSubtitles, splitPoints, hasAutoExported, mappedResult, apiElapsedTime, restoredMappedResult, restoredApiElapsedTime]);
+
+
+
+
+
+  // Timer for processing
   const [liveElapsedTime, setLiveElapsedTime] = useState<number>(0);
 
   // Initialize editedSubtitles from mappedResult
@@ -166,7 +221,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
   }, [isProcessing]);
 
   // Auto-export when results are ready
-  const [hasAutoExported, setHasAutoExported] = useState(false);
+
 
   useEffect(() => {
     if (step === 3 && !isProcessing && mappedResult && !hasAutoExported) {
@@ -255,10 +310,15 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       return;
     }
 
-    if (!projectFolderPath) {
-      alert("Project folder not found. Please run the workflow first.");
+    // Derive project folder path from metadata if hook state is missing
+    const project = getProjects().find(p => p.id === projectId);
+    if (!project) {
+      alert("Project metadata not found.");
       return;
     }
+
+    // Reconstruct the project folder path
+    const derivedProjectFolderPath = projectFolderPath || await join(project.savePath, project.name);
 
     // Use first video for naming conventions
     const primaryVideo = videos[0];
@@ -267,7 +327,8 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       setIsExporting(true);
 
       // 1. Prepare Paths
-      const rawProjectName = primaryVideo.name.replace(/\.[^/.]+$/, "").trim();
+      // Use project name from metadata, not video file name
+      const rawProjectName = project.name;
       const finalTranscriptFileName = transcriptFileName || "transcript.txt";
 
       // 2. Prepare Content
@@ -332,32 +393,43 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       }
 
       // 3. Write files to project folder
-      console.log("Exporting to project folder:", projectFolderPath);
+      console.log("Exporting to project folder:", derivedProjectFolderPath);
+
+      // Ensure folders exist (they should from workflow, but double-check)
+      const mediaFolder = await join(derivedProjectFolderPath, "media");
+      const transcriptionFolder = await join(derivedProjectFolderPath, "transcription");
+
+      if (!(await exists(mediaFolder))) {
+        await mkdir(mediaFolder);
+      }
+      if (!(await exists(transcriptionFolder))) {
+        await mkdir(transcriptionFolder);
+      }
 
       // Copy ALL video files to media folder
       for (const v of videos) {
-        const vDest = await join(projectFolderPath, "media", v.name);
+        const vDest = await join(derivedProjectFolderPath, "media", v.name);
         await copyFile(v.path, vDest);
         console.log(`Video ${v.name} copied to:`, vDest);
       }
 
       // Write .smi file to media folder
-      const smiPath = await join(projectFolderPath, "media", `${rawProjectName}.smi`);
+      const smiPath = await join(derivedProjectFolderPath, "media", `${rawProjectName}.smi`);
       await writeTextFile(smiPath, finalSamiContent);
       console.log(".smi file written to:", smiPath);
 
       // Write transcript to transcription folder
-      const transcriptPath = await join(projectFolderPath, "transcription", finalTranscriptFileName);
+      const transcriptPath = await join(derivedProjectFolderPath, "transcription", finalTranscriptFileName);
       await writeTextFile(transcriptPath, finalTxtContent);
       console.log("Transcript written to:", transcriptPath);
 
       // Write .dvt file to project root
-      const dvtPath = await join(projectFolderPath, `${rawProjectName}.dvt`);
+      const dvtPath = await join(derivedProjectFolderPath, `${rawProjectName}.dvt`);
       await writeTextFile(dvtPath, finalDvtContent!);
       console.log(".dvt file written to:", dvtPath);
 
       // Update .syn file at project root
-      const synPath = await join(projectFolderPath, `${rawProjectName}.syn`);
+      const synPath = await join(derivedProjectFolderPath, `${rawProjectName}.syn`);
       await writeTextFile(synPath, finalSynContent!);
       console.log(".syn file updated at:", synPath);
 
@@ -366,7 +438,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       setStep(5); // Navigate to Job Summary
 
       // Removed auto-navigation and alert as per request
-      console.log(`Export Successful! Files saved to: ${projectFolderPath}`);
+      console.log(`Export Successful! Files saved to: ${derivedProjectFolderPath}`);
       // setStep(4); 
       // alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
     } catch (error: any) {
@@ -387,9 +459,17 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
         mb={3}
       >
         <Typography variant="h5" fontWeight={600}>
-          Sync App POC v2.0.0
+          {projectName}
         </Typography>
         <Box display="flex" gap={2}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<ArrowBackIcon />}
+            onClick={onBackToHome}
+          >
+            My Projects
+          </Button>
           {onNavigateToImport && (
             <Button
               variant="outlined"
@@ -408,61 +488,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       {/* STEP 0: UPLOAD */}
       {step === 0 && (
         <>
-          {/* RESUME BANNER */}
-          {resumeData && videos.length === 0 && (
-            <Alert
-              severity="info"
-              sx={{ mb: 3 }}
-              action={
-                <Box display="flex" gap={1}>
-                  <Button color="inherit" size="small" onClick={async () => {
-                    // Restore Videos (all of them in order)
-                    setVideos(resumeData.videos.map((v: any, idx: number) => ({
-                      id: `${Date.now()}-${idx}`,
-                      path: v.path,
-                      name: v.name
-                    })));
 
-                    // Restore Transcript
-                    if (resumeData.transcriptPath) {
-                      try {
-                        const text = await readTextFile(resumeData.transcriptPath);
-                        setTranscriptText(text);
-                        setTranscriptPath(resumeData.transcriptPath);
-                        setTranscriptFileName(resumeData.transcriptPath.split(/[\\/]/).pop() || "transcript.txt");
-                      } catch (e) {
-                        console.error("Failed to load prev transcript", e);
-                        alert("Could not load previous transcript file. You may need to select it again.");
-                      }
-                    }
-
-                    // Restore StartLine
-                    setStartLine(resumeData.startLine || "0");
-
-                    // Clear resume data to hide banner
-                    setResumeData(null);
-                    // Auto-advance
-                    setStep(1);
-                  }}>
-                    Resume Previous Session
-                  </Button>
-                  <Button
-                    color="inherit"
-                    size="small"
-                    onClick={() => {
-                      localStorage.removeItem("lastSession");
-                      setResumeData(null);
-                    }}
-                  >
-                    ✕
-                  </Button>
-                </Box>
-              }
-            >
-              <AlertTitle>Resume Session?</AlertTitle>
-              Continue with <strong>{resumeData.videos?.length || 0} video(s)</strong> {resumeData.transcriptPath ? " and transcript" : ""}?
-            </Alert>
-          )}
 
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={3} mt={3}>
             {/* Draggable Video List */}
@@ -515,9 +541,6 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               endIcon={<ArrowForwardIcon />}
               disabled={videos.length === 0}
               onClick={() => {
-                if (videos.length > 0) {
-                  saveSession(videos, transcriptPath, startLine);
-                }
                 setStep(1);
               }}
               sx={{ px: 4, py: 1.5, borderRadius: 2 }}
@@ -599,9 +622,6 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
               size="large"
               endIcon={<ArrowForwardIcon />}
               onClick={() => {
-                if (videos.length > 0) {
-                  saveSession(videos, transcriptPath, startLine);
-                }
                 setStep(2);
               }}
               sx={{ px: 4 }}
@@ -628,23 +648,32 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
             >
               Back
             </Button>
-            <Button
-              variant="contained"
-              size="large"
-              disabled={isProcessing}
-              color={error ? "warning" : "primary"}
-              onClick={() =>
-                handleWorkflow(videos, transcriptText, parseInt(startLine) || 0)
-              }
-              startIcon={!isProcessing ? (error ? <RestartAltIcon /> : <PlayArrowIcon />) : null}
-              sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
-            >
-              {isProcessing
-                ? "Extracting & Uploading..."
-                : error
-                  ? "Retry Auto-Sync Workflow"
-                  : "Start Auto-Sync Workflow"}
-            </Button>
+            {!transcriptResult && (
+              <Button
+                variant="contained"
+                size="large"
+                disabled={isProcessing}
+                color={error ? "warning" : "primary"}
+                onClick={() => {
+                  const project = getProjects().find(p => p.id === projectId);
+                  handleWorkflow(
+                    videos,
+                    transcriptText,
+                    parseInt(startLine) || 0,
+                    project?.savePath || null,
+                    project?.name || null
+                  );
+                }}
+                startIcon={!isProcessing ? (error ? <RestartAltIcon /> : <PlayArrowIcon />) : null}
+                sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
+              >
+                {isProcessing
+                  ? "Extracting & Uploading..."
+                  : error
+                    ? "Retry Auto-Sync Workflow"
+                    : "Start Auto-Sync Workflow"}
+              </Button>
+            )}
           </Box>
 
           {error && (
@@ -778,10 +807,10 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
 
           {mappedResult && mappedResult.length > 0 ? (
             <ResultsDisplay
-              mappedResults={mappedResult}
+              mappedResults={mappedResult || restoredMappedResult || []}
               videos={videos}
               splitPoints={splitPoints}
-              apiElapsedTime={apiElapsedTime}
+              apiElapsedTime={apiElapsedTime || restoredApiElapsedTime}
             />
           ) : syncedLines.length > 0 ? (
             <Box>
@@ -846,7 +875,7 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
 
 
       {/* STEP 5: JOB SUMMARY */}
-      {step === 5 && mappedResult && mappedResult.length > 0 && (
+      {step === 5 && ((mappedResult && mappedResult.length > 0) || (restoredMappedResult && restoredMappedResult.length > 0)) && (
         <Box>
           <Box mb={3} display="flex" gap={2} flexWrap="wrap">
             <Button
@@ -877,11 +906,11 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
           <JobSummaryCard
             videoCount={videos.length}
             totalDuration={splitPoints[splitPoints.length - 1] / 1000 || 0}
-            sentenceCount={mappedResult.length}
+            sentenceCount={(mappedResult || restoredMappedResult || []).length}
             avgConfidence={
-              mappedResult.reduce((sum, r) => sum + (r.confidence || 0), 0) / mappedResult.length
+              (mappedResult || restoredMappedResult || []).reduce((sum: number, r: any) => sum + (r.confidence || 0), 0) / ((mappedResult || restoredMappedResult || []).length || 1)
             }
-            processingTime={apiElapsedTime || 0}
+            processingTime={apiElapsedTime || restoredApiElapsedTime || 0}
             estimatedCost={(splitPoints[splitPoints.length - 1] / 1000 || 0) * 0.00025}
           />
         </Box>
@@ -889,12 +918,8 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
 
       <Box mt={5}>
         {/* Hide logs and raw viewer during Preview step (step 1) to keep UI clean */}
-        {step !== 1 && (
-          <>
-            <LogsPanel logs={logs} />
-            <TranscriptViewer data={transcriptResult} />
-          </>
-        )}
+        {/* <LogsPanel logs={logs} /> */}
+        <TranscriptViewer data={transcriptResult} />
       </Box>
     </Box>
   );

@@ -26,7 +26,7 @@ function convertToSimpleTranscriptDto(rawResponse: any): SimpleTranscriptDto {
 }
 
 export function useTranscriptionWorkflow() {
-  const [logs, setLogs] = useState<string[]>([]);
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [transcriptResult, setTranscriptResult] = useState<any>(null);
@@ -38,13 +38,15 @@ export function useTranscriptionWorkflow() {
   const [apiElapsedTime, setApiElapsedTime] = useState<number | null>(null);
   const [projectFolderPath, setProjectFolderPath] = useState<string | null>(null);
 
-  const log = (msg: string) => setLogs((prev) => [...prev, msg]);
+  const log = (msg: string) => console.log(`[Workflow]: ${msg}`);
 
   // Updated signature to accept VideoItem[] (multiple videos)
   const handleWorkflow = async (
     videos: VideoItem[],
     manualTranscript: string | null,
-    startLine: number = 0
+    startLine: number = 0,
+    projectSavePath: string | null = null,
+    projectName: string | null = null
   ) => {
     if (videos.length === 0) {
       log("No videos provided.");
@@ -57,7 +59,7 @@ export function useTranscriptionWorkflow() {
     try {
       setIsProcessing(true);
       setError(null);
-      setLogs([]);
+      // setLogs([]); 
       setTranscriptResult(null);
       setMappedResult(null);
       setSmiContent(null);
@@ -70,16 +72,44 @@ export function useTranscriptionWorkflow() {
       if (!API_URL) throw new Error("VITE_API_URL is missing in .env");
 
       // --- STEP 0: CREATE PROJECT FOLDER STRUCTURE ---
-      log("Creating project folder structure...");
+      // Use provided path or fallback (though provided path should always be there now)
+      let projectFolder = projectFolderPath;
 
-      // Extract project name from video path
-      const projectDisplayName = firstVideo.name.replace(/\.[^/.]+$/, "").trim();
+      if (!projectFolder) {
+        if (projectSavePath) {
+          // If we have a save path from the project metadata, use it!
+          // Ideally, we shouldn't create a subfolder if the user picked the folder intended for the project.
+          // However, usually "save path" is the PARENT directory.
+          // Let's assume projectSavePath is the PARENT directory chosen by user, 
+          // and we create [ProjectName] inside it?
+          // OR is projectSavePath the ACTUAL project folder?
+          // Looking at ProjectManager logic: getProjects() returns saved projects.
+          // When creating: createNewProject(name, savePath).
+          // If the user selected "D:/Work", savePath is "D:/Work".
+          // We likely want "D:/Work/ProjectName".
+          // BUT check if savePath already includes the project name?
+          // Let's assume savePath is the PARENT folder for safety, or check if it already ends in name.
 
-      // Create project folder in Downloads
-      const downloadsPath = await downloadDir();
-      const projectFolder = await join(downloadsPath, projectDisplayName);
+          // Actually, let's use the logic: projectSavePath + "/" + projectName (sanitized)
+          // IF projectSavePath is passed.
 
-      // Create main project folder
+          // Wait, user says: "cant find anything in the path".
+          // So we should respect what comes in.
+
+          if (!projectName) {
+            throw new Error("Project name is required for path generation");
+          }
+
+          // Construct path: savePath / projectName
+          projectFolder = await join(projectSavePath, projectName);
+        } else {
+          // Fallback to Downloads if NO path provided (shouldn't happen in new flow)
+          const downloadsPath = await downloadDir();
+          const projectDisplayName = firstVideo.name.replace(/\.[^/.]+$/, "").trim();
+          projectFolder = await join(downloadsPath, projectDisplayName);
+        }
+      }
+
       if (!(await exists(projectFolder))) {
         await mkdir(projectFolder);
         log(`Created project folder: ${projectFolder}`);
@@ -87,6 +117,8 @@ export function useTranscriptionWorkflow() {
         log(`Project folder exists: ${projectFolder}`);
       }
       setProjectFolderPath(projectFolder);
+
+      const projectDisplayName = projectName || firstVideo.name.replace(/\.[^/.]+$/, "").trim();
 
       // Initialize .syn file path
       const synPath = await join(projectFolder, `${projectDisplayName}.syn`);
@@ -306,13 +338,13 @@ export function useTranscriptionWorkflow() {
           existingSynData.synchronization?.sentences &&
           existingSynData.synchronization.sentences.length > 0) {
           log("RESUMING: Found completed text mapping in .syn file.");
-          
+
           // Use cached mapping result
           mappedSentences = existingSynData.synchronization.sentences.map((s: any) => ({
-              sentence: s.text, // or s.sentence
-              start: s.start,
-              end: s.end,
-              confidence: s.confidence
+            sentence: s.text, // or s.sentence
+            start: s.start,
+            end: s.end,
+            confidence: s.confidence
           }));
           setMappedResult(mappedSentences);
         } else {
@@ -320,13 +352,13 @@ export function useTranscriptionWorkflow() {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           log("Performing Simple Line Mapping (preserving format)...");
-          
+
           // Import dynamically or assume it's available via utils
           const { performSimpleLineMapping } = await import('../utils/simpleLineMapping');
-          
+
           // Uses the raw manualTranscript and startLine
           mappedSentences = performSimpleLineMapping(manualTranscript, mergedTranscript, startLine);
-          
+
           log(`Mapping complete! ${mappedSentences.length} lines synced.`);
           setMappedResult(mappedSentences);
         }
@@ -398,7 +430,7 @@ export function useTranscriptionWorkflow() {
   };
 
   return {
-    logs,
+
     isProcessing,
     error,
     transcriptResult,

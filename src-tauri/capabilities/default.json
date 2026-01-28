@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "shell:allow-execute",
@@ -27,18 +29,15 @@
     {
       "identifier": "fs:scope",
       "allow": [
+        "**",
         "$APPDATA",
         "$APPDATA/**",
-
         "$DESKTOP",
         "$DESKTOP/**",
-
         "$DOWNLOAD",
         "$DOWNLOAD/**",
-
         "$VIDEO",
         "$VIDEO/**",
-
         "$DOCUMENT",
         "$DOCUMENT/**"
       ]
