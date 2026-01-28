@@ -15,12 +15,12 @@ function escapeXml(text: string): string {
 }
 
 /**
- * Replace regular spaces with non-breaking spaces for DVT format
+ * Replace regular spaces with non-breaking space entities for DVT format
  * @param text - Text to process
- * @returns Text with \xa0 instead of spaces
+ * @returns Text with &#160; (non-breaking space entity) instead of spaces
  */
 function replaceSpaces(text: string): string {
-    return text.replace(/ /g, '\xa0');
+    return text.replace(/ /g, '&#160;');
 }
 
 /**
@@ -72,7 +72,7 @@ export function generateDVT(metadata: DVTMetadata): string {
     });
 
     const lines: string[] = [
-        '<?xml version="1.0" encoding="ISO-8859-1"?>',
+        '<?xml version="1.0" encoding="UTF-8"?>',
         '<!-- Copyright (C) 2013-2018 ExhibitBiew LLC.  All rights reserved. -->',
         '<OpenDVT UUID="{C475858E-138F-47C9-8775-536BCE1C9C94}" ShortID="XXXXXXX" Type="Deposition" Version="2.0">',
         '  <Information>',
@@ -114,9 +114,9 @@ export function generateDVT(metadata: DVTMetadata): string {
         const sentence = validLines[i];
         const cleanText = sentence.text || sentence.sentence;
 
-        // CRITICAL: Replace spaces FIRST, then escape XML
-        const textWithNbsp = replaceSpaces(cleanText);
-        const escapedText = escapeXml(textWithNbsp);
+        // CRITICAL: Escape XML FIRST, then replace spaces with entities
+        const escapedText = escapeXml(cleanText);
+        const textWithNbsp = replaceSpaces(escapedText);
 
         // Detect Q/A type
         const qaType = detectQA(cleanText);
@@ -137,7 +137,7 @@ export function generateDVT(metadata: DVTMetadata): string {
             lines.push(`      <QA>${qaType}</QA>`);
         }
 
-        lines.push(`      <Text>${escapedText}</Text>`);
+        lines.push(`      <Text>${textWithNbsp}</Text>`);
         lines.push('    </Line>');
     }
 
@@ -161,30 +161,13 @@ export function generateDVT(metadata: DVTMetadata): string {
 }
 
 /**
- * Download DVT content as a file with proper ISO-8859-1 encoding
+ * Download DVT content as a file with proper UTF-8 encoding
  * @param dvtContent - DVT XML formatted string content
  * @param filename - Optional filename (defaults to 'deposition.dvt')
  */
 export function downloadDVT(dvtContent: string, filename: string = 'deposition.dvt'): void {
-    // Convert string to ISO-8859-1 (Latin-1) byte array
-    // ISO-8859-1 is a single-byte encoding where each character maps directly to a byte value
-    const latin1Array = new Uint8Array(dvtContent.length);
-
-    for (let i = 0; i < dvtContent.length; i++) {
-        const code = dvtContent.charCodeAt(i);
-
-        // ISO-8859-1 only supports characters 0-255
-        // Characters outside this range are replaced with '?' (63)
-        if (code > 255) {
-            console.warn(`Character at position ${i} (code ${code}) is outside ISO-8859-1 range, replacing with '?'`);
-            latin1Array[i] = 63; // '?' character
-        } else {
-            latin1Array[i] = code;
-        }
-    }
-
-    // Create blob with the Latin-1 encoded data
-    const blob = new Blob([latin1Array], { type: 'application/xml;charset=ISO-8859-1' });
+    // Create blob with UTF-8 encoding
+    const blob = new Blob([dvtContent], { type: 'application/xml;charset=UTF-8' });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement('a');
