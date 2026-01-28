@@ -5,12 +5,12 @@ import {
   useTheme,
   alpha,
   Button,
-  CircularProgress,
   Alert,
   AlertTitle,
   Card,
   CardContent,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import { join } from "@tauri-apps/api/path";
 import { writeTextFile, copyFile, readTextFile } from "@tauri-apps/plugin-fs";
@@ -164,6 +164,17 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       if (intervalId) clearInterval(intervalId);
     };
   }, [isProcessing]);
+
+  // Auto-export when results are ready
+  const [hasAutoExported, setHasAutoExported] = useState(false);
+
+  useEffect(() => {
+    if (step === 3 && !isProcessing && mappedResult && !hasAutoExported) {
+      console.log("Auto-exporting results...");
+      handleExportZip();
+      setHasAutoExported(true);
+    }
+  }, [step, isProcessing, mappedResult, hasAutoExported]);
 
   function processAssemblyResult(apiResult: any) {
     if (!apiResult) return;
@@ -354,7 +365,10 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       localStorage.removeItem("lastSession");
       setStep(5); // Navigate to Job Summary
 
-      alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
+      // Removed auto-navigation and alert as per request
+      console.log(`Export Successful! Files saved to: ${projectFolderPath}`);
+      // setStep(4); 
+      // alert(`Export Successful!\nFiles saved to:\n${projectFolderPath}`);
     } catch (error: any) {
       console.error("Export Failed:", error);
       alert(`Export Failed: ${error}`);
@@ -604,23 +618,34 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
           <Typography mb={3} color="text.secondary">
             Click below to extract audio locally and sync via backend.
           </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            disabled={isProcessing}
-            color={error ? "warning" : "primary"}
-            onClick={() =>
-              handleWorkflow(videos, transcriptText, parseInt(startLine) || 0)
-            }
-            startIcon={!isProcessing ? (error ? <RestartAltIcon /> : <PlayArrowIcon />) : null}
-            sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
-          >
-            {isProcessing
-              ? "Extracting & Uploading..."
-              : error
-                ? "Retry Auto-Sync Workflow"
-                : "Start Auto-Sync Workflow"}
-          </Button>
+          <Box display="flex" gap={2}>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => setStep(1)}
+              disabled={isProcessing}
+            >
+              Back
+            </Button>
+            <Button
+              variant="contained"
+              size="large"
+              disabled={isProcessing}
+              color={error ? "warning" : "primary"}
+              onClick={() =>
+                handleWorkflow(videos, transcriptText, parseInt(startLine) || 0)
+              }
+              startIcon={!isProcessing ? (error ? <RestartAltIcon /> : <PlayArrowIcon />) : null}
+              sx={{ py: 1.5, px: 4, borderRadius: 2, fontSize: "1.1rem" }}
+            >
+              {isProcessing
+                ? "Extracting & Uploading..."
+                : error
+                  ? "Retry Auto-Sync Workflow"
+                  : "Start Auto-Sync Workflow"}
+            </Button>
+          </Box>
 
           {error && (
             <Alert severity="error" sx={{ mt: 2, maxWidth: 600 }}>
@@ -699,6 +724,14 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
       {step === 3 && videos.length > 0 && (
         <Box>
           <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="space-between">
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => setStep(2)}
+            >
+              Back
+            </Button>
+
             <Button
               variant="outlined"
               startIcon={<RestartAltIcon />}
@@ -794,17 +827,10 @@ export default function TranscriptionPage({ onNavigateToImport }: Props) {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleExportZip}
-              disabled={isExporting}
-              startIcon={
-                isExporting ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <SaveAltIcon />
-                )
-              }
+              onClick={() => setStep(5)}
+              endIcon={<ArrowForwardIcon />}
             >
-              {isExporting ? "Zipping..." : "Export Project Zip"}
+              Job Summary
             </Button>
           </Box>
 

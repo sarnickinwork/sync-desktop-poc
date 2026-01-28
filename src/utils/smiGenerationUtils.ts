@@ -1,4 +1,4 @@
-import { MappedSentenceResult } from './types';
+import { MappedSentenceResult, SimpleTranscriptDto } from './types';
 
 /**
  * Generate SMI (SAMI) subtitle content from mapped sentence results
@@ -29,7 +29,8 @@ export function generateSMI(sentences: MappedSentenceResult[]): string {
         const endMs = Math.round(sentence.end);
         
         // Escape special HTML characters in the sentence
-        const escapedText = escapeHtml(sentence.sentence);
+        // Use cleaned text if available to avoid speaker labels in subtitles
+        const escapedText = escapeHtml(sentence.text || sentence.sentence);
         
         // Add the subtitle entry
         lines.push(`<Sync Start=${startMs}><P Class=ENCC>${escapedText}`);
@@ -86,4 +87,74 @@ export function downloadSMI(smiContent: string, filename: string = 'subtitle.smi
 export function generateAndDownloadSMI(sentences: MappedSentenceResult[], filename?: string): void {
     const smiContent = generateSMI(sentences);
     downloadSMI(smiContent, filename);
+}
+
+/**
+ * Generate SMI subtitles directly from AI transcription
+ * Groups words into subtitle chunks for readable display
+ * @param aiTranscript - AI transcript with word-level timestamps
+ * @param maxWordsPerSubtitle - Maximum words per subtitle (default: 10)
+ * @param maxDurationMs - Maximum duration per subtitle in ms (default: 3000)
+ * @returns SMI formatted string
+ */
+export function generateSMIFromAI(
+    aiTranscript: SimpleTranscriptDto,
+    maxWordsPerSubtitle: number = 10,
+    maxDurationMs: number = 3000
+): string {
+    const lines: string[] = [
+        '<SAMI>',
+        '<Head>',
+        '<Title>AI Subtitles</Title>',
+        '<Style type="text/css">',
+        '<!--',
+        'P { margin-left: 8pt; margin-right: 8pt; margin-bottom: 2pt; margin-top: 2pt;',
+        '    text-align: center; font-size: 20pt; font-family: Arial, Sans-Serif;',
+        '    font-weight: normal; color: white; }',
+        '.ENCC { Name: English; lang: en-US; }',
+        '-->',
+        '</Style>',
+        '</Head>',
+        '<Body>',
+        '<Sync Start=0><P Class=ENCC>&nbsp;'
+    ];
+
+    // Group words into subtitle chunks
+    const words = aiTranscript.words;
+    let currentChunk: string[] = [];
+    let chunkStartMs = 0;
+    let chunkEndMs = 0;
+
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        
+        // Start new chunk if empty
+        if (currentChunk.length === 0) {
+            chunkStartMs = word.start;
+        }
+        
+        currentChunk.push(word.text);
+        chunkEndMs = word.end;
+        
+        // Determine if we should end this chunk
+        const shouldEndChunk = 
+            currentChunk.length >= maxWordsPerSubtitle ||
+            (chunkEndMs - chunkStartMs) >= maxDurationMs ||
+            i === words.length - 1;
+        
+        if (shouldEndChunk) {
+            const text = currentChunk.join(' ');
+            const escapedText = escapeHtml(text);
+            
+            lines.push(`<Sync Start=${Math.round(chunkStartMs)}><P Class=ENCC>${escapedText}`);
+            lines.push(`<Sync Start=${Math.round(chunkEndMs)}><P Class=ENCC>&nbsp;`);
+            
+            currentChunk = [];
+        }
+    }
+
+    lines.push('</Body>');
+    lines.push('</SAMI>');
+
+    return lines.join('\r\n');
 }

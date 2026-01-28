@@ -127,9 +127,58 @@ const SyncedPlayer = forwardRef<SyncedPlayerRef, Props>(({ videos, splitPoints, 
         // Force set time
         videoRef.current.currentTime = localTime;
         videoRef.current.play().catch(() => { });
+        // Enable track if not already
+        if (videoRef.current.textTracks[0]) {
+          videoRef.current.textTracks[0].mode = 'showing';
+        }
       }
     }, 50);
   };
+
+  // Generate VTT URL for native subtitles (Works in fullscreen)
+  const [vttUrl, setVttUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!currentVideo) return;
+
+    // Start of current video in global timeline
+    const offset = currentVideoIndex === 0 ? 0 : splitPoints[currentVideoIndex - 1];
+
+    // Generate VTT content
+    const vttLines = ["WEBVTT", ""];
+
+    // Format seconds to HH:MM:SS.mmm
+    const formatVttTime = (t: number) => {
+      const totalSeconds = Math.max(0, t);
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = Math.floor(totalSeconds % 60);
+      const ms = Math.floor((totalSeconds % 1) * 1000);
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
+    };
+
+    lines.forEach((line) => {
+      // Calculate local time for this video chunk
+      const startLocal = (line.start - offset) / 1000;
+      const endLocal = (line.end - offset) / 1000;
+
+      // Only include lines that might appear in this video
+      // (End time must be positive, meaning it ends after this video starts)
+      if (endLocal > 0) {
+        vttLines.push(`${formatVttTime(startLocal)} --> ${formatVttTime(endLocal)}`);
+        vttLines.push(line.text); // Clean text
+        vttLines.push("");
+      }
+    });
+
+    const blob = new Blob([vttLines.join("\n")], { type: "text/vtt" });
+    const url = URL.createObjectURL(blob);
+    setVttUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [lines, currentVideoIndex, splitPoints]);
 
   return (
     <Box display="grid" gridTemplateColumns={hideTranscript ? "1fr" : "1fr 1fr"} gap={3} sx={{ height: '100%' }}>
@@ -166,7 +215,11 @@ const SyncedPlayer = forwardRef<SyncedPlayerRef, Props>(({ videos, splitPoints, 
                   setIsPlaying(false);
                 }
               }}
-            />
+            >
+              {vttUrl && <track kind="subtitles" src={vttUrl} default label="English" />}
+            </video>
+
+            {/* Subtitle Overlay removed in favor of native VTT track */}
           </Box>
         )}
       </Box>

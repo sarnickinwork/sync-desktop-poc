@@ -22,6 +22,16 @@ export {
     extractHumanTranscriptFromContent
 } from './textProcessingUtils';
 
+// Text sanitization utilities (for alignment)
+export {
+    sanitizeLineForAlignment,
+    sanitizeLines,
+    isNonSpokenLine,
+    getSpokenContentRatio,
+    reconstructSentences,
+    isSpeakerLabelOnly
+} from './textSanitization';
+
 // Transcript merge utilities
 export { mergeTranscripts } from './transcriptMergeUtils';
 
@@ -42,7 +52,7 @@ export {
 export { performTextMapping } from './textMappingUtils';
 
 // SMI generation utilities
-export { generateSMI, downloadSMI, generateAndDownloadSMI } from './smiGenerationUtils';
+export { generateSMI, downloadSMI, generateAndDownloadSMI, generateSMIFromAI } from './smiGenerationUtils';
 export { parseSMI } from './smiParsingUtils';
 
 // DVT generation utilities

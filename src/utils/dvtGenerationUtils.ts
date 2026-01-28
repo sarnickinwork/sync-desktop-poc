@@ -1,17 +1,8 @@
 import { DVTMetadata } from './types';
 
 /**
- * Format milliseconds to seconds with decimal precision for DVT timecodes
- * @param ms - Milliseconds
- * @returns Seconds as decimal string
- */
-function formatDVTTimecode(ms: number): string {
-    return (ms / 1000).toFixed(3);
-}
-
-/**
  * Escape XML special characters while preserving whitespace
- * @param text: Text to escape
+ * @param text - Text to escape
  * @returns Escaped text
  */
 function escapeXml(text: string): string {
@@ -24,62 +15,128 @@ function escapeXml(text: string): string {
 }
 
 /**
+ * Replace regular spaces with non-breaking spaces for DVT format
+ * @param text - Text to process
+ * @returns Text with \xa0 instead of spaces
+ */
+function replaceSpaces(text: string): string {
+    return text.replace(/ /g, '\xa0');
+}
+
+/**
+ * Detect QA (Question/Answer) type from line text
+ * @param text - Line text to analyze
+ * @returns 'Q' for question, 'A' for answer, '-' for neither
+ */
+function detectQA(text: string): string {
+    const trimmed = text.trim();
+
+    // Check for explicit Q. or A. markers
+    if (/^Q\.\s/i.test(trimmed) || /^QUESTION:/i.test(trimmed)) {
+        return 'Q';
+    }
+    if (/^A\.\s/i.test(trimmed) || /^ANSWER:/i.test(trimmed)) {
+        return 'A';
+    }
+
+    // Check for common answer phrases
+    if (/^(THE\s+WITNESS|MR\.|MS\.|MRS\.|DR\.)/i.test(trimmed)) {
+        return 'A';
+    }
+
+    // Default to no Q/A marker
+    return '-';
+}
+
+/**
+ * Check if a line is a page header (just a page number centered)
+ * @param text - Line text
+ * @returns true if this is a page header line
+ */
+function isPageHeader(text: string): boolean {
+    const trimmed = text.trim();
+    // Page headers are typically just numbers, possibly with some whitespace
+    return /^\d{1,4}$/.test(trimmed);
+}
+
+/**
  * Generate OpenDVT (DepoView-compatible) XML content
  * @param metadata - DVT metadata including video info and synchronized sentences
  * @returns XML-formatted DVT content matching OpenDVT 2.0 specification
  */
 export function generateDVT(metadata: DVTMetadata): string {
+    // Filter out empty lines and page headers
+    const validLines = metadata.sentences.filter(s => {
+        const cleanText = (s.text || s.sentence).trim();
+        return cleanText.length > 0 && !isPageHeader(cleanText);
+    });
+
     const lines: string[] = [
         '<?xml version="1.0" encoding="ISO-8859-1"?>',
-        '<!-- Copyright (C) 2013-2018 ExhibitView LLC.  All rights reserved. -->',
+        '<!-- Copyright (C) 2013-2018 ExhibitBiew LLC.  All rights reserved. -->',
         '<OpenDVT UUID="{C475858E-138F-47C9-8775-536BCE1C9C94}" ShortID="XXXXXXX" Type="Deposition" Version="2.0">',
         '  <Information>',
         '    <Origination>',
         '      <ID>{726017C0-3402-4DCE-9834-7748390ABAD1}</ID>',
-        '      <AppName>SyncExpress</AppName>',
-        '      <AppVersion>1.0</AppVersion>',
-        '      <VendorName>SyncExpress</VendorName>',
-        '      <VendorPhone></VendorPhone>',
-        '      <VendorURL></VendorURL>',
+        '      <AppName>TranscriptPro</AppName>',
+        '      <AppVersion>2.0</AppVersion>',
+        '      <VendorName>',
+        '      </VendorName>',
+        '      <VendorPhone>',
+        '      </VendorPhone>',
+        '      <VendorURL>',
+        '      </VendorURL>',
         '    </Origination>',
         '    <Case>',
-        '      <MatterNumber></MatterNumber>',
+        '      <MatterNumber>',
+        '      </MatterNumber>',
         '    </Case>',
-        '    <Witness>',
+        '    <Case>',
         `      <FirstName>${escapeXml(metadata.title)}</FirstName>`,
         '      <LastName></LastName>',
-        '    </Witness>',
+        '    </Case>',
         '    <ReportingFirm>',
-        '      <Name></Name>',
+        '      <n>',
+        '      </n>',
         '    </ReportingFirm>',
-        '    <FirstPageNo>1</FirstPageNo>',
+        '    <FirstPageNo>0</FirstPageNo>',
         '    <LastPageNo>0</LastPageNo>',
         '    <MaxLinesPerPage>25</MaxLinesPerPage>',
         '    <Volume>1</Volume>',
-        `    <TakenOn>${metadata.createdDate}</TakenOn>`,
+        '    <TakenOn>',
+        '    </TakenOn>',
         '  </Information>',
-        `  <Lines Count="${metadata.sentences.length}">`
+        `  <Lines Count="${validLines.length}">`
     ];
 
-    // Add each sentence as a Line element
-    for (let i = 0; i < metadata.sentences.length; i++) {
-        const sentence = metadata.sentences[i];
-        // Use clean text (without line numbers) if available, otherwise use sentence
+    // Add each valid line
+    for (let i = 0; i < validLines.length; i++) {
+        const sentence = validLines[i];
         const cleanText = sentence.text || sentence.sentence;
-        const escapedText = escapeXml(cleanText);
+
+        // CRITICAL: Replace spaces FIRST, then escape XML
+        const textWithNbsp = replaceSpaces(cleanText);
+        const escapedText = escapeXml(textWithNbsp);
+
+        // Detect Q/A type
+        const qaType = detectQA(cleanText);
 
         lines.push(`    <Line ID="${i}">`);
+
+        // Add Stream and TimeMs if timestamp exists
+        if (sentence.start > 0) {
+            lines.push('      <Stream>0</Stream>');
+            lines.push(`      <TimeMs>${Math.round(sentence.start)}</TimeMs>`);
+        }
+
         lines.push(`      <PageNo>${sentence.pageNumber || 1}</PageNo>`);
         lines.push(`      <LineNo>${sentence.lineNumber || (i + 1)}</LineNo>`);
-        
-        // Only include timestamps if they exist (> 0)
-        if (sentence.start > 0) {
-            const startTime = formatDVTTimecode(sentence.start);
-            const endTime = formatDVTTimecode(sentence.end);
-            lines.push(`      <StartTime>${startTime}</StartTime>`);
-            lines.push(`      <EndTime>${endTime}</EndTime>`);
+
+        // Only add QA tag if it's not empty/default
+        if (qaType !== '-') {
+            lines.push(`      <QA>${qaType}</QA>`);
         }
-        
+
         lines.push(`      <Text>${escapedText}</Text>`);
         lines.push('    </Line>');
     }
@@ -89,11 +146,13 @@ export function generateDVT(metadata: DVTMetadata): string {
     lines.push('    <Stream ID="0">');
     lines.push(`      <URI>${escapeXml(metadata.videoPath)}</URI>`);
     lines.push(`      <URIRelative>\\media\\${escapeXml(metadata.videoPath.split(/[/\\]/).pop() || 'video.mp4')}</URIRelative>`);
-    lines.push('      <VolumeID></VolumeID>');
+    lines.push('      <VolumeID>');
+    lines.push('      </VolumeID>');
     lines.push('      <FileSize>0</FileSize>');
     lines.push(`      <FileDate>${metadata.createdDate}</FileDate>`);
     lines.push(`      <DurationMs>${Math.floor(metadata.duration)}</DurationMs>`);
-    lines.push('      <VolumeLabel></VolumeLabel>');
+    lines.push('      <VolumeLabel>');
+    lines.push('      </VolumeLabel>');
     lines.push('    </Stream>');
     lines.push('  </Streams>');
     lines.push('</OpenDVT>');
@@ -102,21 +161,39 @@ export function generateDVT(metadata: DVTMetadata): string {
 }
 
 /**
- * Download DVT content as a file
+ * Download DVT content as a file with proper ISO-8859-1 encoding
  * @param dvtContent - DVT XML formatted string content
  * @param filename - Optional filename (defaults to 'deposition.dvt')
  */
 export function downloadDVT(dvtContent: string, filename: string = 'deposition.dvt'): void {
-    const blob = new Blob([dvtContent], { type: 'application/xml' });
+    // Convert string to ISO-8859-1 (Latin-1) byte array
+    // ISO-8859-1 is a single-byte encoding where each character maps directly to a byte value
+    const latin1Array = new Uint8Array(dvtContent.length);
+
+    for (let i = 0; i < dvtContent.length; i++) {
+        const code = dvtContent.charCodeAt(i);
+
+        // ISO-8859-1 only supports characters 0-255
+        // Characters outside this range are replaced with '?' (63)
+        if (code > 255) {
+            console.warn(`Character at position ${i} (code ${code}) is outside ISO-8859-1 range, replacing with '?'`);
+            latin1Array[i] = 63; // '?' character
+        } else {
+            latin1Array[i] = code;
+        }
+    }
+
+    // Create blob with the Latin-1 encoded data
+    const blob = new Blob([latin1Array], { type: 'application/xml;charset=ISO-8859-1' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Clean up the URL object
     URL.revokeObjectURL(url);
 }
