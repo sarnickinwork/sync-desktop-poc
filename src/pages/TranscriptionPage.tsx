@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { exists, mkdir } from "@tauri-apps/plugin-fs";
 import {
   Box,
@@ -25,6 +25,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TimerIcon from "@mui/icons-material/Timer";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
+import CloudDoneIcon from '@mui/icons-material/CloudDone';
 
 // Components
 import Stepper from "../components/Stepper";
@@ -157,9 +158,13 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
     }
   }, [projectId]);
 
-  // --- AUTO-SAVE ---
+  // Auto-save UI State
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'editing' | 'saving' | 'saved'>('idle');
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // --- AUTO-SAVE (GENERIC) ---
   useEffect(() => {
-    // Debounce save or save on critical changes
+    // Debounce save for NON-EDITOR changes (step, videos, inputs)
     const timeout = setTimeout(() => {
       saveProjectState(projectId, {
         step,
@@ -173,14 +178,65 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
         splitPoints,
         hasAutoExported,
         mappedResult: mappedResult || restoredMappedResult,
-        // Save extra fields by casting to any or updating type definition
-        // We will cast to any to avoid changing type definition file right now
-        // or just rely on the fact that JS allows it.
         apiElapsedTime: apiElapsedTime || restoredApiElapsedTime
       } as any);
     }, 1000);
     return () => clearTimeout(timeout);
-  }, [projectId, step, videos, transcriptText, transcriptPath, startLine, syncedLines, editedSubtitles, splitPoints, hasAutoExported, mappedResult, apiElapsedTime, restoredMappedResult, restoredApiElapsedTime]);
+  }, [projectId, step, videos, transcriptText, transcriptPath, startLine, syncedLines, splitPoints, hasAutoExported, mappedResult, apiElapsedTime, restoredMappedResult, restoredApiElapsedTime]); // Excluded editedSubtitles
+
+  // --- EDITOR AUTO-SAVE HANDLER ---
+  const handleUpdateSubtitlesWrapper = (updated: SmiSubtitle[]) => {
+    setEditedSubtitles(updated);
+
+    // Set editing status
+    setAutoSaveStatus('editing');
+
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Set new timer for 10 seconds
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave(updated);
+    }, 10000); // 10 seconds
+  };
+
+  const performAutoSave = (currentSubtitles: SmiSubtitle[]) => {
+    setAutoSaveStatus('saving');
+    
+    // Save to Project State
+    saveProjectState(projectId, {
+      step,
+      videos,
+      transcriptText,
+      transcriptFileName,
+      transcriptPath,
+      startLine,
+      syncedLines,
+      editedSubtitles: currentSubtitles,
+      splitPoints,
+      hasAutoExported,
+      mappedResult: mappedResult || restoredMappedResult,
+      apiElapsedTime: apiElapsedTime || restoredApiElapsedTime
+    } as any);
+
+    // Simulate save delay for UX and show Saved state
+    setTimeout(() => {
+        setAutoSaveStatus('saved');
+        // Reset to idle after 3 seconds
+        setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    }, 500);
+  };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+        }
+    };
+  }, []);
 
 
 
@@ -450,7 +506,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
   };
 
   return (
-    <Box p={4} maxWidth={step === 4 ? '100%' : 1100} mx="auto">
+    <Box p={4} maxWidth={step === 3 || step === 4 ? '100%' : 1100} mx="auto">
       {/* HEADER */}
       <Box
         display="flex"
@@ -739,7 +795,46 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       {/* STEP 3: EDIT */}
       {step === 3 && videos.length > 0 && (
         <Box>
-          <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="flex-end">
+          <Box mb={3} display="flex" gap={2} alignItems="center" justifyContent="flex-end">
+
+             {/* Google Docs-style Auto-save Indicator */}
+             {autoSaveStatus !== 'idle' && (
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={0.5}
+                  mr={2}
+                  sx={{
+                    color: autoSaveStatus === 'saved' ? 'success.main' : 'text.secondary',
+                    transition: 'color 0.3s ease'
+                  }}
+                >
+                  {autoSaveStatus === 'editing' && (
+                    <>
+                      <CloudDoneIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                      <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                        Saving...
+                      </Typography>
+                    </>
+                  )}
+                  {autoSaveStatus === 'saving' && (
+                    <>
+                      <CircularProgress size={14} thickness={5} />
+                      <Typography variant="caption">
+                        Saving...
+                      </Typography>
+                    </>
+                  )}
+                  {autoSaveStatus === 'saved' && (
+                    <>
+                      <CheckCircleIcon sx={{ fontSize: 20, color: 'success.main' }} />
+                      <Typography variant="caption" fontWeight={600} color="success.main">
+                        Saved
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+              )}
 
             {/* EXPORT BUTTON */}
             <Button
@@ -756,7 +851,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
             videos={videos}
             splitPoints={splitPoints}
             subtitles={editedSubtitles.length > 0 ? editedSubtitles : (mappedResult ? mappedResult.map(r => ({ text: r.sentence, start: r.start, end: r.end, confidence: r.confidence })) : [])}
-            onUpdateSubtitles={setEditedSubtitles}
+            onUpdateSubtitles={handleUpdateSubtitlesWrapper}
             startLine={parseInt(startLine) || 0}
           />
         </Box>
