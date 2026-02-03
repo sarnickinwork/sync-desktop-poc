@@ -570,24 +570,6 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
                   }}
                   selectedLine={startLine ? parseInt(startLine) : null}
                 />
-
-                {/* Show selected line indicator */}
-                {startLine && (
-                  <Box
-                    p={2}
-                    bgcolor={alpha(theme.palette.primary.main, 0.08)}
-                    borderRadius={2}
-                    border={1}
-                    borderColor="primary.main"
-                  >
-                    <Typography variant="body2" color="primary.main" fontWeight={600}>
-                      ✓ Selected Starting Line: {startLine}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Click a different line in the transcript preview to change
-                    </Typography>
-                  </Box>
-                )}
               </Box>
             ) : (
               <Box
