@@ -121,7 +121,7 @@ const SubtitleLine = memo(
           minHeight: '1.6em',
           borderRadius: '2px',
           my: '2px',
-          pl: 16, // Room for Line# (100px) + Timestamp (80px) + spacing
+          pl: 12, // Room for Timestamp (80px) + spacing
           ...(isSelected && editMode && {
             borderLeft: `4px solid ${theme.palette.warning.main}`
           })
@@ -145,32 +145,12 @@ const SubtitleLine = memo(
           />
         )}
 
-        {/* Original Line Number (Far Left) */}
+        {/* Timestamp (moved to left) */}
         <Typography
           component="span"
           sx={{
             position: 'absolute',
-            left: 3,
-            top: 0,
-            width: 70,
-            color: 'text.secondary',
-            fontSize: '0.75rem',
-            opacity: 0.6,
-            userSelect: 'none',
-            textAlign: 'left',
-            pl: 0.5,
-            fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace',
-          }}
-        >
-          {String(startLine + index + 1).padStart(5, '0')}
-        </Typography>
-
-        {/* Timestamp (After Line Number) */}
-        <Typography
-          component="span"
-          sx={{
-            position: 'absolute',
-            left: 78,
+            left: 8,
             top: 0,
             width: 80,
             color: 'primary.main',
@@ -439,7 +419,7 @@ export default function EditorView({
           border: editMode ? "2px dashed" : 1,
           borderColor: editMode ? theme.palette.warning.main : borderColor,
           borderRadius: 2,
-          overflow: "hidden", 
+          overflow: "hidden",
           bgcolor: editMode ? alpha(theme.palette.warning.main, 0.02) : listBgColor,
           backdropFilter: isDark ? "blur(10px)" : "none",
           color: theme.palette.text.primary,
@@ -549,11 +529,11 @@ export default function EditorView({
         </Box>
 
         {/* Content area - Matching ResultsDisplay */}
-        <Box 
+        <Box
           data-transcript-container
-          sx={{ 
-            flexGrow: 1, 
-            p: 2, 
+          sx={{
+            flexGrow: 1,
+            p: 2,
             pb: 10,
             overflowY: "auto",
             overflowX: "hidden"
