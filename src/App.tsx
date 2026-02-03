@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Snackbar, Alert, Box, Typography } from "@mui/material";
-import VerifiedIcon from '@mui/icons-material/Verified';
+import VerifiedIcon from "@mui/icons-material/Verified";
 
 // Context
 import { ColorModeContext } from "./themes/ThemeContext";
@@ -39,25 +39,27 @@ export default function App() {
 
   // Navigation State
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState<"landing" | "project" | "import">("landing");
+  const [currentPage, setCurrentPage] = useState<
+    "landing" | "project" | "import"
+  >("landing");
 
   // Handler to open a project
   const handleOpenProject = (projectId: string) => {
     setCurrentProjectId(projectId);
     setCurrentPage("project");
-  }
+  };
 
   // Handler to go home
   const handleGoHome = () => {
     setCurrentProjectId(null);
     setCurrentPage("landing");
-  }
+  };
 
   // 2. Theme State Management
   // Initialize from localStorage or default to light
   const [mode, setMode] = useState<"light" | "dark">(() => {
     const savedMode = localStorage.getItem("themeMode");
-    return (savedMode === "dark" || savedMode === "light") ? savedMode : "light";
+    return savedMode === "dark" || savedMode === "light" ? savedMode : "light";
   });
 
   const colorMode = useMemo(
@@ -71,7 +73,7 @@ export default function App() {
         });
       },
     }),
-    [mode]
+    [mode],
   );
 
   const theme = useMemo(
@@ -125,9 +127,9 @@ export default function App() {
             fontWeight: 600,
           },
           button: {
-            textTransform: 'none',
+            textTransform: "none",
             fontWeight: 600,
-          }
+          },
         },
         shape: {
           borderRadius: 12,
@@ -139,14 +141,19 @@ export default function App() {
                 borderRadius: 8,
               },
               contained: ({ ownerState }) => ({
-                ...(ownerState.color === 'primary' && {
-                  background: 'linear-gradient(45deg, #0D9488 30%, #3B82F6 90%)',
-                  color: 'white',
-                  boxShadow: mode === 'light' ? '0 4px 14px 0 rgba(13, 148, 136, 0.3)' : '0 3px 5px 2px rgba(13, 148, 136, .3)',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #0F766E 30%, #2563EB 90%)',
-                    boxShadow: '0 6px 12px 4px rgba(13, 148, 136, .4)',
-                    transform: 'translateY(-1px)',
+                ...(ownerState.color === "primary" && {
+                  background:
+                    "linear-gradient(45deg, #0D9488 30%, #3B82F6 90%)",
+                  color: "white",
+                  boxShadow:
+                    mode === "light"
+                      ? "0 4px 14px 0 rgba(13, 148, 136, 0.3)"
+                      : "0 3px 5px 2px rgba(13, 148, 136, .3)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(45deg, #0F766E 30%, #2563EB 90%)",
+                    boxShadow: "0 6px 12px 4px rgba(13, 148, 136, .4)",
+                    transform: "translateY(-1px)",
                   },
                 }),
               }),
@@ -156,20 +163,23 @@ export default function App() {
             styleOverrides: {
               root: {
                 borderRadius: 12,
-                boxShadow: mode === 'light' ? '0 2px 8px rgba(0,0,0,0.05)' : '0 2px 8px rgba(0,0,0,0.2)',
+                boxShadow:
+                  mode === "light"
+                    ? "0 2px 8px rgba(0,0,0,0.05)"
+                    : "0 2px 8px rgba(0,0,0,0.2)",
               },
             },
           },
           MuiDialog: {
             styleOverrides: {
               paper: {
-                borderRadius: 16
-              }
-            }
-          }
+                borderRadius: 16,
+              },
+            },
+          },
         },
       }),
-    [mode]
+    [mode],
   );
 
   return (
@@ -221,29 +231,6 @@ export default function App() {
                 </Alert>
               </Snackbar>
             )}
-          </Box>
-
-          {/* FOOTER */}
-          <Box
-            component="footer"
-            py={3}
-            textAlign="center"
-            bgcolor={mode === "light" ? "grey.50" : "grey.900"}
-            borderTop={1}
-            borderColor="divider"
-            mt="auto"
-          >
-            <Typography variant="body2" color="text.secondary" display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-              © {new Date().getFullYear()} SyncExpress Live. Developed by{" "}
-              <Typography component="span" fontWeight="bold" color="primary">
-                Kaustubh Paul
-              </Typography>{" "}
-              and{" "}
-              <Typography component="span" fontWeight="bold" color="primary">
-                Sarnick Chakraborty
-              </Typography>
-              <VerifiedIcon color="primary" fontSize="small" sx={{ width: 16, height: 16 }} />
-            </Typography>
           </Box>
         </Box>
       </ThemeProvider>
