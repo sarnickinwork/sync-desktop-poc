@@ -483,7 +483,11 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
         </Box>
       </Box>
 
-      <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result", "Job Summary"]} />
+      <Stepper 
+        step={step} 
+        steps={["Upload", "Preview", "Sync", "Result", "Job Summary"]} 
+        onStepClick={setStep}
+      />
 
       {/* STEP 0: UPLOAD */}
       {step === 0 && (
@@ -735,14 +739,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       {/* STEP 3: EDIT */}
       {step === 3 && videos.length > 0 && (
         <Box>
-          <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="space-between">
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => setStep(2)}
-            >
-              Back to Sync
-            </Button>
+          <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="flex-end">
 
             {/* EXPORT BUTTON */}
             <Button
@@ -769,30 +766,15 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       {/* STEP 4: JOB SUMMARY */}
       {step === 4 && ((mappedResult && mappedResult.length > 0) || (restoredMappedResult && restoredMappedResult.length > 0)) && (
         <Box>
-          <Box mb={3} display="flex" gap={2} flexWrap="wrap">
+          <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="flex-end">
+            {/* Back button disabled to prevent going back to sync */}
             {/* <Button
-              variant="outlined"
-              startIcon={<RestartAltIcon />}
-              color="inherit"
-              onClick={() => {
-                setStep(0);
-                setVideos([]);
-                setTranscriptText(null);
-                setTranscriptFileName(null);
-                setSyncedLines([]);
-                setStartLine("");
-              }}
-            >
-              Start New Project
-            </Button> */}
-
-            <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
               onClick={() => setStep(3)}
             >
               Back to Editor
-            </Button>
+            </Button> */}
             
             <Button
               variant="contained"

@@ -82,12 +82,12 @@ type Props = {
 
 export default function Stepper({ step, steps, onStepClick }: Props) {
   // Determine if a step is clickable
-  // Steps 0, 1, 2 are never clickable
-  // Steps 3, 4, 5 are clickable only when current step >= 3
+  // Steps 0, 1, 2 (Upload, Preview, Sync) are never clickable
+  // Steps 3, 4 (Result, Job Summary) are clickable only when current step >= 3
   const isStepClickable = (stepIndex: number) => {
     if (stepIndex < 3) return false; // Steps 0, 1, 2 are never clickable
     if (step < 3) return false; // Can't navigate to later steps if not yet at step 3
-    return true; // Steps 3+ are clickable when user is in step 3+
+    return true; // Steps 3, 4 are clickable when user is in step 3+
   };
 
   // Determine if a step is locked (cannot be revisited)

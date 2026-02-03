@@ -120,8 +120,8 @@ const SubtitleLine = memo(
           lineHeight: 1.6,
           minHeight: '1.6em',
           borderRadius: '2px',
-          my: '4px',
-          pl: 12, // Room for Time (80px) + spacing
+          my: '2px',
+          pl: 16, // Room for Line# (100px) + Timestamp (80px) + spacing
           ...(isSelected && editMode && {
             borderLeft: `4px solid ${theme.palette.warning.main}`
           })
@@ -145,21 +145,41 @@ const SubtitleLine = memo(
           />
         )}
 
-        {/* Timestamp (Left) */}
+        {/* Original Line Number (Far Left) */}
         <Typography
           component="span"
           sx={{
             position: 'absolute',
-            left: 0,
+            left: 3,
+            top: 0,
+            width: 70,
+            color: 'text.secondary',
+            fontSize: '0.75rem',
+            opacity: 0.6,
+            userSelect: 'none',
+            textAlign: 'left',
+            pl: 0.5,
+            fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace',
+          }}
+        >
+          {String(startLine + index + 1).padStart(5, '0')}
+        </Typography>
+
+        {/* Timestamp (After Line Number) */}
+        <Typography
+          component="span"
+          sx={{
+            position: 'absolute',
+            left: 78,
             top: 0,
             width: 80,
             color: 'primary.main',
             fontSize: '0.75rem',
             opacity: hasTimestamp ? 0.8 : 0,
             userSelect: 'none',
-            textAlign: 'right',
-            pr: 1,
-            pl: 0.5
+            textAlign: 'left',
+            pl: 0.5,
+            fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace',
           }}
         >
           {hasTimestamp ? formatTime(sub.start) : ""}
@@ -176,7 +196,7 @@ const SubtitleLine = memo(
             width: 'auto',
             minWidth: '100%',
             color: 'inherit',
-            pr: 6,
+            pr: 8,
             pl: 1
           }}
         >
