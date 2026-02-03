@@ -22,7 +22,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 import CreateProjectDialog from "./CreateProjectDialog";
-import { getProjects, deleteProject } from "../../utils/projectManager";
+import { getProjects, deleteProject, getProjectState } from "../../utils/projectManager";
 import { ProjectMetadata } from "../../utils/types";
 import ThemeToggle from "../ThemeToggle";
 
@@ -126,8 +126,12 @@ export default function LandingPage({ onProjectSelect, onNavigateToImport }: Pro
                     </Box>
                 ) : (
                     <Grid container spacing={3}>
-                        {projects.map((project) => (
-                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
+                        {projects.map((project) => {
+                            const state = getProjectState(project.id);
+                            const isReady = state && state.mappedResult && state.mappedResult.length > 0;
+
+                            return (
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
                                 <Card
                                     sx={{
                                         height: '100%',
@@ -188,12 +192,13 @@ export default function LandingPage({ onProjectSelect, onNavigateToImport }: Pro
                                                 onProjectSelect(project.id);
                                             }}
                                         >
-                                            Resume
+                                            {isReady ? "View" : "Resume"}
                                         </Button>
                                     </CardActions>
                                 </Card>
-                            </Grid>
-                        ))}
+                                </Grid>
+                            );
+                        })}
                     </Grid>
                 )}
             </Container>

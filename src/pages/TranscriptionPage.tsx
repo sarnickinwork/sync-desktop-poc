@@ -33,10 +33,8 @@ import VideoPreview from "../components/preview/VideoPreview";
 import TranscriptPreview from "../components/preview/TranscriptPreview";
 import TranscriptUploadCard from "../components/upload/TranscriptUploadCard";
 import VideoUploadCard from "../components/upload/VideoUploadCard";
-import SyncedPlayer from "../components/sync/SyncedPlayer";
 import ThemeToggle from "../components/ThemeToggle";
 import EditorView from "../components/import/EditorView";
-import ResultsDisplay from "../components/ResultsDisplay";
 import JobSummaryCard from "../components/JobSummaryCard";
 
 import { useTranscriptionWorkflow } from "../hooks/useTranscriptionWorkflow";
@@ -485,7 +483,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
         </Box>
       </Box>
 
-      <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result", "Edit", "Job Summary"]} />
+      <Stepper step={step} steps={["Upload", "Preview", "Sync", "Result", "Job Summary"]} />
 
       {/* STEP 0: UPLOAD */}
       {step === 0 && (
@@ -752,6 +750,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       )}
 
       {/* STEP 3: RESULT */}
+      {/* STEP 3: EDIT */}
       {step === 3 && videos.length > 0 && (
         <Box>
           <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="space-between">
@@ -760,98 +759,14 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
               startIcon={<ArrowBackIcon />}
               onClick={() => setStep(2)}
             >
-              Back
-            </Button>
-
-            <Button
-              variant="outlined"
-              startIcon={<RestartAltIcon />}
-              color="inherit"
-              onClick={() => {
-                setStep(0);
-                setVideos([]);
-                setTranscriptText(null);
-                setTranscriptFileName(null);
-                setSyncedLines([]);
-                setStartLine("");
-              }}
-            >
-              Start New Project
-            </Button>
-
-            <Box display="flex" gap={2}>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => setStep(5)}
-                startIcon={<CheckCircleIcon />}
-              >
-                Job Summary
-              </Button>
-
-              <Button
-                variant="contained"
-                endIcon={<ArrowForwardIcon />}
-                onClick={() => setStep(4)}
-                sx={{ px: 4 }}
-              >
-                Edit
-              </Button>
-            </Box>
-          </Box>
-
-          {mappedResult && mappedResult.length > 0 ? (
-            <ResultsDisplay
-              mappedResults={mappedResult || restoredMappedResult || []}
-              videos={videos}
-              splitPoints={splitPoints}
-              apiElapsedTime={apiElapsedTime || restoredApiElapsedTime}
-            />
-          ) : syncedLines.length > 0 ? (
-            <Box>
-              <Box mb={2}>
-                <Typography variant="h6">Basic Synchronization</Typography>
-                <Typography variant="body2" color="text.secondary">No advanced mapping available.</Typography>
-              </Box>
-              <SyncedPlayer
-                videos={videos}
-                splitPoints={splitPoints}
-                lines={syncedLines}
-              />
-            </Box>
-          ) : (
-            <Box
-              p={4}
-              textAlign="center"
-              border="1px dashed"
-              borderColor="divider"
-              borderRadius={2}
-            >
-              <Typography color="text.secondary">
-                No results available.
-              </Typography>
-            </Box>
-          )}
-        </Box>
-      )}
-
-      {/* STEP 4: EDIT */}
-      {step === 4 && videos.length > 0 && (
-        <Box>
-          <Box mb={3} display="flex" gap={2} flexWrap="wrap" justifyContent="space-between">
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => setStep(3)}
-            >
-              Back to Results
+              Back to Sync
             </Button>
 
             {/* EXPORT BUTTON */}
             <Button
               variant="contained"
               color="primary"
-              onClick={() => setStep(5)}
+              onClick={() => setStep(4)}
               endIcon={<ArrowForwardIcon />}
             >
               Job Summary
@@ -869,11 +784,11 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       )}
 
 
-      {/* STEP 5: JOB SUMMARY */}
-      {step === 5 && ((mappedResult && mappedResult.length > 0) || (restoredMappedResult && restoredMappedResult.length > 0)) && (
+      {/* STEP 4: JOB SUMMARY */}
+      {step === 4 && ((mappedResult && mappedResult.length > 0) || (restoredMappedResult && restoredMappedResult.length > 0)) && (
         <Box>
           <Box mb={3} display="flex" gap={2} flexWrap="wrap">
-            <Button
+            {/* <Button
               variant="outlined"
               startIcon={<RestartAltIcon />}
               color="inherit"
@@ -887,12 +802,12 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
               }}
             >
               Start New Project
-            </Button>
+            </Button> */}
 
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
-              onClick={() => setStep(4)}
+              onClick={() => setStep(3)}
             >
               Back to Editor
             </Button>
