@@ -181,7 +181,7 @@ const SubtitleLine = memo(
           }}
         >
           {isEdited && <EditIcon sx={{ fontSize: 12, color: 'warning.main', mr: 1, verticalAlign: 'middle' }} />}
-          {sub.text || " "}
+          {sub.text ? sub.text.replace(/^\s*\d+\s+/, '') : " "}
         </Typography>
 
         {/* Confidence Badge (Right) */}
@@ -363,10 +363,6 @@ export default function EditorView({
     ? subtitles.reduce((sum, r) => sum + (r.confidence || 0), 0) / subtitles.length
     : 0;
 
-  const highConfidenceCount = subtitles.filter(r => (r.confidence || 0) >= 80).length;
-  const mediumConfidenceCount = subtitles.filter(r => (r.confidence || 0) >= 50 && (r.confidence || 0) < 80).length;
-  const lowConfidenceCount = subtitles.filter(r => (r.confidence || 0) < 50).length;
-
   // Aesthetics matching ResultsDisplay
   const isDark = theme.palette.mode === 'dark';
   const listBgColor = isDark ? alpha(theme.palette.background.paper, 0.6) : '#fafafa';
@@ -420,17 +416,33 @@ export default function EditorView({
         sx={{
           height: "100%",
           minHeight: "300px",
-          border: 1,
-          borderColor: borderColor,
+          border: editMode ? "2px dashed" : 1,
+          borderColor: editMode ? theme.palette.warning.main : borderColor,
           borderRadius: 2,
           overflow: "hidden", 
-          bgcolor: listBgColor,
+          bgcolor: editMode ? alpha(theme.palette.warning.main, 0.02) : listBgColor,
           backdropFilter: isDark ? "blur(10px)" : "none",
           color: theme.palette.text.primary,
           display: "flex",
           flexDirection: "column",
           fontFamily: '"JetBrains Mono", Consolas, "Courier New", monospace',
-          boxShadow: theme.shadows[1]
+          boxShadow: theme.shadows[1],
+          transition: "all 0.3s ease",
+          // Custom Scrollbar
+          '&::-webkit-scrollbar': {
+            width: '6px',
+            backgroundColor: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: isDark ? alpha(theme.palette.common.white, 0.2) : alpha(theme.palette.common.black, 0.2),
+            borderRadius: '3px',
+            '&:hover': {
+              backgroundColor: isDark ? alpha(theme.palette.common.white, 0.3) : alpha(theme.palette.common.black, 0.3),
+            },
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+          },
         }}
       >
         {/* Header - Matching ResultsDisplay */}
@@ -463,9 +475,9 @@ export default function EditorView({
               }
               label={<Typography variant="caption" fontWeight={600}>{editMode ? "EDITING" : "VIEWING"}</Typography>}
             />
-            <Typography variant="caption" color="text.secondary">
+            {/* <Typography variant="caption" color="text.secondary">
               {filteredSubtitles.length} lines
-            </Typography>
+            </Typography> */}
           </Box>
 
           <Box display="flex" gap={2} alignItems="center">
@@ -475,35 +487,6 @@ export default function EditorView({
                 : "No lines"
               }
             </Typography>
-            <Box display="flex" gap={1}>
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  bgcolor: alpha(theme.palette.success.main, 0.8),
-                  title: `${highConfidenceCount} high confidence`
-                }}
-              />
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  bgcolor: alpha(theme.palette.warning.main, 0.8),
-                  title: `${mediumConfidenceCount} medium confidence`
-                }}
-              />
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  bgcolor: alpha(theme.palette.error.main, 0.8),
-                  title: `${lowConfidenceCount} low confidence`
-                }}
-              />
-            </Box>
           </Box>
         </Box>
 
@@ -531,9 +514,6 @@ export default function EditorView({
             >
               <ToggleButton value="all" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem' }}>
                 All
-              </ToggleButton>
-              <ToggleButton value="edited" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem', color: 'warning.main' }}>
-                Edited
               </ToggleButton>
               <ToggleButton value="high" sx={{ px: 1.5, py: 0.5, fontSize: '0.75rem', color: 'success.main' }}>
                 High
