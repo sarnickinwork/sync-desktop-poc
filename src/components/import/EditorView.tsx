@@ -181,7 +181,7 @@ const SubtitleLine = memo(
           }}
         >
           {isEdited && <EditIcon sx={{ fontSize: 12, color: 'warning.main', mr: 1, verticalAlign: 'middle' }} />}
-          {sub.text ? sub.text.replace(/^\s*\d+\s+/, '') : " "}
+          {sub.text || " "}
         </Typography>
 
         {/* Confidence Badge (Right) */}
