@@ -242,8 +242,18 @@ export default function EditorView({
   const [displayedCount, setDisplayedCount] = useState(200);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Filter subtitles by confidence
-  const filteredSubtitles = subtitles.filter((sub, idx) => {
+  // Helper function to check if a line is empty (creates visual gaps)
+  const isEmptyLine = (sub: SmiSubtitle) => {
+    const trimmedText = (sub.text || "").trim();
+    return trimmedText === "";
+  };
+
+  // Filter out empty lines for cleaner display and editing
+  const nonEmptySubtitles = subtitles.map((sub, idx) => ({ sub, originalIndex: idx }))
+    .filter(({ sub }) => !isEmptyLine(sub));
+
+  // Filter subtitles by confidence (applied to non-empty subtitles)
+  const filteredSubtitles = nonEmptySubtitles.filter(({ sub, originalIndex: idx }) => {
 
 
     if (confidenceFilter === 'all') return true;
@@ -343,8 +353,13 @@ export default function EditorView({
         // Update subtitles (will trigger auto-save)
         onUpdateSubtitles(updated);
 
-        // Auto-advance to next line
-        const nextIndex = selectedIndex + 1;
+        // Auto-advance to next NON-EMPTY line (skip gaps)
+        let nextIndex = selectedIndex + 1;
+        while (nextIndex < subtitles.length && isEmptyLine(subtitles[nextIndex])) {
+          console.log(`⏩ Skipping empty gap at index ${nextIndex}`);
+          nextIndex++;
+        }
+        
         if (nextIndex < subtitles.length) {
           setSelectedIndex(nextIndex);
           console.log('➡️  Auto-advanced to line:', nextIndex);
@@ -559,8 +574,7 @@ export default function EditorView({
             overflowX: "hidden"
           }}
         >
-          {visibleSubtitles.map((sub) => {
-            const originalIndex = subtitles.indexOf(sub);
+          {visibleSubtitles.map(({ sub, originalIndex }) => {
             return (
               <SubtitleLine
                 key={originalIndex}
