@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Snackbar, Alert, Box, Typography } from "@mui/material";
-import VerifiedIcon from "@mui/icons-material/Verified";
+import { Snackbar, Alert, Box } from "@mui/material";
 
 // Context
 import { ColorModeContext } from "./themes/ThemeContext";

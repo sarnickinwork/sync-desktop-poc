@@ -416,11 +416,11 @@ export default function EditorView({
         sx={{
           height: "100%",
           minHeight: "300px",
-          border: editMode ? "2px dashed" : 1,
-          borderColor: editMode ? theme.palette.warning.main : borderColor,
+          border: 1,
+          borderColor: borderColor,
           borderRadius: 2,
           overflow: "hidden",
-          bgcolor: editMode ? alpha(theme.palette.warning.main, 0.02) : listBgColor,
+          bgcolor: listBgColor,
           backdropFilter: isDark ? "blur(10px)" : "none",
           color: theme.palette.text.primary,
           display: "flex",
@@ -444,7 +444,8 @@ export default function EditorView({
             backgroundColor: 'transparent',
           },
         }}
-      >
+        >
+
         {/* Header - Matching ResultsDisplay */}
         <Box
           sx={{
@@ -460,6 +461,25 @@ export default function EditorView({
           }}
         >
           <Box display="flex" alignItems="center" gap={2}>
+            {/* Edit Mode Indicator Dot */}
+            <Box
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                bgcolor: editMode ? 'error.main' : 'grey.400',
+                animation: editMode ? 'pulse 2s ease-in-out infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    opacity: 1,
+                  },
+                  '50%': {
+                    opacity: 0.3,
+                  },
+                },
+              }}
+            />
+
             {/* View/Edit Toggle */}
             <FormControlLabel
               control={
