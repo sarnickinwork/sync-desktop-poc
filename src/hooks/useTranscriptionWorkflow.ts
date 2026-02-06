@@ -253,13 +253,24 @@ export function useTranscriptionWorkflow() {
         const elapsedTime = Date.now() - startTime;
         setApiElapsedTime(elapsedTime);
         log(`Backend processing complete! (${(elapsedTime / 1000).toFixed(2)}s)`);
+
         setTranscriptResult(json);
 
-        // Merge transcripts
+        // Parse transcripts - Handle both formats:
+        // 1. Wrapped format: { results: [{ data: {...} }] }
+        // 2. Direct format: [{...}] or {...}
         let transcriptsArray: SimpleTranscriptDto[];
-        if (Array.isArray(json)) {
+
+        if (json.results && Array.isArray(json.results)) {
+          // Backend returns wrapped format with results array
+          transcriptsArray = json.results
+            .filter((result: any) => result.success && result.data)
+            .map((result: any) => convertToSimpleTranscriptDto(result.data));
+        } else if (Array.isArray(json)) {
+          // Direct array format
           transcriptsArray = json.map((item: any) => convertToSimpleTranscriptDto(item));
         } else {
+          // Direct object format
           transcriptsArray = [convertToSimpleTranscriptDto(json)];
         }
 
