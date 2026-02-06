@@ -242,8 +242,18 @@ export default function EditorView({
   const [displayedCount, setDisplayedCount] = useState(200);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Filter subtitles by confidence
-  const filteredSubtitles = subtitles.filter((sub, idx) => {
+  // Helper function to check if a line is empty (creates visual gaps)
+  const isEmptyLine = (sub: SmiSubtitle) => {
+    const trimmedText = (sub.text || "").trim();
+    return trimmedText === "";
+  };
+
+  // Filter out empty lines for cleaner display and editing
+  const nonEmptySubtitles = subtitles.map((sub, idx) => ({ sub, originalIndex: idx }))
+    .filter(({ sub }) => !isEmptyLine(sub));
+
+  // Filter subtitles by confidence (applied to non-empty subtitles)
+  const filteredSubtitles = nonEmptySubtitles.filter(({ sub, originalIndex: idx }) => {
 
 
     if (confidenceFilter === 'all') return true;
@@ -343,8 +353,13 @@ export default function EditorView({
         // Update subtitles (will trigger auto-save)
         onUpdateSubtitles(updated);
 
-        // Auto-advance to next line
-        const nextIndex = selectedIndex + 1;
+        // Auto-advance to next NON-EMPTY line (skip gaps)
+        let nextIndex = selectedIndex + 1;
+        while (nextIndex < subtitles.length && isEmptyLine(subtitles[nextIndex])) {
+          console.log(`⏩ Skipping empty gap at index ${nextIndex}`);
+          nextIndex++;
+        }
+        
         if (nextIndex < subtitles.length) {
           setSelectedIndex(nextIndex);
           console.log('➡️  Auto-advanced to line:', nextIndex);
@@ -416,11 +431,11 @@ export default function EditorView({
         sx={{
           height: "100%",
           minHeight: "300px",
-          border: editMode ? "2px dashed" : 1,
-          borderColor: editMode ? theme.palette.warning.main : borderColor,
+          border: 1,
+          borderColor: borderColor,
           borderRadius: 2,
           overflow: "hidden",
-          bgcolor: editMode ? alpha(theme.palette.warning.main, 0.02) : listBgColor,
+          bgcolor: listBgColor,
           backdropFilter: isDark ? "blur(10px)" : "none",
           color: theme.palette.text.primary,
           display: "flex",
@@ -444,7 +459,8 @@ export default function EditorView({
             backgroundColor: 'transparent',
           },
         }}
-      >
+        >
+
         {/* Header - Matching ResultsDisplay */}
         <Box
           sx={{
@@ -460,6 +476,25 @@ export default function EditorView({
           }}
         >
           <Box display="flex" alignItems="center" gap={2}>
+            {/* Edit Mode Indicator Dot */}
+            <Box
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                bgcolor: editMode ? 'error.main' : 'grey.400',
+                animation: editMode ? 'pulse 2s ease-in-out infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    opacity: 1,
+                  },
+                  '50%': {
+                    opacity: 0.3,
+                  },
+                },
+              }}
+            />
+
             {/* View/Edit Toggle */}
             <FormControlLabel
               control={
@@ -539,8 +574,7 @@ export default function EditorView({
             overflowX: "hidden"
           }}
         >
-          {visibleSubtitles.map((sub) => {
-            const originalIndex = subtitles.indexOf(sub);
+          {visibleSubtitles.map(({ sub, originalIndex }) => {
             return (
               <SubtitleLine
                 key={originalIndex}

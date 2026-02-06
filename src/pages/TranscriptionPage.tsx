@@ -98,6 +98,8 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
   const [isExporting, setIsExporting] = useState(false);
   const [startLine, setStartLine] = useState<string>("");
   const [exportSuccess, setExportSuccess] = useState(false);
+  const [hasUserSelectedLine, setHasUserSelectedLine] = useState(false);
+  const [showLineWarning, setShowLineWarning] = useState(false);
 
   // Other state needed for restore
   const [syncedLines, setSyncedLines] = useState<SyncedLine[]>([]);
@@ -155,6 +157,11 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       // For now, let's cast state as any to access custom props or I'll just rely on what's there.
       // If I add it to save, I can read it back.
       if ((state as any).apiElapsedTime) setRestoredApiElapsedTime((state as any).apiElapsedTime);
+
+      // If startLine is set and not default, user had selected a line
+      if (state.startLine && state.startLine !== "0" && state.startLine !== "") {
+        setHasUserSelectedLine(true);
+      }
     }
   }, [projectId]);
 
@@ -204,7 +211,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
 
   const performAutoSave = (currentSubtitles: SmiSubtitle[]) => {
     setAutoSaveStatus('saving');
-    
+
     // Save to Project State
     saveProjectState(projectId, {
       step,
@@ -223,18 +230,18 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
 
     // Simulate save delay for UX and show Saved state
     setTimeout(() => {
-        setAutoSaveStatus('saved');
-        // Reset to idle after 3 seconds
-        setTimeout(() => setAutoSaveStatus('idle'), 3000);
+      setAutoSaveStatus('saved');
+      // Reset to idle after 3 seconds
+      setTimeout(() => setAutoSaveStatus('idle'), 3000);
     }, 500);
   };
 
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-        if (autoSaveTimerRef.current) {
-            clearTimeout(autoSaveTimerRef.current);
-        }
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
     };
   }, []);
 
@@ -490,7 +497,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       await writeTextFile(synPath, finalSynContent!);
       console.log(".syn file updated at:", synPath);
 
-       // Clear the session so it doesn't prompt to resume next time
+      // Clear the session so it doesn't prompt to resume next time
       localStorage.removeItem("lastSession");
       // setStep(5); // Navigate to Job Summary - REMOVED
 
@@ -539,9 +546,9 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
         </Box>
       </Box>
 
-      <Stepper 
-        step={step} 
-        steps={["Upload", "Preview", "Sync", "Result", "Job Summary"]} 
+      <Stepper
+        step={step}
+        steps={["Upload", "Preview", "Sync", "Result", "Job Summary"]}
         onStepClick={setStep}
       />
 
@@ -614,6 +621,18 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       {/* STEP 1: PREVIEW */}
       {step === 1 && videos.length > 0 && (
         <>
+          {/* Instruction Alert - Show when transcript exists but no line selected */}
+          {transcriptText && !hasUserSelectedLine && (
+            <Alert
+              severity="info"
+              sx={{ mt: 2, mb: 2 }}
+
+            >
+              <AlertTitle>Select a Starting Line</AlertTitle>
+              Click on a line number in the transcript to set where the sync process should begin. This helps align the AI-generated timestamps with your transcript.
+            </Alert>
+          )}
+
           <Box display="flex" gap={3} mt={3} height="70vh">
             {/* Video Preview - Fixed 350px width */}
             <Box flex="0 0 350px">
@@ -627,6 +646,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
                   transcript={transcriptText}
                   onLineSelect={(lineNum) => {
                     setStartLine(lineNum.toString());
+                    setHasUserSelectedLine(true);
                   }}
                   selectedLine={startLine ? parseInt(startLine) : null}
                 />
@@ -649,7 +669,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
             )}
           </Box>
 
-          <Box mt={4} display="flex" justifyContent="space-between">
+          <Box mt={4} display="flex" justifyContent="space-between" alignItems="flex-end">
             <Button
               variant="outlined"
               size="large"
@@ -659,17 +679,30 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
             >
               Back
             </Button>
-            <Button
-              variant="contained"
-              size="large"
-              endIcon={<ArrowForwardIcon />}
-              onClick={() => {
-                setStep(2);
-              }}
-              sx={{ px: 4 }}
-            >
-              Proceed to Sync
-            </Button>
+            <Box display="flex" flexDirection="column" alignItems="flex-end" gap={1}>
+              <Button
+                variant="contained"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                disabled={transcriptText ? !hasUserSelectedLine : false}
+                onClick={() => {
+                  // Check if user has selected a line when transcript is present
+                  if (transcriptText && !hasUserSelectedLine) {
+                    setShowLineWarning(true);
+                    return;
+                  }
+                  setStep(2);
+                }}
+                sx={{ px: 4 }}
+              >
+                Proceed to Sync
+              </Button>
+              {transcriptText && !hasUserSelectedLine && (
+                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  Select a starting line to enable this button
+                </Typography>
+              )}
+            </Box>
           </Box>
         </>
       )}
@@ -797,44 +830,44 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
         <Box>
           <Box mb={3} display="flex" gap={2} alignItems="center" justifyContent="flex-end">
 
-             {/* Google Docs-style Auto-save Indicator */}
-             {autoSaveStatus !== 'idle' && (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={0.5}
-                  mr={2}
-                  sx={{
-                    color: autoSaveStatus === 'saved' ? 'success.main' : 'text.secondary',
-                    transition: 'color 0.3s ease'
-                  }}
-                >
-                  {autoSaveStatus === 'editing' && (
-                    <>
-                      <CloudDoneIcon sx={{ fontSize: 18, opacity: 0.7 }} />
-                      <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                        Saving...
-                      </Typography>
-                    </>
-                  )}
-                  {autoSaveStatus === 'saving' && (
-                    <>
-                      <CircularProgress size={14} thickness={5} />
-                      <Typography variant="caption">
-                        Saving...
-                      </Typography>
-                    </>
-                  )}
-                  {autoSaveStatus === 'saved' && (
-                    <>
-                      <CheckCircleIcon sx={{ fontSize: 20, color: 'success.main' }} />
-                      <Typography variant="caption" fontWeight={600} color="success.main">
-                        Saved
-                      </Typography>
-                    </>
-                  )}
-                </Box>
-              )}
+            {/* Google Docs-style Auto-save Indicator */}
+            {autoSaveStatus !== 'idle' && (
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={0.5}
+                mr={2}
+                sx={{
+                  color: autoSaveStatus === 'saved' ? 'success.main' : 'text.secondary',
+                  transition: 'color 0.3s ease'
+                }}
+              >
+                {autoSaveStatus === 'editing' && (
+                  <>
+                    <CloudDoneIcon sx={{ fontSize: 18, opacity: 0.7 }} />
+                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                      Saving...
+                    </Typography>
+                  </>
+                )}
+                {autoSaveStatus === 'saving' && (
+                  <>
+                    <CircularProgress size={14} thickness={5} />
+                    <Typography variant="caption">
+                      Saving...
+                    </Typography>
+                  </>
+                )}
+                {autoSaveStatus === 'saved' && (
+                  <>
+                    <CheckCircleIcon sx={{ fontSize: 20, color: 'success.main' }} />
+                    <Typography variant="caption" fontWeight={600} color="success.main">
+                      Saved
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            )}
 
             {/* EXPORT BUTTON */}
             <Button
@@ -870,7 +903,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
             >
               Back to Editor
             </Button> */}
-            
+
             <Button
               variant="contained"
               color="primary"
@@ -902,6 +935,7 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       )}
 
 
+      {/* Export Success Snackbar */}
       <Snackbar
         open={exportSuccess}
         autoHideDuration={4000}
@@ -910,6 +944,18 @@ export default function TranscriptionPage({ projectId, onNavigateToImport, onBac
       >
         <Alert onClose={() => setExportSuccess(false)} severity="success" sx={{ width: '100%' }}>
           Project exported successfully!
+        </Alert>
+      </Snackbar>
+
+      {/* Line Selection Warning Snackbar */}
+      <Snackbar
+        open={showLineWarning}
+        autoHideDuration={4000}
+        onClose={() => setShowLineWarning(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setShowLineWarning(false)} severity="warning" sx={{ width: '100%' }}>
+          Please select a starting line from the transcript before proceeding.
         </Alert>
       </Snackbar>
     </Box>
