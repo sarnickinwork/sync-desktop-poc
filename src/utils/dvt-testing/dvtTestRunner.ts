@@ -31,18 +31,18 @@ const __dirname = path.dirname(__filename);
 
 // ─── Configuration ───────────────────────────────────────────────────────
 
-const TRANSCRIPT_FILE = path.join(__dirname, "IST71923willmanFelton.txt");
-const AI_RESPONSE_FILE = path.join(__dirname, "assemblyAIResponse.json");
-const OUTPUT_FILE = path.join(__dirname, "acd.dvt");
+const TRANSCRIPT_FILE = path.join(__dirname, "KL.txt");
+const AI_RESPONSE_FILE = path.join(__dirname, "KL.json");
+const OUTPUT_FILE = path.join(__dirname, "kl.dvt");
 
 /** Line number in the transcript where spoken audio begins.
- *  Page 4 Line 1 = absolute non-continuation entry #76.
- *  The videographer opens with "Okay. We are on the record." which matches
- *  the first word in assemblyAIResponse.json at 2720ms. */
-const START_LINE = 76;
+ *  Page 4 Line 1 = absolute non-continuation entry #109.
+ *  The videographer opens with "Okay. We are officially on the record." which matches
+ *  the first word in KL.json at 3040ms ("We"). */
+const START_LINE = 109;
 
-/** Video duration: 41 minutes 21 seconds = 2,481,000 ms */
-const VIDEO_DURATION_MS = 41 * 60 * 1000 + 21 * 1000; // 2,481,000
+/** Video duration: 89 mins 51 seconds = 5,391,000 ms */
+const VIDEO_DURATION_MS = 89 * 60 * 1000 + 51 * 1000; // 5,391,000
 
 const VIDEO_PATH = String.raw`C:\Users\HP\Downloads\acd\media\JasonKellyWillman.mp4`;
 const VIDEO_RELATIVE_PATH = String.raw`\media\JasonKellyWillman.mp4`;
@@ -210,19 +210,22 @@ async function main() {
   // Determine actual max line number across all entries.
   // Numbered pages top out at 25, but unnumbered cover pages preserve every
   // physical row so their LineNo can exceed 25.
-  const actualMaxLines = parsedLines.reduce((max, l) => Math.max(max, l.lineNo), 25);
+  const actualMaxLines = parsedLines.reduce(
+    (max, l) => Math.max(max, l.lineNo),
+    25,
+  );
 
   const dvtConfig: DVTConfig = {
-    shortId: "acd",
-    deponentFirstName: "Jason",
-    deponentLastName: "Willman",
+    shortId: "kl",
+    deponentFirstName: "Katie",
+    deponentLastName: "Leicht",
     videoPath: VIDEO_PATH,
     videoRelativePath: VIDEO_RELATIVE_PATH,
     durationMs: VIDEO_DURATION_MS,
     fileSize: 0,
     fileDate: "",
-    takenOn: "07/19/2023",
-    matterNumber: "23-SCCV-095734",
+    takenOn: "02/04/2026",
+    matterNumber: "25-06-10028",
     firstPageNo: summary.firstPage,
     lastPageNo: summary.lastPage,
     maxLinesPerPage: actualMaxLines,

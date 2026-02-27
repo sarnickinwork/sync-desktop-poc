@@ -1,0 +1,3888 @@
+
+                                                                        1
+
+
+
+            1                   CAUSE NO. 25-06-10028
+
+            2   JUSTIN CROWSON,            ) IN THE DISTRICT COURT
+                                           )
+            3         Plaintiff,           )
+                                           )
+            4   v.                         ) MONTGOMERY COUNTY, TEXAS
+                                           )
+            5   KATIE LEICHT,              )
+                                           )
+            6         Defendant.           ) 457TH JUDICIAL DISTRICT
+
+            7
+
+            8
+
+            9      *************************************************
+
+           10             ORAL AND VIDEOTAPED DEPOSITION OF
+
+           11                       KATIE LEICHT
+
+           12                     FEBRUARY 4, 2026
+
+           13      *************************************************
+
+           14
+
+           15          ORAL AND VIDEOTAPED DEPOSITION OF KATIE LEICHT,
+
+           16   produced as a witness at the instance of the Plaintiff,
+
+           17   and duly sworn, was taken via Zoom videoconference in
+
+           18   the above-styled and numbered cause on the 4th day of
+
+           19   February, 2026, from 10:04 a.m. to 11:42 a.m., before
+
+           20   Lisa D. Huneycutt, CSR in and for the State of Texas,
+
+           21   reported by machine shorthand, pursuant to the Texas
+
+           22   Rules of Civil Procedure, Notice, and the provisions
+
+           23   stated on the record or attached hereto.
+
+           24
+
+           25
+
+                                                                        2
+
+
+
+            1                    A P P E A R A N C E S
+
+            2
+
+            3   FOR THE PLAINTIFF:
+
+            4      Mr. Joe B. Stephens
+                   THE STEPHENS LAW FIRM
+            5      440 Cobia Drive, Suite 601
+                   Katy, Texas  77494
+            6      FAX:  713-224-0055
+                   TELEPHONE:  713-224-0000
+            7      E-MAIL:  joe@joestephenslaw.com
+
+            8
+                FOR THE DEFENDANT:
+            9
+                   Mr. Travis Grosscope
+           10      RAMEY CHANDLER SCHEIN
+                   750 Bering Drive, Suite 600
+           11      Houston, Texas  77057
+                   TELEPHONE:  713-266-0074
+           12      E-MAIL:  tgrosscope@ramey-chandler.com
+
+           13
+
+           14
+
+           15   ALSO PRESENT:
+
+           16      William Roach, Videographer
+
+           17
+
+           18
+
+           19
+
+           20
+
+           21
+
+           22
+
+           23
+
+           24
+
+           25
+
+                                                                        3
+
+
+
+            1                         I N D E X
+
+            2                                                      PAGE
+
+            3   Appearances ......................................   2
+
+            4   KATIE LEICHT
+
+            5      Examination by Mr. Stephens ...................   4
+
+            6   Signature ........................................  67
+
+            7   Reporter's Certificate ...........................  69
+
+            8
+
+            9
+
+           10                        E X H I B I T S
+
+           11   NUMBER AND DESCRIPTION                             PAGE
+
+           12      EXHIBIT 1 .....................................   4
+                       PowerPoint Presentation
+           13
+
+           14
+
+           15
+
+           16
+
+           17
+
+           18
+
+           19
+
+           20
+
+           21
+
+           22
+
+           23
+
+           24
+
+           25
+
+                                                                        4
+
+
+
+  10:04:06  1               THE VIDEOGRAPHER:  Okay.  We are officially
+
+  10:04:16  2   on the record.  Today's date is Wednesday, February 4th,
+
+  10:04:19  3   2026, and the time right now where our witness is --
+
+  10:04:23  4   and our witness is Katie Leicht -- is approximately
+
+  10:04:27  5   10:04 a.m.
+
+  10:04:28  6               Will the court reporter please swear in
+
+  10:04:29  7   our witness.
+
+  10:04:45  8                        KATIE LEICHT,
+
+  10:04:45  9   called as a witness, having been first duly sworn, was
+
+  11:44:40 10   examined and testified as follows:
+
+  11:44:40 11               (Exhibit No. 1 was premarked for
+
+  11:44:40 12                identification.)
+
+  11:44:40 13                        EXAMINATION
+
+  10:04:47 14   BY MR. STEPHENS:
+
+  10:04:47 15      Q.  Good morning.  How are you?
+
+  10:04:48 16      A.  Good morning.
+
+  10:04:49 17      Q.  Your name is Katie Leicht?
+
+  10:04:51 18      A.  Yes.
+
+  10:04:52 19      Q.  All right.  I'm sure you've had a chance to
+
+  10:04:55 20   visit with your legal team.  Travis Grosscope is here.
+
+  10:05:00 21   You've had a chance to visit with him about a
+
+  10:05:02 22   deposition, true?
+
+  10:05:02 23      A.  Yes.
+
+  10:05:04 24      Q.  Have you ever given a deposition before?
+
+  10:05:07 25      A.  No.
+
+                                                                        5
+
+
+
+  10:05:09  1      Q.  Have you ever given any testimony anyplace,
+
+  10:05:13  2   anywhere before?
+
+  10:05:14  3      A.  No.
+
+  10:05:15  4      Q.  All right.  You understand that you're under
+
+  10:05:17  5   oath, right?
+
+  10:05:19  6      A.  Yes.
+
+  10:05:19  7      Q.  And that the penalties of perjury apply during
+
+  10:05:24  8   this deposition, just as though you were at the
+
+  10:05:27  9   courthouse on the witness stand.
+
+  10:05:29 10          Do you understand that?
+
+  10:05:30 11      A.  Yes.
+
+  10:05:31 12      Q.  If I ask you a question today that you don't
+
+  10:05:34 13   understand, please let me know and I'll repeat it,
+
+  10:05:38 14   okay?
+
+  10:05:39 15      A.  Okay.
+
+  10:05:41 16      Q.  Because if I ask you the same question on the
+
+  10:05:44 17   witness stand at trial, it would be fair for me to get
+
+  10:05:48 18   the same answer in the courtroom as I do here today.
+
+  10:05:51 19          You understand that?
+
+  10:05:53 20      A.  Yes.
+
+  10:05:57 21      Q.  And you're doing a great job so far, but let me
+
+  10:06:02 22   finish my question before you begin your answer.  You
+
+  10:06:05 23   may think you know where I'm going, but if you start
+
+  10:06:09 24   talking while I am, the court reporter can't get both
+
+  10:06:12 25   of us down, okay?
+
+                                                                        6
+
+
+
+  10:06:14  1      A.  Okay.
+
+  10:06:16  2      Q.  If you need to take a break, let me know and
+
+  10:06:19  3   I'll finish kind of where we are in the deposition,
+
+  10:06:22  4   and we'll take a break, all right?
+
+  10:06:24  5      A.  Okay.
+
+  10:06:26  6      Q.  So to kind of give you an outline of what we're
+
+  10:06:30  7   going to talk about, I'm going to get some background
+
+  10:06:33  8   information about you, and then I'm going to talk to
+
+  10:06:39  9   you about the rules of the road a little bit, and then
+
+  10:06:42 10   I'm going to talk to you about the accident.
+
+  10:06:45 11          And I've got a number of photographs and stuff
+
+  10:06:47 12   I'm going to go through and try to get your best memory
+
+  10:06:53 13   of how things happened and where everything was, okay?
+
+  10:06:57 14      A.  Okay.
+
+  10:07:02 15      Q.  And let me just say at the outset, I'm sorry to
+
+  10:07:07 16   meet you under these circumstances.  I know this was a
+
+  10:07:09 17   traumatic event for you and your -- your daughter, and
+
+  10:07:13 18   so I apologize in advance.  I'm just doing my job,
+
+  10:07:18 19   okay?  Because I'm representing somebody that was badly
+
+  10:07:21 20   hurt, okay?
+
+  10:07:22 21      A.  Okay.
+
+  10:07:23 22      Q.  First of all, let me get some information about
+
+  10:07:26 23   you.
+
+  10:07:27 24          What is your date of birth?
+
+  10:07:30 25      A.  12-16-83.
+
+                                                                        7
+
+
+
+  10:07:33  1      Q.  And that makes you how old?
+
+  10:07:35  2      A.  Forty-two years old.
+
+  10:07:37  3      Q.  Are you married?
+
+  10:07:38  4      A.  Yes.
+
+  10:07:39  5      Q.  Who are you married to?
+
+  10:07:41  6      A.  Jordan Leicht.
+
+  10:07:44  7      Q.  Where do y'all live?
+
+  10:07:45  8      A.  The Woodlands.
+
+  10:07:47  9      Q.  Do you live at the same address that you did on
+
+  10:07:50 10   the date of this incident?
+
+  10:07:51 11      A.  Yes.
+
+  10:07:53 12      Q.  How long have y'all lived there?
+
+  10:07:56 13      A.  Since 2019.
+
+  10:07:59 14      Q.  And what's the address where you live?
+
+  10:08:05 15      A.  22 Misty Cloud Street.
+
+  10:08:09 16      Q.  22 Misty Cloud?
+
+  10:08:12 17      A.  Yes.
+
+  10:08:15 18      Q.  There in The Woodlands?
+
+  10:08:17 19      A.  Yes.
+
+  10:08:19 20      Q.  Right?
+
+  10:08:19 21      A.  Yes.
+
+  10:08:21 22      Q.  I'm sorry.  The volume is not coming --
+
+  10:08:26 23      A.  Yes.
+
+  10:08:26 24      Q.  Who else lives there with you and your husband?
+
+  10:08:29 25      A.  My 13-year-old daughter and a 9-year-old son.
+
+                                                                        8
+
+
+
+  10:08:38  1      Q.  And I think your 13-year-old daughter's named
+
+  10:08:42  2   Julia, right?
+
+  10:08:43  3      A.  Yes.
+
+  10:08:44  4      Q.  And she was 12 at the time of this wreck, right?
+
+  10:08:52  5      A.  (Inaudible.)
+
+  10:08:53  6      Q.  It -- it's not coming through.  I'm sorry,
+
+  10:08:57  7   Ms. Leicht.
+
+  10:08:57  8      A.  (Inaudible.)
+
+  10:08:58  9      Q.  It's either on my end or yours.  It's muted.
+
+  10:09:01 10      A.  I can hear you.
+
+  10:09:04 11      Q.  There you go.  All right.
+
+  10:09:12 12          What do you do for a living?
+
+  10:09:14 13      A.  I am an active volunteer in my community, and I
+
+  10:09:19 14   am a substitute teacher in elementary school.
+
+  10:09:22 15          I -- I have served on many PTO boards for my
+
+  10:09:27 16   children's schools.  I volunteer all the time, and I
+
+  10:09:31 17   am a Girl Scout leader for the past nine years.
+
+  10:09:36 18      Q.  Where do you teach?
+
+  10:09:38 19      A.  I -- anywhere in Conroe I.S.D., I can sub.
+
+  10:09:44 20      Q.  So tell me some of the schools that you sub at.
+
+  10:09:52 21      A.  Galatas Elementary, Mitchell Intermediate,
+
+  10:10:03 22   Powell Elementary.  Those are a few of them.  I've
+
+  10:10:06 23   been to several.
+
+  10:10:07 24      Q.  And what grades?
+
+  10:10:09 25      A.  Anywhere between K and sixth grade is what I --
+
+                                                                        9
+
+
+
+  10:10:14  1   is what I usually sub in.
+
+  10:10:16  2      Q.  How long have you been subbing?
+
+  10:10:18  3      A.  About two -- two -- almost three years.
+
+  10:10:28  4      Q.  And when this accident happened, were you
+
+  10:10:33  5   subbing during that time period?
+
+  10:10:35  6      A.  Yes.
+
+  10:10:36  7      Q.  What schools?  The same -- same general ones?
+
+  10:10:41  8      A.  The same general ones, yes, sir.
+
+  10:10:45  9      Q.  Before you became a substitute teacher, what
+
+  10:10:49 10   did you do?
+
+  10:10:50 11      A.  I've been -- I have been a volunteer basically
+
+  10:10:53 12   my whole life.  I -- my husband was active-duty Air
+
+  10:10:59 13   Force before we moved here.  He still continues to
+
+  10:11:02 14   serve.  He's been in the Air Force for 19 years.
+
+  10:11:05 15          I was a military key spouse for many years,
+
+  10:11:09 16   which is a --
+
+  10:11:11 17      Q.  A military what?
+
+  10:11:12 18      A.  Military key spouse, which is a liaison between
+
+  10:11:15 19   military spouses and the squadron commander during
+
+  10:11:21 20   times of war.  It's kind of a point of contact during
+
+  10:11:25 21   times of war.
+
+  10:11:26 22          I've served on PTO boards at school -- at my
+
+  10:11:31 23   different -- at my children's schools in various roles.
+
+  10:11:35 24   I've done fundraisers that I've raised hundreds of
+
+  10:11:39 25   thousands of dollars.
+
+                                                                       10
+
+
+
+  10:11:41  1          I also volunteer in my kids' school, like, all
+
+  10:11:45  2   the time.  So if I'm not subbing, I'm there
+
+  10:11:49  3   volunteering.
+
+  10:11:49  4          I volunteer at my -- the pantry, like a food
+
+  10:11:53  5   pantry.  I volunteer at church.  I volunteer for Reads
+
+  10:11:58  6   Across America.  I am a Girl Scout leader for the past
+
+  10:12:02  7   nine years.  I'm very involved in my community.
+
+  10:12:05  8      Q.  You certainly are, and my hat's off to you.
+
+  10:12:10  9   That's outstanding.  And thank you for your service,
+
+  10:12:12 10   and then for your husband's service.
+
+  10:12:15 11      A.  Thank you.
+
+  10:12:15 12      Q.  That's outstanding.
+
+  10:12:17 13          So where did you -- tell me about your
+
+  10:12:20 14   educational background.
+
+  10:12:21 15      A.  I have a bachelor's degree in liberal studies
+
+  10:12:24 16   with a concentration in elementary education.
+
+  10:12:32 17      Q.  Where did you get it?
+
+  10:12:32 18      A.  California State University, San Bernardino.
+
+  10:12:37 19      Q.  When did you graduate?
+
+  10:12:39 20      A.  When?
+
+  10:12:40 21      Q.  Yes, ma'am.
+
+  10:12:43 22      A.  2006.
+
+  10:12:48 23      Q.  Tell me about your husband.  What does he do?
+
+  10:12:51 24      A.  He is an Air Force officer, and he is an airline
+
+  10:12:56 25   pilot.
+
+                                                                       11
+
+
+
+  10:12:59  1      Q.  What airline?
+
+  10:13:00  2      A.  Southwest Airlines.
+
+  10:13:03  3      Q.  Has he been doing that a long time?
+
+  10:13:05  4      A.  Since 2019.
+
+  10:13:10  5      Q.  And then tell me briefly about his service.
+
+  10:13:15  6      A.  He was commissioned in the Air Force in 2006,
+
+  10:13:21  7   and he has been deployed, I think, four times.  He was
+
+  10:13:28  8   a command pilot in the Air Force, and he was gone a
+
+  10:13:33  9   lot --
+
+  10:13:34 10      Q.  I imagine.
+
+  10:13:35 11      A.  -- in times of war.
+
+  10:13:39 12      Q.  Did he fight over in Iraq?
+
+  10:13:40 13      A.  Afghanistan.
+
+  10:13:43 14      Q.  All right.
+
+  10:13:44 15      A.  The first couple of years we were married, he
+
+  10:13:47 16   was gone 250 days a year.
+
+  10:13:51 17      Q.  Well, thank goodness he came back, huh?
+
+  10:13:54 18      A.  Yes.
+
+  10:13:56 19      Q.  What did he fly?
+
+  10:13:57 20      A.  C-17s mostly.  And he flew a Gulfstream and an
+
+  10:14:06 21   E-11.
+
+  10:14:09 22      Q.  Okay.  And then let me go through -- I've got a
+
+  10:14:14 23   slide show that's going to help us out some.  Let me --
+
+  10:14:17 24   I'm going to be sharing this a lot, or attempting to.
+
+  10:14:24 25          I've got your driver's license on Slide
+
+                                                                       12
+
+
+
+  10:14:28  1   Number 2 --
+
+  10:14:29  2      A.  Uh-huh.
+
+  10:14:30  3      Q.  -- that y'all provided to me in discovery.
+
+  10:14:33  4          Do you see that, Ms. Leicht?
+
+  10:14:35  5      A.  Yes.
+
+  10:14:38  6      Q.  Do you still have the same driver's license?
+
+  10:14:40  7      A.  Yes.
+
+  10:14:41  8      Q.  It's got your date of birth as December 16,
+
+  10:14:46  9   1983.
+
+  10:14:46 10          Is that accurate?
+
+  10:14:47 11      A.  Yes.  I have it right here if you need to see
+
+  10:14:50 12   it.  I can't see my screen, though.
+
+  10:14:52 13      Q.  You can't see your screen?
+
+  10:14:53 14      A.  I can't -- I can't see me now that you have
+
+  10:14:56 15   that up there.
+
+  10:14:58 16      Q.  Okay.  But I'm sure it's the same one.
+
+  10:15:02 17      A.  Okay.
+
+  10:15:02 18      Q.  My bigger concern is can you see the screen I'm
+
+  10:15:05 19   sharing?
+
+  10:15:05 20      A.  Yes, I can see the screen you're sharing.
+
+  10:15:08 21      Q.  Okay.  Thank you.
+
+  10:15:09 22          You don't have any restrictions on your driver's
+
+  10:15:11 23   license for anything?
+
+  10:15:12 24      A.  No.
+
+  10:15:14 25      Q.  What's your vision like?
+
+                                                                       13
+
+
+
+  10:15:17  1      A.  I mean, I think I have pretty good vision.
+
+  10:15:21  2      Q.  You don't wear glasses or contacts, or never
+
+  10:15:23  3   had eye surgery, correct?
+
+  10:15:25  4      A.  No.
+
+  10:15:26  5      Q.  All right.  And I want to get some background --
+
+  10:15:33  6   more background information about you.
+
+  10:15:37  7          Have you ever been involved in any other lawsuit
+
+  10:15:40  8   before?
+
+  10:15:40  9      A.  No.
+
+  10:15:41 10      Q.  Any other insurance claims, either bringing
+
+  10:15:45 11   claims or somebody bringing a claim against you?
+
+  10:15:48 12      A.  I have had a couple of other little claims.  I
+
+  10:15:52 13   got rear-ended -- well, not rear-ended, but a lady
+
+  10:15:57 14   backed into me in a parking lot.  Yeah.
+
+  10:16:02 15      Q.  Did you get hurt?
+
+  10:16:03 16      A.  No.
+
+  10:16:04 17      Q.  Okay.  Just a property damage claim?
+
+  10:16:06 18      A.  Yeah.
+
+  10:16:07 19      Q.  All right.  And what else?  Anything else?
+
+  10:16:11 20      A.  I got in an accident when I was 16.
+
+  10:16:16 21      Q.  All right.  Anything come of that, a lawsuit,
+
+  10:16:20 22   claim, anything like that?
+
+  10:16:22 23      A.  Not that I know of.
+
+  10:16:23 24      Q.  All right.  And is that the only accidents
+
+  10:16:27 25   you've ever been involved in as a driver?
+
+                                                                       14
+
+
+
+  10:16:30  1      A.  Yes.
+
+  10:16:31  2      Q.  Okay.  Tell me about your driving record.  In
+
+  10:16:36  3   the past five years or so, have you had any speeding
+
+  10:16:40  4   tickets, moving violations, that type of thing?
+
+  10:16:43  5      A.  I got a ticket with this accident.  But other
+
+  10:16:47  6   than that, nothing.
+
+  10:16:49  7      Q.  All right.  Thank you for sharing that.
+
+  10:16:51  8          And what became of the citation that was issued
+
+  10:16:55  9   to you in this case, disregarding a traffic control
+
+  10:17:01 10   device, I think it was?  What -- what -- what became
+
+  10:17:04 11   of that?
+
+  10:17:04 12      A.  It was dismissed in court with -- with traffic
+
+  10:17:09 13   school.
+
+  10:17:10 14      Q.  All right.  Did you get Travis to go over there
+
+  10:17:13 15   and help you out, or did you go by yourself, or get
+
+  10:17:16 16   somebody else?
+
+  10:17:17 17      A.  We hired another lawyer, sir.
+
+  10:17:18 18      Q.  Did you get you a good traffic lawyer?
+
+  10:17:20 19      A.  Yes.
+
+  10:17:21 20      Q.  Who did you hire?
+
+  10:17:22 21      A.  I don't remember his name.
+
+  10:17:23 22      Q.  All right.  Fair enough.
+
+  10:17:25 23          But when it was dismissed, did you have to plead
+
+  10:17:30 24   to anything, guilty, no contest, or did they just get
+
+  10:17:35 25   it dismissed?
+
+                                                                       15
+
+
+
+  10:17:38  1      A.  I believe it was just dismissed.
+
+  10:17:41  2      Q.  Okay.  Fair enough.
+
+  10:17:43  3          And then I hate to ask you this, but I've got
+
+  10:17:51  4   to.
+
+  10:17:51  5          Have you ever been arrested?
+
+  10:17:53  6      A.  No.
+
+  10:17:53  7      Q.  All right.  And then I want to ask you about
+
+  10:18:06  8   your insurance coverage.
+
+  10:18:13  9          In a lawsuit, we're entitled to find out
+
+  10:18:17 10   about insurance coverage, and Travis has been kind
+
+  10:18:20 11   enough to send me y'all's coverage, showing that
+
+  10:18:23 12   you've got coverage with USAA for 300,000 primary
+
+  10:18:27 13   limits and 2 million dollar umbrella.
+
+  10:18:32 14          Do you see that?
+
+  10:18:33 15      A.  Yes.
+
+  10:18:33 16      Q.  Is that all the insurance coverage that you're
+
+  10:18:36 17   aware of that would provide coverage for any settlement
+
+  10:18:39 18   or judgment in this case?
+
+  10:18:41 19      A.  Yes.
+
+  10:18:43 20      Q.  Okay.  And so do you accept any responsibility
+
+  10:18:52 21   for causing the crash that's made the basis of this
+
+  10:18:55 22   suit?
+
+  10:18:57 23      A.  No.
+
+  10:19:01 24      Q.  Do you believe that there's anything that you
+
+  10:19:06 25   could have done differently that would have prevented
+
+                                                                       16
+
+
+
+  10:19:10  1   the wreck from happening?
+
+  10:19:11  2      A.  No.
+
+  10:19:14  3      Q.  And when I say "prevented the wreck from
+
+  10:19:17  4   happening," I'm talking about the wreck of May 10th,
+
+  10:19:21  5   2025.
+
+  10:19:21  6          Do you understand that?
+
+  10:19:24  7      A.  Yes.
+
+  10:19:27  8      Q.  All right.  Tell me, in your own words, how did
+
+  10:19:32  9   the wreck happen, from your perspective?
+
+  10:19:44 10      A.  This is a very emotional topic for me.
+
+  10:19:49 11      Q.  Take your time and let me know how it happened.
+
+  10:20:04 12      A.  My daughter and I needed to go to Kohl's to go
+
+  10:20:09 13   buy a dress for her.  So we left our house and we began
+
+  10:20:17 14   driving.
+
+  10:20:20 15          I go -- I turn right on Windridge.  There's a
+
+  10:20:25 16   stop sign.  I stop at the stop sign.  I look left, I
+
+  10:20:30 17   look right for pedestrians, and I look left again.  I
+
+  10:20:36 18   did not see anyone coming, so I pulled out into the
+
+  10:20:40 19   intersection.
+
+  10:20:40 20          You have to stop in the median in this
+
+  10:20:45 21   intersection, because there are trees everywhere.
+
+  10:20:48 22   You have to stop in the median.
+
+  10:20:52 23          After I -- when I stopped at the stop sign and
+
+  10:20:58 24   I proceeded out into the intersection is when I saw
+
+  10:21:03 25   Mr. Crowson.  He was in the far-right lane, and he
+
+                                                                       17
+
+
+
+  10:21:09  1   switched to the -- to the left lane.
+
+  10:21:12  2          When I saw him, I pushed down the accelerator to
+
+  10:21:19  3   try to get out of his way.  I did not see him when I
+
+  10:21:24  4   pulled out.
+
+  10:21:44  5          We ended up crashing, running into each other.
+
+  10:21:50  6   When he -- when he went into the left lane and I was
+
+  10:21:53  7   going forward, I was trying to get to the median to
+
+  10:21:57  8   get out of his way.
+
+  10:22:16  9      Q.  Do you need to take a break?
+
+  10:22:19 10      A.  No.
+
+  10:22:26 11               MR. GROSSCOPE:  You're doing good, Katie.
+
+  10:22:29 12               THE WITNESS:  Thanks.
+
+  10:22:46 13               It was very traumatic.
+
+  10:22:54 14      Q.  (BY MR. STEPHENS)  I know it was.  And take
+
+  10:22:55 15   your time.  If you need to take a break, that's fine.
+
+  10:22:58 16          If not, we'll sit here and give you as much
+
+  10:23:00 17   time as you want to finish how it happened, okay?
+
+  10:23:06 18      A.  That is how it happened.
+
+  10:23:11 19      Q.  Okay.  Are you -- are you done?  Okay.
+
+  10:23:14 20      A.  I was going forward.  I didn't see him.
+
+  10:23:23 21      Q.  All right.  So let me go back and ask you some
+
+  10:23:26 22   questions, okay?
+
+  10:23:27 23      A.  Okay.
+
+  10:23:30 24      Q.  So if the crash had not happened -- I pulled
+
+  10:23:41 25   from Google Maps -- this is my Slide Number 5.  And
+
+                                                                       18
+
+
+
+  10:23:48  1   it's put a general red dot here where Windridge Place
+
+  10:23:54  2   intersects with Research -- Research Forest Drive.
+
+  10:23:59  3          Do you see that?
+
+  10:24:00  4      A.  Yes, sir.
+
+  10:24:03  5      Q.  And so you were going to head to Kohl's.  That's
+
+  10:24:07  6   K-O-H-L-S, correct?
+
+  10:24:11  7      A.  Yes, sir.
+
+  10:24:11  8      Q.  To get a dress for your daughter, Julia, right?
+
+  10:24:15  9      A.  Yes, sir.
+
+  10:24:16 10      Q.  And so as I understand what you're saying, you
+
+  10:24:22 11   would have come up here to this intersection, if this
+
+  10:24:25 12   had not happened, and your intention was to make a
+
+  10:24:28 13   left-hand turn on Research Forest?
+
+  10:24:30 14      A.  Yes, sir.
+
+  10:24:32 15      Q.  Where, in general, on this map, if it's shown,
+
+  10:24:35 16   is Kohl's?
+
+  10:24:39 17      A.  You would go down right -- you would turn right
+
+  10:24:42 18   on Greenbridge Drive --
+
+  10:24:46 19      Q.  Yes, ma'am.
+
+  10:24:47 20      A.  -- and keep going all the way down, and you
+
+  10:24:49 21   would turn -- keep going -- and you would turn right
+
+  10:24:52 22   on 242.
+
+  10:24:53 23      Q.  Is that the same as College Park Drive?
+
+  10:24:55 24      A.  Yes, sir.
+
+  10:24:55 25      Q.  Yes, ma'am.
+
+                                                                       19
+
+
+
+  10:24:56  1      A.  And Kohl's is close to the freeway on the --
+
+  10:25:02  2      Q.  All right.
+
+  10:25:03  3      A.  -- left-hand side.
+
+  10:25:03  4      Q.  More or less a long ways or short ways from
+
+  10:25:06  5   what we've got on the map to the freeway?
+
+  10:25:09  6      A.  I don't -- I think --
+
+  10:25:15  7      Q.  Here's where it ends (indicating).
+
+  10:25:17  8      A.  I don't know what that -- what this is right
+
+  10:25:19  9   here.  I don't --
+
+  10:25:20 10      Q.  There are some baseball fields over here to the
+
+  10:25:24 11   left.
+
+  10:25:24 12      A.  Oh.  So it would continue down 242.  That's a --
+
+  10:25:27 13      Q.  All right.
+
+  10:25:29 14      A.  That's a sports park.
+
+  10:25:31 15      Q.  Yeah.  And I know you don't know an exact
+
+  10:25:34 16   distance, but would it have been five minutes, ten
+
+  10:25:37 17   minutes, fifteen minutes?  Have you got any -- can you
+
+  10:25:41 18   give me some estimate?  I'm trying to figure out how
+
+  10:25:45 19   long the intended trip was going to be.
+
+  10:25:48 20      A.  It's about a 15-minute drive.
+
+  10:25:51 21      Q.  Fair enough.
+
+  10:25:52 22          And so the next question I -- I want to know is,
+
+  10:25:56 23   you live back in this neighborhood off of Windridge
+
+  10:25:59 24   Place, correct?
+
+  10:26:01 25      A.  Yes, sir.
+
+                                                                       20
+
+
+
+  10:26:03  1      Q.  And I'm just wanting to know, were you coming
+
+  10:26:08  2   from -- is your home over here off North Floral Leaf
+
+  10:26:13  3   Circle back here to the top of this picture, or down
+
+  10:26:16  4   here to the bottom?
+
+  10:26:18  5      A.  To the bottom.
+
+  10:26:20  6      Q.  All right.  So -- and I'm guessing it's not too
+
+  10:26:26  7   far where your home is up to where you take a right on
+
+  10:26:30  8   Windridge Place?
+
+  10:26:31  9      A.  Yes.  True.
+
+  10:26:32 10      Q.  A couple of minutes or whatever, right?
+
+  10:26:34 11      A.  Yes.
+
+  10:26:35 12      Q.  And you would have taken a right onto Windridge
+
+  10:26:39 13   Place --
+
+  10:26:40 14      A.  Yes.
+
+  10:26:40 15      Q.  -- and you would have come up here to this stop
+
+  10:26:44 16   sign where I've got this red dot, correct?
+
+  10:26:46 17      A.  Yes, sir.
+
+  10:26:47 18      Q.  All right.  And that's Slide 6 we were looking
+
+  10:26:56 19   at.
+
+  10:26:56 20          And then here is -- I'm pulling these images
+
+  10:26:59 21   here from Google Maps.
+
+  10:27:00 22          Slide 7 has got a picture of the stop sign
+
+  10:27:04 23   where Windridge Place intersects with Research Forest;
+
+  10:27:08 24   is that right?
+
+  10:27:09 25      A.  Yes, sir.
+
+                                                                       21
+
+
+
+  10:27:09  1      Q.  I'm trying to figure out, when you say at the
+
+  10:27:13  2   stop sign, the stop sign's offset from the Research
+
+  10:27:20  3   Forest Drive, correct?
+
+  10:27:21  4      A.  Say that again.
+
+  10:27:22  5      Q.  This stop sign you see here --
+
+  10:27:26  6      A.  Uh-huh.
+
+  10:27:26  7      Q.  -- it's a little ways back from the intersection
+
+  10:27:30  8   of Research Forest Drive, true?
+
+  10:27:31  9      A.  Yes.
+
+  10:27:34 10      Q.  When you say you stopped at the stop sign that
+
+  10:27:38 11   day, where did you stop?  At the stop sign?
+
+  10:27:50 12      A.  I mean, I stopped at the stop sign.  There's no
+
+  10:27:53 13   limit line there, so -- like, I stopped before I go out
+
+  10:27:57 14   in the road.  You have to stop.
+
+  10:27:58 15      Q.  I know.  And that's what I'm trying to figure
+
+  10:28:00 16   out.
+
+  10:28:00 17          Is the stop sign -- here is Slide Number 8.
+
+  10:28:11 18   It's got a car that's back here at the stop sign.
+
+  10:28:15 19          Do you see that in Slide 8?
+
+  10:28:18 20      A.  Yes.
+
+  10:28:19 21      Q.  And then it's got quite a bit of room from the
+
+  10:28:22 22   stop sign out to the -- the road surface.
+
+  10:28:25 23          Do you see where my dot is out here at the road
+
+  10:28:28 24   surface?
+
+  10:28:29 25      A.  Yes.
+
+                                                                       22
+
+
+
+  10:28:30  1      Q.  What I want to know is, on that day, where --
+
+  10:28:39  2   first of all, where did you first stop?  Did you only
+
+  10:28:42  3   make one stop before getting onto Research Forest
+
+  10:28:45  4   Drive before the wreck happened, or more than one
+
+  10:28:49  5   stop?
+
+  10:28:50  6      A.  I don't recall.
+
+  10:28:53  7      Q.  Okay.
+
+  10:28:54  8      A.  There is --
+
+  10:28:58  9      Q.  But you stopped before getting onto Research
+
+  10:29:01 10   Forest Drive, correct?
+
+  10:29:01 11      A.  Definitely.
+
+  10:29:03 12      Q.  Okay.  Do you see this photograph here?
+
+  10:29:06 13      A.  Yes.
+
+  10:29:07 14      Q.  Where is it that you stopped, your best
+
+  10:29:11 15   estimate?  Back here where this car is?
+
+  10:29:14 16      A.  I mean, yeah, probably pretty close.
+
+  10:29:18 17      Q.  Okay.  So your testimony today is, you would
+
+  10:29:37 18   have stopped back here where this car is that I'm
+
+  10:29:39 19   putting the red line, correct?
+
+  10:29:41 20      A.  Yeah.  I mean, roughly.  You have to -- you
+
+  10:29:45 21   have to be able to see around.
+
+  10:29:48 22      Q.  Okay.
+
+  10:29:49 23      A.  So wherever that is in that picture.
+
+  10:29:51 24      Q.  So on Slide 8, I've marked in red where you say
+
+  10:29:56 25   that you stopped back by the stop sign, correct?
+
+                                                                       23
+
+
+
+  10:29:59  1      A.  Yeah.  I stopped at the stop sign.
+
+  10:30:04  2      Q.  Thank you.  Okay.
+
+  10:30:06  3          And here's another view -- again, here's the --
+
+  10:30:10  4   the outline of the stop sign over here.
+
+  10:30:13  5          And I've got -- I'm going to show you here, you
+
+  10:30:28  6   would have stopped -- if this is the stop sign where
+
+  10:30:34  7   this arrow is in Slide Number 9, you would have stopped
+
+  10:30:38  8   back here (indicating), is what your testimony is,
+
+  10:30:40  9   correct?
+
+  10:30:42 10      A.  I would have stopped where I could have seen to
+
+  10:30:45 11   turn left.
+
+  10:30:47 12      Q.  Okay.
+
+  10:30:47 13      A.  I --
+
+  10:30:50 14      Q.  So this -- that's what I'm trying to figure out.
+
+  10:30:54 15      A.  Yes.
+
+  10:30:54 16      Q.  So here is a view -- this is Slide Number 10.
+
+  10:31:00 17   This is a view from Google Maps.  If you stop at that
+
+  10:31:04 18   stop sign, that's the view that a motorist would have.
+
+  10:31:08 19          Is that where you stopped?
+
+  10:31:12 20      A.  I mean, I may have paused there for a second
+
+  10:31:16 21   and moved up.  I don't -- I would not have turned left
+
+  10:31:21 22   from a view of that.
+
+  10:31:22 23      Q.  Okay.
+
+  10:31:23 24      A.  You can't see down at all.
+
+  10:31:27 25      Q.  That would be dangerous, right?
+
+                                                                       24
+
+
+
+  10:31:28  1      A.  Definitely.
+
+  10:31:29  2      Q.  That would be playing Russian roulette, right?
+
+  10:31:35  3      A.  Definitely.
+
+  10:31:35  4      Q.  Okay.
+
+  10:31:36  5      A.  I had a 12-year-old daughter in my car.  There
+
+  10:31:39  6   was no way I would have done anything to hurt her.
+
+  10:31:43  7      Q.  I understand.  And I'm just trying to get your
+
+  10:31:45  8   best memory, okay?  Because I only get to talk to you
+
+  10:31:50  9   once to figure out your best memory of how this
+
+  10:31:55 10   happened.  That's all I'm trying to do.
+
+  10:32:03 11          So you believe that you would have pulled
+
+  10:32:05 12   forward from this view, because over to the left, it
+
+  10:32:08 13   would have been blocked off by the trees, right?
+
+  10:32:11 14      A.  Yes.
+
+  10:32:12 15      Q.  Okay.
+
+  10:32:13 16      A.  I would not have turned from that -- from that
+
+  10:32:17 17   vantage point.
+
+  10:32:18 18      Q.  And you gave a statement to your representative
+
+  10:32:21 19   after this collision, and you told us what everybody
+
+  10:32:29 20   knows.
+
+  10:32:30 21          There's lots of trees in The Woodlands, right?
+
+  10:32:34 22      A.  Yes.
+
+  10:32:34 23      Q.  And these trees, like we just saw, they keep
+
+  10:32:37 24   you from seeing who's coming, right?
+
+  10:32:40 25      A.  The trees and the curvature of the road, as
+
+                                                                       25
+
+
+
+  10:32:46  1   well.
+
+  10:32:46  2      Q.  So what you want to do, as a safe motorist, is
+
+  10:32:51  3   to make certain that you get your vehicle in a position
+
+  10:32:55  4   where you can see people before getting onto Research
+
+  10:33:00  5   Forest Drive, right?
+
+  10:33:01  6      A.  Yes.
+
+  10:33:07  7      Q.  So here's another view.  This is Slide Number 12.
+
+  10:33:20  8   And I've got a red block here.
+
+  10:33:24  9          I was hoping that you could tell me from this
+
+  10:33:27 10   overhead view where you think you were positioned
+
+  10:33:33 11   before entering onto Research Forest Drive, where you
+
+  10:33:37 12   stopped.
+
+  10:33:42 13          Were you -- here's the stop sign.  See where I
+
+  10:33:45 14   put the little red deal at the bottom?
+
+  10:33:48 15      A.  Yes.
+
+  10:33:49 16      Q.  In relation to this stop sign, were you here
+
+  10:33:51 17   (indicating)?  Were you out here (indicating)?  Where
+
+  10:33:56 18   were you?
+
+  10:33:56 19      A.  I was probably a little bit further up.  I
+
+  10:34:00 20   would not have turned if I did not -- if I could not
+
+  10:34:04 21   clearly see down Research.
+
+  10:34:06 22      Q.  All right.  You've lived there for about six
+
+  10:34:08 23   years, right?
+
+  10:34:09 24      A.  Yes.
+
+  10:34:10 25      Q.  Do you stop and do about the same thing every --
+
+                                                                       26
+
+
+
+  10:34:14  1   every single day when you're leaving that subdivision?
+
+  10:34:22  2      A.  Say that again.
+
+  10:34:22  3      Q.  When you're leaving that subdivision, do you
+
+  10:34:25  4   pull up about the same place every day?
+
+  10:34:28  5      A.  Yeah, I guess.  Everyone does.
+
+  10:34:31  6      Q.  Where do you pull up?  You've done it literally
+
+  10:34:35  7   hundreds, if not thousands of times.
+
+  10:34:37  8          Where did you pull up this morning, if you -- or
+
+  10:34:40  9   yesterday?
+
+  10:34:43 10      A.  Well, to be honest, I have not gone through that
+
+  10:34:46 11   intersection since then.
+
+  10:34:49 12      Q.  Okay.  You go out a different way now?
+
+  10:34:52 13      A.  Yes.
+
+  10:34:53 14      Q.  All right.  And why is that?
+
+  10:34:59 15      A.  Because I have extreme PTSD from that
+
+  10:35:02 16   intersection.
+
+  10:35:04 17      Q.  All right.  Before this collision, you had been
+
+  10:35:09 18   driving this intersection for a long time, right?
+
+  10:35:16 19      A.  Yes.
+
+  10:35:17 20      Q.  Had you ever had any close calls there before?
+
+  10:35:21 21      A.  No.
+
+  10:35:24 22      Q.  Did you believe it to be a dangerous
+
+  10:35:26 23   intersection before this occurred?
+
+  10:35:32 24      A.  I mean, there's a lot of intersections in The
+
+  10:35:36 25   Woodlands that are not the best.  They have a lot of
+
+                                                                       27
+
+
+
+  10:35:39  1   trees.
+
+  10:35:39  2      Q.  Did you believe that this was a dangerous
+
+  10:35:43  3   intersection before this wreck occurred?
+
+  10:35:46  4      A.  No.
+
+  10:35:49  5      Q.  Had you ever heard of anybody having collisions
+
+  10:35:52  6   there before this happened?
+
+  10:35:56  7      A.  I don't know.
+
+  10:35:59  8      Q.  You weren't aware of any collisions that had
+
+  10:36:02  9   ever taken place there before?
+
+  10:36:04 10      A.  I was not aware of any collisions.
+
+  10:36:12 11      Q.  So if you were to give me your best estimate, in
+
+  10:36:20 12   looking at this Slide Number 12, where would you place
+
+  10:36:27 13   this red vehicle, signifying your -- your truck?  Where
+
+  10:36:34 14   would you say that it was positioned on the date of
+
+  10:36:37 15   this wreck, your best memory?
+
+  10:36:40 16      A.  Well, sir, I would have pulled up so I could
+
+  10:36:45 17   have seen.
+
+  10:36:49 18      Q.  All right.  So where would that be?
+
+  10:37:01 19      A.  (Inaudible.)
+
+  10:37:01 20      Q.  I've got the red truck.  You tell me where to
+
+  10:37:05 21   draw it.
+
+  10:37:06 22      A.  Somewhere in there probably.
+
+  10:37:10 23      Q.  Okay.  You would have pulled up ahead of that
+
+  10:37:14 24   stop sign so you could get in a better position to see,
+
+  10:37:17 25   right?
+
+                                                                       28
+
+
+
+  10:37:19  1      A.  Yes, probably.
+
+  10:37:21  2      Q.  All right.  Is this a fair place to -- to put
+
+  10:37:25  3   the truck?  Because I have never been there.  I'm
+
+  10:37:27  4   trying to get your best estimate.
+
+  10:37:31  5      A.  Yeah.
+
+  10:37:32  6      Q.  All right.
+
+  10:37:35  7      A.  It's not a very well-placed stop sign, in my
+
+  10:37:39  8   opinion.
+
+  10:37:42  9      Q.  Yes, ma'am.  So you've faced that situation
+
+  10:37:45 10   before in the many years you've been on this Earth
+
+  10:37:49 11   driving.
+
+  10:37:50 12          When you've come to a stop sign and you can't
+
+  10:37:54 13   get a good look at approaching traffic, what are you
+
+  10:37:57 14   supposed to do?
+
+  10:38:02 15      A.  Can you repeat the question.
+
+  10:38:05 16      Q.  When the stop sign is not in a place where you
+
+  10:38:07 17   can see, what are you supposed to do?
+
+  10:38:15 18      A.  You always have to look, and you always have to
+
+  10:38:18 19   stop at a stop sign.
+
+  10:38:20 20      Q.  Yeah.  And you have to be able to see the
+
+  10:38:22 21   traffic that's approaching or near that intersection
+
+  10:38:24 22   before you can pull out.
+
+  10:38:26 23          That's the safe thing to do, right?
+
+  10:38:29 24      A.  Yes, obviously.
+
+  10:38:30 25      Q.  All right.  So when you got up to the stop sign,
+
+                                                                       29
+
+
+
+  10:38:35  1   you said that you looked left, then you looked right,
+
+  10:38:40  2   then you looked back to the left, correct?
+
+  10:38:44  3      A.  Yes.
+
+  10:38:50  4      Q.  How long did that take you to look left, right,
+
+  10:38:53  5   left?
+
+  10:38:56  6      A.  I don't know.  I mean, left, right, left.  I'm
+
+  10:39:05  7   looking.
+
+  10:39:07  8      Q.  Okay.
+
+  10:39:08  9      A.  I looked for pedestrians.  We have a lot of
+
+  10:39:11 10   pedestrians in The Woodlands, as well.
+
+  10:39:13 11      Q.  Okay.  That's another reason that you want to
+
+  10:39:16 12   get up here and make certain that you can see, because
+
+  10:39:19 13   you don't want to run over any pedestrians walking or
+
+  10:39:23 14   running down that -- is this a -- is this a pedestrian
+
+  10:39:28 15   path where I've got my cursor?
+
+  10:39:30 16      A.  It's a shoulder; yes.
+
+  10:39:32 17      Q.  And that's where the pedestrians are that you
+
+  10:39:35 18   were looking for to the right?
+
+  10:39:37 19      A.  Yeah.  Well, yeah.
+
+  10:39:41 20      Q.  So if you're back here at this stop sign -- I'm
+
+  10:39:50 21   looking here at this -- at this slide we looked at
+
+  10:39:53 22   before, the view from the stop sign, Slide 10.
+
+  10:39:56 23          That's not a real safe place to be, either,
+
+  10:40:00 24   because there could be pedestrians coming down these --
+
+  10:40:03 25   this walkway here to the shoulder, and you want to make
+
+                                                                       30
+
+
+
+  10:40:06  1   certain you don't run over them when you get to the
+
+  10:40:09  2   road, right?
+
+  10:40:11  3      A.  Yes.
+
+  10:40:12  4      Q.  So when you pulled up here and you looked left --
+
+  10:40:15  5   and this is Slide -- again, Slide Number 12 -- and you
+
+  10:40:26  6   get in position -- you see there's traffic on this road
+
+  10:40:30  7   in Slide Number 12 that's headed east, right?
+
+  10:40:34  8      A.  Yes.
+
+  10:40:35  9      Q.  There's three cars right here.
+
+  10:40:38 10          Do you see these three cars headed east?
+
+  10:40:41 11      A.  Yes.
+
+  10:40:41 12      Q.  Your plan was to head north into the median
+
+  10:40:46 13   over here and take a left, correct?
+
+  10:40:51 14      A.  Yes.
+
+  10:40:52 15      Q.  So from the position here while you're stopped,
+
+  10:40:55 16   before you started to enter onto the roadway -- do you
+
+  10:41:03 17   see where I've marked "Crowson" back here?
+
+  10:41:07 18      A.  Yes.
+
+  10:41:08 19      Q.  If he were in this position anywhere -- up here
+
+  10:41:12 20   on the right is Greenbridge.
+
+  10:41:18 21          Do you see where I've got Greenbridge up here?
+
+  10:41:26 22      A.  Yes.
+
+  10:41:27 23      Q.  You know from times past that if you pull up
+
+  10:41:29 24   here and you're looking, you can see all the way down
+
+  10:41:34 25   here to Greenbridge, can't you?
+
+                                                                       31
+
+
+
+  10:41:36  1      A.  Yes.
+
+  10:41:37  2      Q.  You can see vehicles down here at the stop
+
+  10:41:39  3   light.
+
+  10:41:40  4          See this white vehicle down here that's parked
+
+  10:41:43  5   at the stop light at Greenridge -- Greenbridge?
+
+  10:41:47  6      A.  Yes.
+
+  10:41:49  7      Q.  So if there is any traffic between Windridge
+
+  10:41:54  8   Place and Greenbridge, if you're positioned correctly,
+
+  10:42:00  9   you ought to be able to see them, correct?
+
+  10:42:03 10      A.  Yes.
+
+  10:42:05 11      Q.  Just like if there's any vehicle -- if
+
+  10:42:14 12   Mr. Crowson's motorcycle was where I have it
+
+  10:42:18 13   positioned -- just happened to stick it there on
+
+  10:42:21 14   Number 12 -- if it was -- happened to be there, you
+
+  10:42:24 15   should have seen him, right, if you were looking?
+
+  10:42:26 16               MR. GROSSCOPE:  Objection; form.
+
+  10:42:28 17               You can answer.
+
+  10:42:30 18      A.  Sir, I looked.  I did not see any oncoming
+
+  10:42:34 19   traffic.
+
+  10:42:35 20      Q.  (BY MR. STEPHENS)  Yes, ma'am.  I understand
+
+  10:42:36 21   that.  I'm just asking --
+
+  10:42:38 22      A.  It was a sunny day, and there were lots of
+
+  10:42:42 23   shadows cast on the road.  There's a curvature in the
+
+  10:42:45 24   road.  I didn't see him.
+
+  10:42:50 25      Q.  If you need to take -- take a break, that's
+
+                                                                       32
+
+
+
+  10:42:52  1   okay.  But my question's a little bit different.
+
+  10:42:55  2          If you were looking, you -- and you were paying
+
+  10:43:01  3   attention, you should have been able to see traffic
+
+  10:43:07  4   between Windridge Place and Greenbridge; isn't that
+
+  10:43:12  5   true?
+
+  10:43:18  6      A.  Yes, I should have -- I should have been able
+
+  10:43:20  7   to see him, but I did not see him.  He was very --
+
+  10:43:25  8      Q.  Yes, ma'am.
+
+  10:43:26  9      A.  -- camouflaged.
+
+  10:43:29 10      Q.  You know that that motorcycle has a headlight
+
+  10:43:33 11   that comes on automatically when you start it up.
+
+  10:43:36 12          Did you ever see a headlight headed your way?
+
+  10:43:40 13      A.  I never saw a headlight.
+
+  10:43:42 14      Q.  All right.  As you're looking back to the left,
+
+  10:43:47 15   before you pulled out onto Research Forest Drive, were
+
+  10:43:53 16   there any other vehicles that you saw eastbound?
+
+  10:44:02 17      A.  No.
+
+  10:44:03 18      Q.  How long did you sit at the stop sign area that
+
+  10:44:05 19   we see in Slide 12, more or less, before you decided to
+
+  10:44:11 20   pull out?
+
+  10:44:12 21      A.  Well, I looked left and I looked right and I
+
+  10:44:15 22   looked left, and I felt it was safe to go across, to
+
+  10:44:19 23   stop in the median where you have to stop.  I did not
+
+  10:44:23 24   see any oncoming traffic.
+
+  10:44:28 25      Q.  All right.  Have you seen the vehicle download
+
+                                                                       33
+
+
+
+  10:44:32  1   from your Tacoma?
+
+  10:44:38  2               THE WITNESS:  Am I allowed to answer that
+
+  10:44:39  3   question?
+
+  10:44:41  4               MR. STEPHENS:  Yes.
+
+  10:44:43  5               THE WITNESS:  I'm asking my lawyer.
+
+  10:44:45  6               MR. GROSSCOPE:  You can.
+
+  10:44:47  7      Q.  (BY MR. STEPHENS)  Yes, you're allowed to
+
+  10:44:49  8   answer that.
+
+  10:44:51  9          Have you seen the vehicle download on your
+
+  10:44:53 10   vehicle?
+
+  10:44:54 11      A.  Yes.  I mean, I -- I haven't seen it in person,
+
+  10:44:57 12   but --
+
+  10:44:58 13      Q.  Okay.  We're going to look at that in a minute.
+
+  10:45:02 14          The reason I ask how long you sat there, the
+
+  10:45:05 15   vehicle download, I'll hold out to you, appears to
+
+  10:45:10 16   show that you stopped for about a second.
+
+  10:45:17 17          If that's true, then your look to the left,
+
+  10:45:20 18   look to the right, look back to the left, that would
+
+  10:45:22 19   have happened very quickly, correct?
+
+  10:45:26 20      A.  I didn't see anyone coming, sir.
+
+  10:45:29 21      Q.  That would have happened very quickly, correct?
+
+  10:45:32 22   Left, right, left?  True?
+
+  10:45:35 23      A.  Yeah, I guess.
+
+  10:45:37 24      Q.  Let us skip Slide 13.
+
+  10:45:50 25          Okay.  At some point, you decided to enter into
+
+                                                                       34
+
+
+
+  10:45:57  1   or onto Research Forest Drive to go over to the median,
+
+  10:46:03  2   intending to turn left, right?
+
+  10:46:08  3      A.  Yes.
+
+  10:46:09  4      Q.  Correct?
+
+  10:46:10  5      A.  Yes.
+
+  10:46:12  6      Q.  And you -- you've told us that you saw the
+
+  10:46:18  7   motorcycle before you got to the median, correct?
+
+  10:46:21  8      A.  Yes.
+
+  10:46:23  9      Q.  So this is Slide Number 14.  And what I want to
+
+  10:46:27 10   do here -- whoops -- is get you to help us position
+
+  10:46:39 11   where your vehicle was, approximately, when you first
+
+  10:46:46 12   saw his -- his motorcycle.
+
+  10:46:50 13          Which -- was it at the edge of the roadway, was
+
+  10:46:54 14   it in one of the lanes, was it in the --
+
+  10:46:57 15      A.  It was in one of the lanes.  It was, like, in
+
+  10:47:00 16   the first lane, approaching the second lane.
+
+  10:47:02 17      Q.  In the first lane?  Tell me where to put the
+
+  10:47:06 18   vehicle.  Do you see it?
+
+  10:47:10 19      A.  A little bit farther back.  Like, I had left the
+
+  10:47:13 20   stop sign.  Yeah.  Like, right around there.  I had
+
+  10:47:18 21   already --
+
+  10:47:19 22      Q.  All right.  Is that a fairly good estimate that
+
+  10:47:28 23   you have in your mind today where your vehicle was
+
+  10:47:31 24   positioned when you first saw the Crowson motorcycle
+
+  10:47:35 25   headed your way?
+
+                                                                       35
+
+
+
+  10:47:38  1      A.  Roughly, yes.
+
+  10:47:39  2      Q.  Thank you.  That's Slide Number 14.
+
+  10:47:43  3          All right.  And when you saw him -- I've placed
+
+  10:47:48  4   this yellow box here.  I want you to help me position,
+
+  10:47:52  5   where was the motorcycle, approximately?
+
+  10:47:55  6      A.  It was in the far-right lane.
+
+  10:47:58  7      Q.  The far-right lane.  All right.
+
+  10:48:03  8      A.  Like, in the far-right lane.  Like, keep going.
+
+  10:48:06  9   Yeah.
+
+  10:48:06 10      Q.  Well, here's the shoulder over here (indicating).
+
+  10:48:10 11   When I get to blow it up, you'll see what I'm doing.
+
+  10:48:14 12          But I get it.  You're in the far-right lane.
+
+  10:48:17 13   And -- but where?  Was it farther back?  Was it closer?
+
+  10:48:24 14      A.  It happened so quick, I don't even know.  I only
+
+  10:48:26 15   remember watching him go from the far-right lane to
+
+  10:48:30 16   the left lane.
+
+  10:48:31 17      Q.  Fair enough.
+
+  10:48:32 18          So what I'm going to do -- attempt to do --
+
+  10:48:46 19   while you're sitting there, you saw him go from the
+
+  10:48:55 20   far-right lane where I've got it positioned, and you
+
+  10:49:00 21   saw him go into the left lane?
+
+  10:49:04 22      A.  Yes.
+
+  10:49:05 23      Q.  Okay.  And I'm arbitrarily putting the distance
+
+  10:49:12 24   between you and him, because we don't know where you
+
+  10:49:17 25   were.
+
+                                                                       36
+
+
+
+  10:49:17  1          But it went into the left lane.  I'm putting
+
+  10:49:23  2   it -- there's another Crowson.  I'm going to type
+
+  10:49:27  3   "Crowson 2," or attempt to, signifying he went into the
+
+  10:49:35  4   left lane, correct?
+
+  10:49:36  5      A.  Yes.
+
+  10:49:36  6      Q.  And, again, we're looking at Slide 14.
+
+  10:49:39  7          So when Crowson goes into the left lane, what
+
+  10:49:45  8   were you doing?  Where was your vehicle when he goes to
+
+  10:49:49  9   the left lane?
+
+  10:49:51 10      A.  I was right there when he --
+
+  10:49:53 11      Q.  Okay.
+
+  10:49:55 12      A.  I crossed -- and I slammed on the gas to try to
+
+  10:49:58 13   get out of his way into the median.
+
+  10:50:01 14      Q.  Okay.  So what you did -- (inaudible) -- you
+
+  10:50:19 15   slammed on the gas and went towards the median, right?
+
+  10:50:25 16      A.  Yes.  You have to stop at the median.
+
+  10:50:36 17      Q.  So I have marked a second box farther north on
+
+  10:50:43 18   Slide 14, signifying the second red box there, red
+
+  10:50:46 19   rectangular box, that signifies your movement when you
+
+  10:50:52 20   saw -- when -- when Crowson was in the left lane,
+
+  10:50:55 21   correct?
+
+  10:50:55 22      A.  Yes.
+
+  10:50:56 23      Q.  Okay.  Got it.
+
+  10:50:58 24          Okay.  And I think we've already covered this.
+
+  10:51:18 25   Slide 15.  You believe -- I think you're saying that
+
+                                                                       37
+
+
+
+  10:51:24  1   you only remember stopping once when -- after you got
+
+  10:51:29  2   onto Windridge Place, before you got onto Research
+
+  10:51:33  3   Forest Drive.  You don't remember stopping twice or
+
+  10:51:36  4   anything else, right?
+
+  10:51:39  5      A.  I don't recall if there was anything on
+
+  10:51:42  6   Windridge Place.  I know I stopped at the stop sign.
+
+  10:51:48  7      Q.  Where we've got you positioned in the earlier
+
+  10:51:51  8   slides, correct?  Where you're trying to see?
+
+  10:51:54  9      A.  Yes.
+
+  10:51:55 10      Q.  All right.
+
+  10:52:05 11          Okay.  Slide 16.  We've already been through
+
+  10:52:08 12   it.  We're not going to go into that anymore.
+
+  10:52:11 13          Okay.  The point of impact.  Was the point of
+
+  10:52:28 14   impact -- and this is not going to be exactly precise.
+
+  10:52:34 15          But the point of impact, was it in the median
+
+  10:52:37 16   over here, or was it in this left lane over here
+
+  10:52:40 17   (indicating), to your memory?
+
+  10:52:43 18      A.  I don't know.  Somewhere right in there.
+
+  10:52:46 19      Q.  And here's what I'm trying to find out:  The
+
+  10:52:50 20   police officer, on his diagram, he's got the point of
+
+  10:52:54 21   impact in the left lane.
+
+  10:52:55 22          Do you think it was in the left lane, or it was
+
+  10:52:57 23   in the median?
+
+  10:53:02 24      A.  I don't know.
+
+  10:53:06 25      Q.  Or do you know?
+
+                                                                       38
+
+
+
+  10:53:06  1      A.  I don't know.
+
+  10:53:08  2      Q.  Thank you.
+
+  10:53:18  3          Here's Picture Number 18, which has got your
+
+  10:53:24  4   pickup and the motorcycle.
+
+  10:53:25  5          Do you see it?
+
+  10:53:29  6      A.  Yes.
+
+  10:53:32  7      Q.  Did you see the impact?
+
+  10:53:36  8      A.  Yes.
+
+  10:53:42  9      Q.  Do you need to take a break?  That's -- that's
+
+  10:53:46 10   fine.
+
+  10:53:51 11               MR. GROSSCOPE:  Do you want to take a
+
+  10:53:52 12   quick break, Katie?
+
+  10:53:54 13               THE WITNESS:  It's okay.
+
+  10:53:56 14               MR. STEPHENS:  Let's take a quick break,
+
+  10:53:58 15   about five, ten minutes.
+
+  10:54:00 16               THE WITNESS:  Okay.
+
+  10:54:01 17               MR. GROSSCOPE:  Let's do five minutes.
+
+  10:54:03 18   That's good.
+
+  10:54:04 19               THE VIDEOGRAPHER:  Okay.  Going off the
+
+  10:54:06 20   record right now for the moment at approximately
+
+  10:54:10 21   10:54 a.m.
+
+  10:54:12 22               (Brief recess taken.)
+
+  11:02:58 23               THE VIDEOGRAPHER:  Okay.  We are back on
+
+  11:02:59 24   the record.  The time is approximately 11:02 a.m.
+
+  11:03:07 25   You may proceed.
+
+                                                                       39
+
+
+
+  11:03:08  1      Q.  (BY MR. STEPHENS)  Ms. Leicht, are you ready to
+
+  11:03:10  2   proceed again?
+
+  11:03:11  3      A.  Yes.
+
+  11:03:12  4      Q.  So what do you remember about when the
+
+  11:03:15  5   motorcycle hit the -- hit your door?
+
+  11:03:19  6      A.  I remember him slamming into my door, and glass
+
+  11:03:24  7   shattered all over my face.
+
+  11:03:32  8      Q.  Did you see the motorcycle as it was
+
+  11:03:35  9   approaching, or were you looking straight ahead, or
+
+  11:03:37 10   what?
+
+  11:03:39 11      A.  I think I saw it out of the corner of my eye.
+
+  11:03:42 12   I was trying to get to the median.
+
+  11:03:45 13      Q.  Yes, ma'am.  You were trying to get out of the
+
+  11:03:48 14   way, right?
+
+  11:03:49 15      A.  Yes.
+
+  11:03:52 16      Q.  And what I'm trying to focus on is whether you
+
+  11:03:56 17   saw the movement of the motorcycle as it's headed
+
+  11:04:00 18   toward you.  Was it sliding, was it still upright
+
+  11:04:04 19   when it hit you --
+
+  11:04:04 20      A.  He was still upright.
+
+  11:04:08 21      Q.  -- or do you know any of that?
+
+  11:04:09 22      A.  I believe he was still upright.
+
+  11:04:11 23      Q.  Okay.  And I'm trying to figure out if you saw
+
+  11:04:13 24   what part of his motorcycle strike your door.
+
+  11:04:18 25          Was it his -- like, the front end of it, the
+
+                                                                       40
+
+
+
+  11:04:21  1   side of it?  Do you know?
+
+  11:04:24  2      A.  I believe it was the front end.
+
+  11:04:27  3      Q.  All right.  Do you have any idea what broke
+
+  11:04:35  4   your windshield -- your -- your window on the driver's
+
+  11:04:39  5   side?  Was it his helmet, the motorcycle?  Do you have
+
+  11:04:46  6   any idea?
+
+  11:04:47  7      A.  I don't know.  Just the impact.
+
+  11:04:49  8      Q.  I'm sorry.  I didn't hear you.
+
+  11:04:51  9      A.  I don't know.  Just the impact.
+
+  11:04:54 10      Q.  Okay.  From the time that you saw him after you
+
+  11:05:03 11   pulled out into that first lane until the time that the
+
+  11:05:08 12   wreck happened, do you have an estimate of how long
+
+  11:05:12 13   that took?
+
+  11:05:15 14      A.  I don't know.
+
+  11:05:17 15      Q.  And from your memory, to my understanding, once
+
+  11:05:19 16   you saw him, you decided, "I'm going to hit the gas to
+
+  11:05:28 17   try to" -- "to try to evade him," right?
+
+  11:05:32 18      A.  Yes.
+
+  11:05:34 19      Q.  You didn't hit the brakes?
+
+  11:05:37 20      A.  Say that again.
+
+  11:05:38 21      Q.  You don't have any memory of hitting the brakes?
+
+  11:05:41 22   You decided to accelerate and try to evade the -- the
+
+  11:05:47 23   wreck, right?
+
+  11:05:48 24      A.  I don't think I did.
+
+  11:05:49 25      Q.  Right.  As this is going on -- and I hate to
+
+                                                                       41
+
+
+
+  11:05:54  1   ask this, but I need to know it -- what -- what was
+
+  11:05:59  2   your child saying or reacting, if at all, while this
+
+  11:06:09  3   was going on before the impact?
+
+  11:06:11  4      A.  I don't recall if there was any interaction.
+
+  11:06:14  5      Q.  All right.  Y'all were both belted, I take it?
+
+  11:06:17  6      A.  Of course.
+
+  11:06:19  7      Q.  And Julia usually rides -- rides up there in the
+
+  11:06:24  8   front end with you?
+
+  11:06:25  9      A.  I don't allow my children in the front seat
+
+  11:06:27 10   until they're 12, because I know that back seat is
+
+  11:06:30 11   best.
+
+  11:06:31 12      Q.  Okay.  And at the time of the impact, did Julia
+
+  11:06:44 13   say anything or scream or do anything at that time?
+
+  11:06:54 14      A.  Well, at the time of impact, I got shattered --
+
+  11:06:57 15   the glass shattered all over my face, so I had blood
+
+  11:07:01 16   all over my face.  I think she said, like, "Oh, my
+
+  11:07:09 17   gosh," or something.
+
+  11:07:10 18      Q.  Okay.  What about her?  Was she hurt?
+
+  11:07:13 19      A.  She had a few nicks from the glass, but I took
+
+  11:07:19 20   all of it.
+
+  11:07:21 21      Q.  And how bad were the cuts on your face or
+
+  11:07:25 22   wherever else on your body?
+
+  11:07:28 23      A.  Well, my eyes were completely full of glass.  I
+
+  11:07:31 24   had cuts on my chin and my lip, and I had some in my
+
+  11:07:37 25   scalp, as well.
+
+                                                                       42
+
+
+
+  11:07:40  1      Q.  I'm sorry to hear that.
+
+  11:07:42  2          Did you have to get medical attention for all
+
+  11:07:44  3   that, I would imagine?
+
+  11:07:46  4      A.  I -- the paramedics helped flush out some of
+
+  11:07:54  5   the glass out of my eyes.  I did go to urgent care
+
+  11:07:57  6   afterwards, because I still felt like I had glass in
+
+  11:08:00  7   my eyes and they were still very irritated.
+
+  11:08:04  8      Q.  And how long did they stay irritated, or
+
+  11:08:08  9   whatever else happened to them?
+
+  11:08:12 10      A.  A few days.  I was picking glass out of my hair
+
+  11:08:17 11   and my lips and my face for days.
+
+  11:08:22 12      Q.  I'm sure that was an awful experience.
+
+  11:08:25 13          Did that eventually heal up, or do you still
+
+  11:08:28 14   have any problems from that?
+
+  11:08:30 15      A.  It eventually healed up.
+
+  11:08:32 16      Q.  All right.  I mean, it's obviously affected you
+
+  11:08:37 17   emotionally, and I'm sorry that it has.
+
+  11:08:40 18          Have you had to get counseling or anything
+
+  11:08:42 19   because of it?
+
+  11:08:42 20      A.  I have, yes.
+
+  11:08:46 21      Q.  Well, I pray that -- that you're able to
+
+  11:08:49 22   overcome that, and -- and I hope and pray that you do,
+
+  11:09:02 23   all right?
+
+  11:09:02 24      A.  Thank you.
+
+  11:09:04 25      Q.  I need to talk to you about what we call the
+
+                                                                       43
+
+
+
+  11:09:13  1   rules of the road.
+
+  11:09:15  2          And before I get there, did -- you talked to
+
+  11:09:18  3   the police officer afterwards, correct?
+
+  11:09:20  4      A.  I don't remember really talking to the police
+
+  11:09:24  5   officer.  I know that he was there.  I was in a state
+
+  11:09:28  6   of shock after the incident happened.
+
+  11:09:32  7      Q.  Okay.  Have you seen the police report?
+
+  11:09:39  8      A.  My husband has seen the police report.  I've
+
+  11:09:42  9   been -- I did not look at the police report, though.
+
+  11:09:46 10      Q.  Okay.  And I don't want to know anything about
+
+  11:09:48 11   what you -- Travis has told you.  That's privileged.
+
+  11:09:53 12   I'm going to show that to you in a minute.
+
+  11:09:55 13          The -- let me see if I can share this screen
+
+  11:10:01 14   again.
+
+  11:10:02 15          Okay.  I want to show you Transportation Code
+
+  11:10:19 16   Section 544.010, dealing with stop signs and yield
+
+  11:10:24 17   signs.
+
+  11:10:28 18          And it says, the important part of it, "The
+
+  11:10:34 19   operator of a vehicle approaching in a" -- "approaching
+
+  11:10:37 20   an intersection with a stop sign shall stop, as
+
+  11:10:40 21   provided by Subsection C," and Subsection C says, "In
+
+  11:10:47 22   the absence of a clearly-marked stop line or crosswalk,
+
+  11:10:50 23   the operator shall stop at the place nearest the
+
+  11:10:56 24   intersecting roadway where the operator has a view of
+
+  11:10:59 25   approaching traffic on the intersecting roadway."
+
+                                                                       44
+
+
+
+  11:11:02  1          Do you see that?
+
+  11:11:04  2      A.  Yes.
+
+  11:11:04  3      Q.  And you understand that's what the law requires
+
+  11:11:09  4   if -- if -- here, there wasn't -- there's no stop line
+
+  11:11:13  5   there at that stop sign there on Windridge, right?
+
+  11:11:18  6      A.  I don't believe so.
+
+  11:11:19  7      Q.  So what the law requires you to do is, you --
+
+  11:11:25  8   you're obligated to stop at the place nearest the
+
+  11:11:29  9   intersecting roadway, here, Research Forest Drive, so
+
+  11:11:32 10   you've got a view of approaching traffic, correct?
+
+  11:11:35 11      A.  Yes.
+
+  11:11:37 12      Q.  That's the rule?
+
+  11:11:37 13      A.  You have to stop at all stop signs always.
+
+  11:11:43 14      Q.  Yeah.  But not at the stop sign.  You've got
+
+  11:11:46 15   to --
+
+  11:11:47 16      A.  Yes.
+
+  11:11:47 17      Q.  -- stop where you can see.
+
+  11:11:49 18      A.  Yes.  Stop where you can see.
+
+  11:11:51 19      Q.  All right.  So that's the rule.  And then --
+
+  11:11:57 20   that is Slide 19.
+
+  11:11:59 21          And on Slide 20, the state law -- Transportation
+
+  11:12:05 22   Code Section 545.153, "Vehicle Entering Stop or Yield
+
+  11:12:13 23   Intersection," says that there's -- a preferential
+
+  11:12:16 24   right-of-way at an intersection may be indicated by a
+
+  11:12:18 25   stop sign, meaning that here, Research Forest Drive
+
+                                                                       45
+
+
+
+  11:12:25  1   traffic had the preferential right-of-way over the
+
+  11:12:30  2   traffic coming off of Windridge.
+
+  11:12:32  3          You understood that, correct?
+
+  11:12:34  4      A.  Yes.
+
+  11:12:39  5      Q.  And, "An operator approaching an intersection on
+
+  11:12:41  6   a roadway controlled by a stop sign, after stopping, as
+
+  11:12:47  7   required by Section 544.010" -- that's what we just
+
+  11:12:53  8   looked at -- "shall yield the right-of-way to a vehicle
+
+  11:12:58  9   that has entered the intersection from another highway,
+
+  11:13:01 10   or that is approaching so closely as to be an immediate
+
+  11:13:05 11   hazard to the operator's movement in or across the
+
+  11:13:09 12   intersection."
+
+  11:13:09 13          Do you see that?
+
+  11:13:11 14      A.  Yes.
+
+  11:13:17 15      Q.  And you -- you knew that.  That's just basic
+
+  11:13:20 16   stuff we learn when we're 16 years old and driving a
+
+  11:13:25 17   car, right?
+
+  11:13:25 18      A.  Yes.
+
+  11:13:25 19      Q.  You can't get on the road if you've got traffic
+
+  11:13:28 20   that's coming your way that might be a hazard to you
+
+  11:13:31 21   or the people in the car, right?
+
+  11:13:33 22      A.  Yes.
+
+  11:13:33 23      Q.  Or a hazard to the traffic, the drivers -- the
+
+  11:13:38 24   drivers on the road, right?
+
+  11:13:44 25      A.  Yes.
+
+                                                                       46
+
+
+
+  11:13:44  1      Q.  So I want to see if we can agree on just some
+
+  11:13:48  2   basic rules of the road that you and I and Travis and
+
+  11:13:50  3   everybody's got to follow.
+
+  11:13:51  4          You've got to, number one -- this is Slide
+
+  11:13:55  5   Number 21 -- yield the right-of-way to oncoming
+
+  11:13:59  6   traffic, right?
+
+  11:13:59  7      A.  Yes.
+
+  11:14:00  8      Q.  Come to a complete stop at stop signs, right?
+
+  11:14:03  9      A.  Yes.
+
+  11:14:04 10      Q.  And if you can't see at the stop sign, you've
+
+  11:14:10 11   got to stop at the place nearest the roadway to have a
+
+  11:14:15 12   clear view.  That's -- that's Rule 3, right?
+
+  11:14:17 13      A.  Yes.
+
+  11:14:17 14      Q.  Number 4, you -- you must not interfere with
+
+  11:14:19 15   approaching traffic, true?
+
+  11:14:21 16      A.  Yes.
+
+  11:14:22 17      Q.  You've got to stop -- Rule 5, you've got to stop
+
+  11:14:26 18   before getting on that road, and you've got to stop
+
+  11:14:30 19   long enough to see what's coming, right?
+
+  11:14:32 20      A.  Yes.
+
+  11:14:32 21      Q.  Rolling stops may not be a good idea,
+
+  11:14:35 22   especially getting on Research Forest Drive, true?
+
+  11:14:38 23      A.  Yes.
+
+  11:14:41 24      Q.  Then you can proceed only when it's safe,
+
+  11:14:43 25   right?
+
+                                                                       47
+
+
+
+  11:14:44  1      A.  Yes.
+
+  11:14:45  2      Q.  And then Rule 7, you do not block the right
+
+  11:14:51  3   lane of traffic; Rule 8, you can't block the left lane
+
+  11:14:55  4   of traffic; and you can't block both lanes of traffic
+
+  11:14:59  5   when you get out onto Research Forest Drive, true?
+
+  11:15:02  6      A.  Yes.
+
+  11:15:04  7      Q.  And those rules apply even if the vehicle
+
+  11:15:07  8   coming down Research -- Research Forest Drive is going
+
+  11:15:14  9   25, 45 or 105 miles an hour, right?
+
+  11:15:25 10      A.  Yes.
+
+  11:15:25 11      Q.  It's no excuse to get out onto Research Forest
+
+  11:15:31 12   Drive, and if -- if the traffic just happens to be
+
+  11:15:33 13   going fast, that makes it even -- the greater the
+
+  11:15:38 14   need to use more caution, right?
+
+  11:15:41 15      A.  Can you repeat that.
+
+  11:15:45 16      Q.  Your lawyer has provided some photographs
+
+  11:15:52 17   that -- from somebody, and this is Slide Number 22.
+
+  11:15:55 18          It says, "Approximate maximum sight distance
+
+  11:15:58 19   from stop sign at Windridge and Research Forest Drive
+
+  11:16:02 20   is 350 feet.  The speed limit on Research Forest Drive
+
+  11:16:06 21   is 45 miles an hour.  At 45 miles an hour, it takes
+
+  11:16:14 22   5.3 seconds to cover 350 feet."
+
+  11:16:16 23          And they've written, "Location of Katie
+
+  11:16:19 24   Leicht's vehicle at the stop sign on Windridge Place,"
+
+  11:16:22 25   and they've got it placed there on Slide 22 with a red
+
+                                                                       48
+
+
+
+  11:16:26  1   box.
+
+  11:16:26  2          Do you see that?
+
+  11:16:27  3      A.  Yes.
+
+  11:16:29  4      Q.  Do you see this red box?
+
+  11:16:30  5      A.  Yes.
+
+  11:16:31  6      Q.  Okay.  I tell you all that just to get that
+
+  11:16:34  7   into the record so when I -- so I can ask you a
+
+  11:16:37  8   question.
+
+  11:16:37  9          Did you participate when they were putting this
+
+  11:16:43 10   together?  Do you -- do you have personal knowledge
+
+  11:16:46 11   from looking at Google Maps that this distance, 350
+
+  11:16:51 12   feet, is correct or not?
+
+  11:16:55 13      A.  My husband made those, I believe.
+
+  11:16:58 14      Q.  Thank you.
+
+  11:17:00 15          And did -- it's up here in the upper right-hand
+
+  11:17:03 16   corner.  It's got 352 feet.
+
+  11:17:06 17          Did he just use the Google app to do that
+
+  11:17:09 18   measurement?
+
+  11:17:09 19      A.  I assume so.
+
+  11:17:11 20      Q.  And then "The location of Katie Leicht's
+
+  11:17:15 21   vehicle" is -- is put here.
+
+  11:17:17 22          Where did he get the information that's where
+
+  11:17:18 23   your vehicle was spotted?  From you, or did he just
+
+  11:17:22 24   decide to put it there?  Where did that come from?
+
+  11:17:26 25      A.  I don't know.
+
+                                                                       49
+
+
+
+  11:17:28  1      Q.  All right.  Thank you.
+
+  11:17:34  2          Do you remember giving a statement to the
+
+  11:17:36  3   representative after this collision, about five days
+
+  11:17:43  4   later, and you told the representative that -- that
+
+  11:17:47  5   your best estimate of where this motorcycle was when
+
+  11:17:50  6   you first saw it was seven or eight car lengths; and
+
+  11:17:54  7   then later on, you said about 200 feet?
+
+  11:17:58  8          And you -- and you did say that you're not the
+
+  11:18:00  9   best estimator of distance, but that's the words you
+
+  11:18:04 10   used, right?
+
+  11:18:06 11      A.  I guess.  I don't remember.
+
+  11:18:12 12      Q.  So if you can see 350 feet, and the motorcycle
+
+  11:18:17 13   was at 200 feet when you entered onto the roadway,
+
+  11:18:24 14   you -- do you believe that you should have been able
+
+  11:18:26 15   to see him before you did?
+
+  11:18:29 16      A.  I did not see him.
+
+  11:18:33 17      Q.  Yes, ma'am.  I understand that.
+
+  11:18:34 18          But do you believe that you should have seen
+
+  11:18:36 19   him before you did?
+
+  11:18:43 20      A.  I -- I just didn't see him.
+
+  11:18:48 21      Q.  Okay.  This is Slide Number 23.
+
+  11:18:55 22          In the statement that you gave to your
+
+  11:18:56 23   representative, you were asked, "Could there have
+
+  11:19:00 24   been anything blocking your view of him?"
+
+  11:19:04 25          And you told him, "I could almost see" --
+
+                                                                       50
+
+
+
+  11:19:08  1   "there's a stop light that is down there, and I could
+
+  11:19:11  2   almost see the stop light from there," talking about
+
+  11:19:15  3   Greenbridge, correct?
+
+  11:19:17  4      A.  I believe so.
+
+  11:19:20  5      Q.  Is that still your testimony, that there was
+
+  11:19:23  6   really nothing that you remember that was blocking
+
+  11:19:26  7   your view of approaching traffic, eastbound traffic,
+
+  11:19:31  8   on the date of the wreck, true?
+
+  11:19:33  9      A.  Well, there's shadows, there's foliage behind
+
+  11:19:39 10   him.  He's in all black.  There's a curve in the road.
+
+  11:19:55 11      Q.  Did you know that Justin Crowson had pulled up
+
+  11:19:57 12   to that stop light on Greenbridge and had stopped on --
+
+  11:20:00 13   at that light, and had waited on a red light
+
+  11:20:05 14   immediately before this collision?
+
+  11:20:07 15      A.  No.
+
+  11:20:08 16      Q.  If he had -- if you were looking and he was at
+
+  11:20:12 17   the light, you should have been able to see him,
+
+  11:20:14 18   correct?
+
+  11:20:15 19               MR. GROSSCOPE:  Object to form.
+
+  11:20:17 20               You can answer if you know.
+
+  11:20:19 21      A.  I did not see him.
+
+  11:20:22 22      Q.  (BY MR. STEPHENS)  There's a picture, Slide 24
+
+  11:20:29 23   of 37, taken from a vehicle that has positioned itself
+
+  11:20:35 24   on Windridge.  And on the -- in the camera, you can see
+
+  11:20:42 25   a vehicle down here at the Greenbridge intersection.
+
+                                                                       51
+
+
+
+  11:20:45  1          Do you see that vehicle down there?
+
+  11:20:47  2      A.  Yes.
+
+  11:20:48  3      Q.  And here's a zoom-in of it.
+
+  11:20:52  4          So if you position your vehicle correctly, you
+
+  11:20:56  5   can see all the way down to Greenbridge, right?
+
+  11:21:02  6      A.  Yes.  This vehicle, in particular, is turning
+
+  11:21:05  7   left, though.
+
+  11:21:10  8      Q.  And that's basically what you told us.  In
+
+  11:21:14  9   Slide 23, again, in this statement, you told your
+
+  11:21:18 10   representative five days afterwards that you could
+
+  11:21:20 11   almost see -- "There's a stop light that is down
+
+  11:21:23 12   there, and I could almost see the stop light from
+
+  11:21:25 13   there," right?
+
+  11:21:30 14      A.  Yeah.
+
+  11:21:31 15      Q.  Is that true?
+
+  11:21:33 16      A.  Sir, can I tell you what happened to us after --
+
+  11:21:39 17   within 48 hours of this accident?
+
+  11:21:42 18      Q.  Sure.  Go ahead.
+
+  11:21:44 19      A.  It's been just one traumatic thing after
+
+  11:21:47 20   another.
+
+  11:21:48 21          Less than 48 hours after this accident, my
+
+  11:21:52 22   husband's stepfather had a massive heart attack.  He
+
+  11:21:58 23   was resuscitated 13 times on that Monday.  Thirteen
+
+  11:22:04 24   times.
+
+  11:22:08 25          He was in and out of ICU the entire summer.
+
+                                                                       52
+
+
+
+  11:22:12  1   He went to a nursing facility.  He ultimately was
+
+  11:22:18  2   hospitalized for the final time at the end of the
+
+  11:22:21  3   summer, where he was put on hospice and we watched him
+
+  11:22:25  4   take his final breaths.
+
+  11:22:29  5          Trying to give my statement a couple of days
+
+  11:22:32  6   after all of this has happened was extremely traumatic.
+
+  11:22:40  7      Q.  I understand.
+
+  11:22:41  8          While that was going on, Justin Crowson was
+
+  11:22:44  9   lying in the hospital, so it's been hard on him, too,
+
+  11:22:47 10   in all fairness.
+
+  11:22:50 11      A.  I completely understand.  I have felt for
+
+  11:22:54 12   Mr. Crowson every single day.  I have prayed for this
+
+  11:22:58 13   man every single day.  I have felt his pain.
+
+  11:23:03 14      Q.  Yes, ma'am.  I understand.
+
+  11:23:04 15          And hopefully, we'll get this thing resolved.
+
+  11:23:07 16   And we have offered to give you a full and final
+
+  11:23:10 17   release -- I'll just let you know that, in case you
+
+  11:23:14 18   didn't -- so your insurance company can get the case
+
+  11:23:21 19   settled.
+
+  11:23:22 20          So I'm hoping that this will lead to that, all
+
+  11:23:25 21   right?
+
+  11:23:25 22      A.  Okay.
+
+  11:23:26 23      Q.  So that we don't have to mess with it anymore,
+
+  11:23:29 24   okay?  We've got a few more minutes.
+
+  11:23:44 25          And then here's Slide 25.  This is another view
+
+                                                                       53
+
+
+
+  11:23:48  1   from the roadway edge that -- up here in the upper
+
+  11:23:54  2   right, I believe, is the actual camera distance, and
+
+  11:23:59  3   the one on the left just shows it zoomed in where you
+
+  11:24:04  4   can see traffic down there by Green -- Greenbridge.
+
+  11:24:07  5          Do you see that?
+
+  11:24:08  6      A.  Yes.
+
+  11:24:13  7      Q.  And the statute, again, requires you to get
+
+  11:24:16  8   positioned, like we see in Slide 25, so that you've
+
+  11:24:20  9   got a view of approaching traffic on the intersecting
+
+  11:24:24 10   roadway.
+
+  11:24:25 11          That's what you're required to do, true?
+
+  11:24:27 12      A.  Yes.
+
+  11:24:31 13      Q.  I need to get you to answer when you get
+
+  11:24:36 14   through taking a sip.
+
+  11:24:41 15      A.  In the absence of a clearly-marked stop sign?
+
+  11:24:44 16   Is that what you're asking?
+
+  11:24:47 17      Q.  You need to get up to the edge of the roadway,
+
+  11:24:50 18   like we see on Slide 25, so you can see the traffic
+
+  11:24:54 19   coming, right?
+
+  11:24:55 20      A.  Yes.  You have to have a view.
+
+  11:24:58 21      Q.  All right.  This is Slide Number 26.  This is a
+
+  11:25:04 22   Google image that the Google truck has taken as it's
+
+  11:25:11 23   entering into that first lane that you would have.
+
+  11:25:16 24          Is this basically the view you would have had
+
+  11:25:19 25   as you entered onto Research Forest Drive that day?
+
+                                                                       54
+
+
+
+  11:25:25  1      A.  Yeah.
+
+  11:25:30  2      Q.  When you looked, in relation to that vehicle
+
+  11:25:33  3   that we see in this photograph in Exhibit -- Slide 26,
+
+  11:25:43  4   do you have any estimate of where Mr. Crowson's
+
+  11:25:46  5   motorcycle was in relation to this first car that I'm
+
+  11:25:51  6   circling with the red dot?
+
+  11:25:53  7      A.  I don't know.  I'm not good with distances.  He
+
+  11:25:56  8   was quickly approaching, and I tried to get out of his
+
+  11:25:59  9   way.
+
+  11:26:00 10      Q.  Yes, ma'am.
+
+  11:26:01 11          Was he closer than this car?
+
+  11:26:06 12      A.  I don't -- I don't know.
+
+  11:26:14 13      Q.  You don't know -- have any estimate as to where
+
+  11:26:19 14   he would have been positioned on -- looking at this
+
+  11:26:21 15   photograph, true?
+
+  11:26:24 16      A.  It's not a very good photograph, sir.
+
+  11:26:30 17      Q.  Do you see the light down here at Greenridge --
+
+  11:26:35 18   Greenbridge?
+
+  11:26:35 19      A.  Kind of.
+
+  11:26:48 20      Q.  So if I ask you this question at trial, or if
+
+  11:26:51 21   your lawyers ask you this question at trial, you're not
+
+  11:26:57 22   going to be able to tell us where Mr. Crowson was,
+
+  11:26:59 23   looking back towards Greenbridge, on what section --
+
+  11:27:03 24   what part of the roadway, true?
+
+  11:27:05 25               MR. GROSSCOPE:  Object to form.
+
+                                                                       55
+
+
+
+  11:27:07  1               You can answer.
+
+  11:27:07  2      A.  I mean, he was probably where that first car
+
+  11:27:10  3   was, maybe.  I don't -- it's hard to tell.  I didn't
+
+  11:27:20  4   see him, though, when I pulled out.
+
+  11:27:24  5      Q.  (BY MR. STEPHENS)  But this -- this Slide 26 is
+
+  11:27:30  6   when somebody has pulled out and they're in that right
+
+  11:27:33  7   lane.
+
+  11:27:33  8          And so that's what I'm asking.  You said that
+
+  11:27:35  9   you saw him when you entered into the roadway, about
+
+  11:27:39 10   this position, and you -- to my understanding, you've
+
+  11:27:42 11   just told me that you think he was positioned about
+
+  11:27:45 12   where this car is where I've got the red cursor.
+
+  11:27:47 13          Is that true, or not?
+
+  11:27:53 14      A.  I don't know.  I guess.
+
+  11:27:58 15      Q.  Okay.  I'm going to put it there anyway, with
+
+  11:28:01 16   the understanding that you're saying that you're not
+
+  11:28:04 17   real sure.
+
+  11:28:05 18          That's your best estimate?  Would that be
+
+  11:28:08 19   accurate?
+
+  11:28:11 20      A.  Yeah.
+
+  11:28:13 21      Q.  I need to get your answer, ma'am.
+
+  11:28:15 22      A.  Yes.
+
+  11:28:19 23      Q.  I'm sorry.  I didn't hear you.
+
+  11:28:22 24      A.  Yes.
+
+  11:28:24 25      Q.  I'm -- I still didn't hear you.  Yes or no?
+
+                                                                       56
+
+
+
+  11:28:27  1      A.  Yes.
+
+  11:28:28  2      Q.  Thank you.
+
+  11:28:36  3          Okay.  This is the answers to interrogatories.
+
+  11:28:41  4   I'm going to ask you about one -- one part of this
+
+  11:28:44  5   statement.
+
+  11:28:45  6          Interrogatory Number 2, which is the written
+
+  11:28:49  7   answers that your lawyer supplied to us, "I stopped at
+
+  11:28:53  8   the stop sign at Windridge Place and Research Forest
+
+  11:28:58  9   Drive."
+
+  11:28:59 10          True?  That's what happened, right?
+
+  11:29:01 11      A.  Yes.
+
+  11:29:02 12      Q.  You looked left, right and left again.  "I did
+
+  11:29:07 13   not see any oncoming traffic, so I proceeded northbound
+
+  11:29:10 14   onto Research Forest Drive."
+
+  11:29:11 15          That's what -- what they wrote for you, true?
+
+  11:29:15 16      A.  Yes.
+
+  11:29:18 17      Q.  "I crossed the first lane of traffic when I
+
+  11:29:21 18   noticed plaintiff riding eastbound on his motorcycle,
+
+  11:29:25 19   and I hit the gas in order to avoid a collision."
+
+  11:29:28 20          That's -- that's your statement today, correct?
+
+  11:29:32 21      A.  Yes.
+
+  11:29:33 22      Q.  "I crossed the first two lanes of Research
+
+  11:29:37 23   Forest Drive and came to a full stop at the median
+
+  11:29:41 24   dividing eastbound traffic from westbound traffic on
+
+  11:29:47 25   Research Forest Drive."
+
+                                                                       57
+
+
+
+  11:29:47  1          True?  That's what you did, right?
+
+  11:29:50  2      A.  I did -- I don't think I came to a full stop.
+
+  11:29:53  3   I believe I was still going when he hit me.
+
+  11:29:56  4      Q.  All right.  Thank -- that's what I wanted to
+
+  11:29:57  5   clarify.  Thank you for saying that.
+
+  11:30:00  6          And then this last sentence, it says, "I was
+
+  11:30:03  7   preparing to turn left on Research Forest Drive when I
+
+  11:30:07  8   felt plaintiff impact my vehicle."
+
+  11:30:10  9          That's -- that's not accurate, is it?
+
+  11:30:13 10      A.  "I was preparing to turn left" -- no.
+
+  11:30:18 11      Q.  All right.  Thank you.
+
+  11:30:24 12          Then the motorcycle speed -- in the statement
+
+  11:30:27 13   that you gave to your representative five days later,
+
+  11:30:30 14   on page 7, he asked you, "Do you know how fast he was
+
+  11:30:35 15   traveling?"
+
+  11:30:36 16          And you said, "I mean, he appeared to be going
+
+  11:30:39 17   very quickly, quickly coming up on me.  I don't" -- "I
+
+  11:30:42 18   don't know how many."
+
+  11:30:43 19          Question, "Do you know" -- and then it's got a
+
+  11:30:46 20   question mark.  And then answer, "The speed limit is
+
+  11:30:49 21   45 on Research Forest."
+
+  11:30:50 22          That's what you -- the words typed in that
+
+  11:30:54 23   statement, true?
+
+  11:30:55 24      A.  Yes.
+
+  11:30:55 25      Q.  And so I just want to ask you, do you have any
+
+                                                                       58
+
+
+
+  11:31:00  1   speed estimate today as to how fast he was going when
+
+  11:31:03  2   you saw him?
+
+  11:31:06  3      A.  I have no idea.
+
+  11:31:08  4      Q.  You don't know whether it was 25, 35, 45, 55?
+
+  11:31:14  5   You just don't have an estimate, true?
+
+  11:31:16  6      A.  No.
+
+  11:31:22  7      Q.  Did Mr. Crowson -- after the collision, what
+
+  11:31:30  8   was his state?  Was he knocked out?  Was he talking?
+
+  11:31:33  9   Did he stand up?  Tell me about how he was doing.
+
+  11:31:37 10      A.  He was crying in pain.
+
+  11:31:41 11      Q.  Was he on the ground?  Was he standing up?
+
+  11:31:44 12   What -- tell me what happened to him after the
+
+  11:31:46 13   collision.
+
+  11:31:46 14      A.  He was on the ground.
+
+  11:31:49 15      Q.  Did you get out and try to assist him in any
+
+  11:31:52 16   way?
+
+  11:31:52 17      A.  I was in shock, sir.
+
+  11:31:56 18      Q.  I'm sorry.  I didn't hear you.  He was in
+
+  11:32:02 19   shock, or you were in shock?
+
+  11:32:04 20      A.  I was in shock.
+
+  11:32:05 21      Q.  All right.  All right.  Were you able to help
+
+  11:32:07 22   him, or -- or you weren't because you were in a state
+
+  11:32:09 23   of shock?  Tell me more about that, please.
+
+  11:32:12 24      A.  I did not help him.  I was in a state of shock.
+
+  11:32:15 25      Q.  All right.  Did you stay in your vehicle?
+
+                                                                       59
+
+
+
+  11:32:17  1      A.  No, I did not.
+
+  11:32:20  2      Q.  Where did you go?
+
+  11:32:23  3      A.  Well, after the accident happened, we exited
+
+  11:32:29  4   out the passenger's side.
+
+  11:32:38  5      Q.  Right.  And your daughter, she was able to get
+
+  11:32:41  6   out okay?
+
+  11:32:42  7      A.  Yes.
+
+  11:32:42  8      Q.  And how was she reacting?
+
+  11:32:46  9      A.  We were both in shock.
+
+  11:32:48 10      Q.  All right.  Did y'all get out on the curb?
+
+  11:32:52 11   Where did y'all go after the wreck?
+
+  11:32:53 12      A.  We went to the median.
+
+  11:32:56 13      Q.  Okay.  On the other side from where he was,
+
+  11:33:00 14   right?
+
+  11:33:00 15      A.  Yes.
+
+  11:33:01 16      Q.  Did you call 9-1-1, or did somebody else call
+
+  11:33:05 17   9-1-1?  What happened?
+
+  11:33:07 18      A.  I had my cell phone in the center console.  I
+
+  11:33:11 19   always keep it there for emergencies.  And I was in
+
+  11:33:16 20   such a state of shock that I couldn't even figure out
+
+  11:33:18 21   how to unlock my phone.  I tried to call 9-1-1, but I
+
+  11:33:25 22   couldn't even unlock my phone.
+
+  11:33:28 23      Q.  Okay.  You never talked to him or heard him make
+
+  11:33:35 24   any statement there or anywhere since the crash, true?
+
+  11:33:38 25      A.  True.
+
+                                                                       60
+
+
+
+  11:33:42  1      Q.  That's true?  I'm sorry.
+
+  11:33:44  2      A.  Yes.  I have not.
+
+  11:33:45  3      Q.  All right.  Were there any witnesses that
+
+  11:33:51  4   you're aware of that said they saw everything, how it
+
+  11:33:54  5   happened?
+
+  11:33:55  6      A.  I don't know.
+
+  11:33:56  7      Q.  All right.  You're not aware of anybody, either
+
+  11:33:59  8   that day or since then, that have said, "Oh, I saw what
+
+  11:34:05  9   happened," true?
+
+  11:34:06 10      A.  I don't know of anyone.
+
+  11:34:17 11      Q.  Okay.  The police officer made a report.  It's
+
+  11:34:24 12   got your name on it.  And he's -- he's made some
+
+  11:34:32 13   statements in the investigator's narrative.
+
+  11:34:36 14          One of the things he says is, "Unit 1" --
+
+  11:34:39 15   that's you -- "operator stated she misjudged the speed
+
+  11:34:42 16   of Unit 2 and continued into the intersection."
+
+  11:34:44 17          Do you see where that's written in that report?
+
+  11:34:48 18      A.  I don't see anything.
+
+  11:34:54 19      Q.  Maybe I'm not sharing it.  Hold on.  I'm sorry.
+
+  11:35:05 20   We're about done.
+
+  11:35:09 21          In the police report -- I'll read it again.
+
+  11:35:09 22   "Unit 1 operator stated she misjudged the speed of
+
+  11:35:13 23   Unit 2 and continued into the intersection."
+
+  11:35:14 24          That's what it says, true?
+
+  11:35:23 25      A.  That's what it says.
+
+                                                                       61
+
+
+
+  11:35:24  1      Q.  Okay.  And so my question is, do you remember
+
+  11:35:26  2   talking to him about that or not?
+
+  11:35:27  3      A.  I do not remember talking to him.  I remember
+
+  11:35:29  4   him being present.  I remember being in the ambulance.
+
+  11:35:34  5   They have all these probes hooked up all over me.
+
+  11:35:37  6          I remember the paramedic asking my name.  My
+
+  11:35:39  7   daughter is sitting there.  My eyes are full of glass.
+
+  11:35:43  8   My daughter looks like she's about ready to just burst
+
+  11:35:46  9   into tears.  I don't remember talking to the police.
+
+  11:35:49 10      Q.  Okay.
+
+  11:35:49 11      A.  I remember him there, but I don't remember
+
+  11:35:51 12   anything that I said to him.
+
+  11:35:56 13          My husband tells me that I talked to him outside
+
+  11:36:00 14   of the paramedic, but I don't even remember him being
+
+  11:36:03 15   there, either.
+
+  11:36:03 16      Q.  Okay.  So your husband was able to come to the
+
+  11:36:06 17   scene while y'all were still out there?
+
+  11:36:08 18      A.  Yes.
+
+  11:36:11 19      Q.  Since this crash has happened, have you talked
+
+  11:36:14 20   to your husband about anything he knows about how the
+
+  11:36:21 21   crash happened, or what you have told him about how it
+
+  11:36:24 22   happened?
+
+  11:36:26 23      A.  I don't understand your question.
+
+  11:36:28 24      Q.  Yeah.  Have you talked to him about how the
+
+  11:36:30 25   wreck happened?
+
+                                                                       62
+
+
+
+  11:36:33  1      A.  I mean, yeah.
+
+  11:36:36  2      Q.  Did you tell him the same thing that you've
+
+  11:36:41  3   told me in deposition today?
+
+  11:36:44  4      A.  Yes.
+
+  11:36:44  5      Q.  Have you ever told anybody you misjudged the
+
+  11:36:47  6   speed of the motorcycle?
+
+  11:36:49  7      A.  I don't recall.
+
+  11:37:05  8      Q.  And then earlier, I told you that the officer
+
+  11:37:08  9   had the point of impact -- you see in this Slide
+
+  11:37:12 10   Number 30, he's got the point of impact out there in
+
+  11:37:16 11   the left lane of Research Forest Drive.
+
+  11:37:20 12          And it's your belief that the impact happened
+
+  11:37:23 13   over here in the median, true?
+
+  11:37:27 14      A.  Well, you can look back at the pictures.
+
+  11:37:31 15      Q.  Yeah.  Where the -- where -- the picture we
+
+  11:37:35 16   looked at earlier, it showed a picture of your vehicle
+
+  11:37:39 17   in the median, and the motorcycle stood up next to it.
+
+  11:37:42 18          Do you remember that one?
+
+  11:37:43 19      A.  Yes.
+
+  11:37:43 20      Q.  You believe that's where the impact occurred,
+
+  11:37:46 21   true?
+
+  11:37:48 22      A.  I did not move forward after the impact.
+
+  11:37:52 23      Q.  Thank you.
+
+  11:37:53 24          So that picture that's got -- that we've seen,
+
+  11:38:01 25   you didn't move forward after -- after impact?  That's
+
+                                                                       63
+
+
+
+  11:38:04  1   where everything ended up, and that's where that
+
+  11:38:06  2   picture was taken, true?
+
+  11:38:08  3      A.  True.
+
+  11:38:19  4      Q.  Do you want me to give you another question?
+
+  11:38:21  5   Do you understand the question?
+
+  11:38:26  6      A.  Can you ask me again.
+
+  11:38:29  7      Q.  Is that where the impact occurred, where that
+
+  11:38:33  8   picture was taken?
+
+  11:38:34  9      A.  Yes.  We did not move forward.
+
+  11:38:37 10      Q.  Who took that picture?  Do you know?
+
+  11:38:40 11      A.  My husband.
+
+  11:38:47 12      Q.  Okay.  Do you blame anybody else -- and we're
+
+  11:39:02 13   not talking about my client right now; we're talking
+
+  11:39:06 14   about others, like the neighborhood association or The
+
+  11:39:10 15   Woodlands -- for the way that intersection is set up?
+
+  11:39:15 16      A.  No.
+
+  11:39:16 17      Q.  Did you understand my question?
+
+  11:39:31 18      A.  Yeah.  No.  I have no one to blame.
+
+  11:39:35 19      Q.  Okay.  You have never gone to the city council
+
+  11:39:41 20   in The Woodlands or the neighborhood association and
+
+  11:39:46 21   told them that that intersection's dangerous and they
+
+  11:39:50 22   need to do something about it, that somebody was hurt
+
+  11:39:53 23   out there, true?
+
+  11:39:55 24      A.  No, I've never done that.
+
+  11:39:57 25      Q.  I think you've referenced this.  You weren't on
+
+                                                                       64
+
+
+
+  11:40:00  1   your cell phone at the time, true?
+
+  11:40:02  2      A.  I don't talk on my cell phone during car --
+
+  11:40:06  3   when I'm in the car, or mess with it at all.
+
+  11:40:11  4      Q.  Do you blame Justin Crowson for causing the
+
+  11:40:15  5   wreck?
+
+  11:40:15  6      A.  No.
+
+  11:40:17  7      Q.  I'm sorry.  I didn't hear you.
+
+  11:40:24  8      A.  No.
+
+  11:40:24  9      Q.  You're not going to tell the jury that you
+
+  11:40:26 10   think he was negligent, right?
+
+  11:40:29 11      A.  No.
+
+  11:40:29 12      Q.  You're not going to tell the jury that you
+
+  11:40:32 13   think he could have done something to avoid the
+
+  11:40:34 14   collision, are you?
+
+  11:40:36 15      A.  No.
+
+  11:40:37 16      Q.  That he could have done something differently
+
+  11:40:42 17   to -- in the manner in which he tried to avoid hitting
+
+  11:40:48 18   you?  You're not going to say -- say that, are you?
+
+  11:40:52 19      A.  No.
+
+  11:40:54 20      Q.  Okay.  Well, you made it through it.  I'm sorry
+
+  11:41:14 21   that you've had to relive this.
+
+  11:41:15 22      A.  Thank you.
+
+  11:41:16 23      Q.  Do you have anything that you want to change in
+
+  11:41:19 24   your testimony, or think that I really need to know
+
+  11:41:24 25   about something?
+
+                                                                       65
+
+
+
+  11:41:28  1      A.  I don't think so.
+
+  11:41:31  2               MR. STEPHENS:  All right.  Well, I wish
+
+  11:41:33  3   you the best.  I hope this is the last that you've got
+
+  11:41:37  4   to deal with any of this.  And I hope we can get this
+
+  11:41:40  5   thing settled, and I hope USAA will get you a full and
+
+  11:41:44  6   final release.
+
+  11:41:46  7               And I wish you the best going forward,
+
+  11:41:51  8   okay?
+
+  11:41:52  9               THE WITNESS:  Thank you, sir.
+
+  11:41:55 10               MR. GROSSCOPE:  We'll reserve.
+
+  11:41:55 11               THE REPORTER:  Before we go off the
+
+  11:41:55 12   record, Travis, are you going to need a copy of the
+
+  11:41:55 13   transcript?
+
+  11:41:55 14               MR. GROSSCOPE:  I'll take an E-tran.  That
+
+  11:42:05 15   would be great.  Thank you, Lisa.
+
+  11:42:05 16               THE REPORTER:  Thank you.  And does she
+
+  11:42:07 17   need to read and sign?
+
+  11:42:09 18               MR. GROSSCOPE:  She will.
+
+           19               MR. STEPHENS:  Okay.  And then let me grab
+
+           20   your info in the chat so I can send everybody this
+
+           21   PowerPoint.
+
+           22               THE REPORTER:  All right.
+
+           23               THE VIDEOGRAPHER:  What do you want to do
+
+  11:42:23 24   on the video?  Just -- do you want to sync this one, or
+
+  11:42:24 25   do you want to --
+
+                                                                       66
+
+
+
+  11:42:27  1               MR. STEPHENS:  Go ahead and sync it for
+
+  11:42:29  2   now.  Yeah.  It's just $15, isn't it?  Go ahead and
+
+  11:42:33  3   sync it.
+
+  11:42:35  4               THE VIDEOGRAPHER:  Yeah.  Because this is,
+
+  11:42:36  5   like -- yeah.  Okay.  We're still waiting on some
+
+  11:42:46  6   transcripts for your other ones, Joe, so just FYI --
+
+  11:42:46  7               THE REPORTER:  Are we off the record?
+
+  11:42:48  8               THE VIDEOGRAPHER:  Going off of the record
+
+  11:42:49  9   now.  The time is 12:42 -- or I'm sorry -- 11:42 a.m.
+
+  11:44:31 10               (Deposition proceedings concluded.)
+
+  11:44:31 11
+
+  14:14:53 12
+
+           13
+
+           14
+
+           15
+
+           16
+
+           17
+
+           18
+
+           19
+
+           20
+
+           21
+
+           22
+
+           23
+
+           24
+
+           25
+
+                                                                       67
+
+
+
+            1                    CHANGES AND SIGNATURE
+
+            2   WITNESS NAME:  KATIE LEICHT
+
+            3   PAGE LINE  CHANGE                REASON
+
+            4
+
+            5
+
+            6
+
+            7
+
+            8
+
+            9
+
+           10
+
+           11
+
+           12
+
+           13
+
+           14
+
+           15
+
+           16
+
+           17
+
+           18
+
+           19
+
+           20
+
+           21
+
+           22
+
+           23
+
+           24
+
+           25
+
+                                                                       68
+
+
+
+            1                     CHANGES AND SIGNATURE
+
+            2   WITNESS NAME:  KATIE LEICHT
+
+            3   PAGE LINE  CHANGE                REASON
+
+            4
+
+            5
+
+            6
+
+            7
+
+            8
+
+            9
+
+           10
+                       I, KATIE LEICHT, have read the foregoing
+           11   deposition, and hereby affix my signature that the
+                same is true and correct, except as noted above.
+           12
+
+           13                       KATIE LEICHT
+
+           14
+
+           15   THE STATE OF TEXAS   )
+
+           16   COUNTY OF            )
+
+           17          Before me,                        , on this
+                day personally appeared KATIE LEICHT, known to me to be
+           18   the person whose name is subscribed to the foregoing
+                instrument, and acknowledged to me that he/she executed
+           19   the same for the purposes and consideration therein
+                expressed.
+           20          Given under my hand and seal of office this
+                     day of             , 2026.
+           21
+
+           22
+
+           23
+                                NOTARY PUBLIC FOR THE STATE OF TEXAS
+           24                   My Commission Expires:
+
+           25
+
+                                                                       69
+
+
+
+            1                   CAUSE NO. 25-06-10028
+
+            2   JUSTIN CROWSON,            ) IN THE DISTRICT COURT
+                                           )
+            3         Plaintiff,           )
+                                           )
+            4   v.                         ) MONTGOMERY COUNTY, TEXAS
+                                           )
+            5   KATIE LEICHT,              )
+                                           )
+            6         Defendant.           ) 457TH JUDICIAL DISTRICT
+
+            7
+
+            8
+
+            9                 COURT REPORTER'S CERTIFICATE
+                     ORAL AND VIDEOTAPED DEPOSITION OF KATIE LEICHT
+           10                    TAKEN FEBRUARY 4, 2026
+
+           11
+
+           12          I, Lisa D. Huneycutt, Certified Shorthand
+
+           13   Reporter in and for the State of Texas, do hereby
+
+           14   certify to the following:
+
+           15          That the witness was duly sworn by the officer,
+
+           16   and that the transcript of the oral deposition is a
+
+           17   true record of the testimony given by the witness;
+
+           18          That the deposition transcript was submitted on
+
+           19   February 10, 2026, to the witness or to the attorney
+
+           20   for the witness for examination, signature, and return
+
+           21   to me on or before 20 days from the above-designated
+
+           22   date March 2, 2026;
+
+           23          That the amount of time used by each party at
+
+           24   the deposition is as follows:
+
+           25          Mr. Joe B. Stephens - 1 Hour, 30 Minutes
+
+                                                                       70
+
+
+
+            1          That pursuant to information given to the
+
+            2   deposition officer at the time said testimony was
+
+            3   taken, the following includes counsel for all parties
+
+            4   of record:
+
+            5   FOR THE PLAINTIFF:
+
+            6      Mr. Joe B. Stephens
+                   THE STEPHENS LAW FIRM
+            7      440 Cobia Drive, Suite 601
+                   Katy, Texas  77494
+            8      FAX:  713-224-0055
+                   TELEPHONE:  713-224-0000
+            9      E-MAIL:  joe@joestephenslaw.com
+
+           10
+                FOR THE DEFENDANT:
+           11
+                   Mr. Travis Grosscope
+           12      RAMEY CHANDLER SCHEIN
+                   750 Bering Drive, Suite 600
+           13      Houston, Texas  77057
+                   TELEPHONE:  713-266-0074
+           14      E-MAIL:  tgrosscope@ramey-chandler.com
+
+           15
+
+           16          I further certify that I am neither counsel for,
+
+           17   related to, nor employed by any of the parties in the
+
+           18   action in which this proceeding was taken, and further
+
+           19   that I am not financially or otherwise interested in
+
+           20   the outcome of the action.
+
+           21          Further certification requirements pursuant to
+
+           22   Rule 203 of TRCP will be certified to after they have
+
+           23   occurred.
+
+           24
+
+           25
+
+                                                                       71
+
+
+
+            1          Certified to by me this 10th day of February,
+
+            2   2026.
+
+            3
+
+            4                   ____________________________________
+                                Lisa D. Huneycutt, Texas CSR No. 6529
+            5                   Expiration:  4-30-2026
+                                LEXITAS LEGAL
+            6                   Firm Registration No. 95
+                                13101 Northwest Freeway, Suite 210
+            7                   Houston, Texas 77040
+                                Tel:  (888) 893-3767
+            8
+
+            9
+
+           10
+
+           11
+
+           12
+
+           13
+
+           14
+
+           15
+
+           16
+
+           17
+
+           18
+
+           19
+
+           20
+
+           21
+
+           22
+
+           23
+
+           24
+
+           25
+
+                                                                       72
+
+
+
+            1      FURTHER CERTIFICATION PURSUANT TO RULE 203 TRCP
+
+            2               The original deposition was    /was
+                not    returned to the deposition officer on,
+            3                , 2026.
+
+            4               If returned, the attached Changes and
+                Signature page contains any changes and the reasons
+            5   therefor;
+
+            6               If returned, the original deposition was
+                delivered to Mr. Joe B. Stephens, Custodial Attorney;
+            7
+                            That $         is the deposition officer's
+            8   charges to Counsel for the Plaintiff, Mr. Joe B.
+                Stephens, SBOT No. 19157300, for preparing the original
+            9   deposition transcript and any copies of exhibits;
+
+           10               That the deposition was delivered in
+                accordance with Rule 203.3, and that a copy of this
+           11   certificate was served on all parties shown herein and
+                filed with the Clerk.
+           12
+                            Certified to by me this     day of
+           13              , 2026.
+
+           14
+                                ____________________________________
+           15                   Lisa D. Huneycutt, Texas CSR No. 6529
+                                Expiration:  4-30-2026
+           16                   LEXITAS LEGAL
+                                Firm Registration No. 95
+           17                   13101 Northwest Freeway, Suite 210
+                                Houston, Texas 77040
+           18                   Tel:  (888) 893-3767
+
+           19
+
+           20
+
+           21
+
+           22
+
+           23
+
+           24
+
+           25

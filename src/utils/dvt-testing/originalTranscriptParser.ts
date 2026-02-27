@@ -27,8 +27,8 @@ export interface OriginalTranscriptLine {
 }
 
 // Regex to detect explicit line numbers (1-25) at start of line
-// Matches: "  00001:01", " 1 ", "       25"
-const EXPLICIT_LINE_REGEX = /^\s*(?:\d{1,5}:)?0*([1-9]|1[0-9]|2[0-5])(?=\s|$)/;
+// Matches: "  00001:01", " 1 ", "       25", "  10:04:06  1"
+const EXPLICIT_LINE_REGEX = /^\s*(?:\d{1,5}:|\d{1,2}:\d{2}:\d{2}\s+)?0*([1-9]|1[0-9]|2[0-5])(?=\s|$)/;
 
 // Standalone page headers to ignore (e.g. "       1      ")
 const PAGE_HEADER_REGEX = /^\s*(\d{1,3})\s*$/;
